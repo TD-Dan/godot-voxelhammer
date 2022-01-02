@@ -7,6 +7,7 @@ Voxel plugin for Godot
 Chunky voxels for minecraft style generating and rendering of 3d geometry
 
 ## Features:
+* Editor integration
 * Multithreaded cpu background processing for voxel and geometry data
 * multitexture/material support inside one mesh
 * configurable voxel and chunk sizes
