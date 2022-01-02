@@ -1,6 +1,6 @@
 # godot_voxelhammer
 
-<DONT USE YET: MULTIPLE COMMITS INCOMING>
+! DONT USE YET: MULTIPLE COMMITS INCOMING !
 
 Voxel plugin for Godot
 
