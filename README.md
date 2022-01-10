@@ -12,6 +12,7 @@ Chunky voxels for minecraft style generating and rendering of 3d geometry
 * multitexture/material support inside one mesh
 * configurable voxel and chunk sizes
 * chunk based terrain loader
+* Terrain generation with layer stack with noise, gradients,spheres and more to come
 
 
 ## Related repositories:
