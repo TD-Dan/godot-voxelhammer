@@ -1,4 +1,4 @@
-<img src="https://github.com/kupoli/godot_voxelhammer-examples/blob/main/screenshots/screencap%20220109.jpg"  width="800">
+<img src="https://github.com/kupoli/godot_voxelhammer-examples/blob/main/screenshots/screencap%20220109.jpg">
 
 # godot_voxelhammer
 
