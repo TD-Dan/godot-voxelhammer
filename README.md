@@ -1,3 +1,5 @@
+<img src="https://github.com/kupoli/godot_voxelhammer-examples/blob/main/screenshots/screencap%20220109.jpg"  width="400">
+
 # godot_voxelhammer
 
 ! DONT USE YET: MULTIPLE COMMITS INCOMING !
