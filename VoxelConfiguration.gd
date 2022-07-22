@@ -1,4 +1,4 @@
-tool
+@tool
 
 extends Resource
 
@@ -7,40 +7,37 @@ class_name VoxelConfiguration
 signal voxel_configuration_changed(what)
 
 
-export(Array, Material) var materials setget _set_vox_materials
+@export var materials : Array[Material]:
+	set(v):
+		materials = v
+		emit_signal("voxel_configuration_changed", "materials")
 
 # Voxel size in game units
-export(float, 0.01, 32.0, 0.01) var voxel_base_size : float = 1.0 setget _set_voxel_size
+@export_range(0.01, 32.0, 0.01) var voxel_base_size : float = 1.0:
+	set(v):
+		voxel_base_size = v
+		emit_signal("voxel_configuration_changed", "voxel_base_size")
 
+# Mesh generation mode. Use FAST, others are used for development purposes
 enum MESH_MODE {
 	NONE,
 	CUBES,
 	FACES,
 	FAST,
 }
+@export var mesh_mode : MESH_MODE = MESH_MODE.FAST:
+	set(v):
+		mesh_mode = v
+		emit_signal("voxel_configuration_changed", "mesh_mode")
 
-export(MESH_MODE) var mesh_mode = MESH_MODE.FACES setget _set_mesh_mode
-
+# Select hardware acceleration mode to usu, will fall back to NONE if not available on target system
 enum ACCEL_MODE {
 	NONE,
 	NATIVE,
 	GPU,
 	GPU_AND_NATIVE
 }
-export(ACCEL_MODE) var accel_mode = ACCEL_MODE.NONE setget _set_accel_mode
-
-func _set_vox_materials(new_value):
-	materials = new_value
-	emit_signal("voxel_configuration_changed", "materials")
-
-func _set_voxel_size(new_value):
-	voxel_base_size = floor(new_value)
-	emit_signal("voxel_configuration_changed", "voxel_base_size")
-
-func _set_mesh_mode(new_value):
-	mesh_mode = new_value
-	emit_signal("voxel_configuration_changed", "mesh_mode")
-	
-func _set_accel_mode(new_value):
-	accel_mode = new_value
-	emit_signal("voxel_configuration_changed", "accel_mode")
+@export var accel_mode : ACCEL_MODE = ACCEL_MODE.NONE:
+	set(v):
+		accel_mode = v
+		emit_signal("voxel_configuration_changed", "accel_mode")

@@ -1,34 +1,34 @@
 [remap]
 
 importer="texture"
-type="StreamTexture"
-path="res://.import/icon_vh.png-7ddf032d8b879968ba19522794bccb59.stex"
+type="CompressedTexture2D"
+uid="uid://dnpesvmv0c2ag"
+path="res://.godot/imported/icon_vh.png-54e745c9c0c51b75a3af17c30453b73f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/voxel_hammer/icon_vh.png"
-dest_files=[ "res://.import/icon_vh.png-7ddf032d8b879968ba19522794bccb59.stex" ]
+source_file="res://addons/TallDwarf/VoxelHammer/icon_vh.png"
+dest_files=["res://.godot/imported/icon_vh.png-54e745c9c0c51b75a3af17c30453b73f.ctex"]
 
 [params]
 
 compress/mode=0
 compress/lossy_quality=0.7
-compress/hdr_mode=0
+compress/hdr_compression=1
 compress/bptc_ldr=0
 compress/normal_map=0
-flags/repeat=0
-flags/filter=true
-flags/mipmaps=false
-flags/anisotropic=false
-flags/srgb=2
+compress/channel_pack=0
+mipmaps/generate=false
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
-process/HDR_as_SRGB=false
-process/invert_color=false
-stream=false
-size_limit=0
-detect_3d=false
-svg/scale=1.0
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1

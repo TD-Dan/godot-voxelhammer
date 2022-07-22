@@ -1,34 +1,35 @@
 [remap]
 
 importer="texture"
-type="StreamTexture"
-path="res://.import/RotateLeft.svg-3fe196bb33b04bbf18692550f6d12985.stex"
+type="CompressedTexture2D"
+uid="uid://nbipb5ahb181"
+path="res://.godot/imported/RotateLeft.svg-cee97f2a3df086f1cbc6ac90471f2886.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/voxel_hammer/ui/icons/RotateLeft.svg"
-dest_files=[ "res://.import/RotateLeft.svg-3fe196bb33b04bbf18692550f6d12985.stex" ]
+source_file="res://addons/TallDwarf/VoxelHammer/ui/icons/RotateLeft.svg"
+dest_files=["res://.godot/imported/RotateLeft.svg-cee97f2a3df086f1cbc6ac90471f2886.ctex"]
 
 [params]
 
 compress/mode=0
 compress/lossy_quality=0.7
-compress/hdr_mode=0
+compress/hdr_compression=1
 compress/bptc_ldr=0
 compress/normal_map=0
-flags/repeat=0
-flags/filter=true
-flags/mipmaps=false
-flags/anisotropic=false
-flags/srgb=2
+compress/channel_pack=0
+mipmaps/generate=false
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
 process/fix_alpha_border=true
 process/premult_alpha=false
-process/HDR_as_SRGB=false
-process/invert_color=false
-stream=false
-size_limit=0
-detect_3d=true
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1
 svg/scale=1.0
