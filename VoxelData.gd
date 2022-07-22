@@ -1,4 +1,4 @@
-tool
+@tool
 
 extends Resource
 
@@ -20,30 +20,102 @@ signal voxel_data_changed(what)
 #var voxels = []
 
 
-export var voxel_count = Vector3(8,8,8) setget _set_voxel_count
+@export var voxel_count = Vector3(8,8,8):
+	set(nv):
+		if nv.x == 0 or nv.y == 0 or nv.z == 0:
+			push_error("VoxelData size cannot be zero: %s. -> Ignored" % nv)
+			return
+		
+		#print("Setting VoxelData size to: %s" % nv)
+		
+		voxel_count = nv.floor() # round downwards
+		real_size = voxel_count * voxel_scale
+		total_count = voxel_count.x * voxel_count.y * voxel_count.z 
+		smallest_count = min(min(voxel_count.x,voxel_count.y),voxel_count.z)
+		largest_count = max(max(voxel_count.x,voxel_count.y),voxel_count.z)
+		
+		if calculation_state == CALC_STATE.INIT:
+			calculation_state = CALC_STATE.NONE
+		_change_state_to(CALC_STATE.INIT)
+		_notify_state_change()
+
 # scale in proportion to voxel_base_scale
-export var voxel_scale = 1 setget _set_voxel_scale
+@export var voxel_scale = 1:
+	set(nv):
+		voxel_scale = nv
+		# recalculate size
+		real_size = voxel_count * voxel_scale
 
-var real_size = Vector3(8,8,8) setget _set_real_size
-var total_count = 512 setget _set_total
-var smallest_count = 8 setget _set_smallest_count
-var largest_count = 8 setget _set_largest_count
+var real_size = Vector3(8,8,8):
+	set(nv):
+		push_warning("'real_size' is read only. Use 'voxel_count' and 'voxel_scale' instead")
+
+var total_count = 512:
+	set(nv):
+		push_warning("Can't set total. Read only")
+
+var smallest_count = 8:
+	set(nv):
+		push_warning("Can't set smallest_count. Read only")
+
+var largest_count = 8:
+	set(nv):
+		push_warning("Can't set largest_count. Read only.")
 
 
-export(PoolIntArray) var material = PoolIntArray() setget _set_material
-export(PoolByteArray) var smooth = PoolByteArray() setget _set_smooth
-export(PoolByteArray) var visible = PoolByteArray() setget _set_visible
+@export var material : PackedInt32Array = PackedInt32Array():
+	set(nv):
+		#print("_set_material")
+		_change_state_to(CALC_STATE.VOXEL)
+		
+		_vox_m_mutex.lock()
+		material = nv
+		_vox_m_mutex.unlock()
+		
+		_notify_state_change()
+
+@export var smooth : PackedByteArray = PackedByteArray():
+	set(nv):
+		#print("_set_smooth")
+		_change_state_to(CALC_STATE.VOXEL)
+		
+		_vox_s_mutex.lock()
+		smooth = nv
+		_vox_s_mutex.unlock()
+		
+		_notify_state_change()
+
+@export var visible : PackedByteArray = PackedByteArray():
+	set(nv):
+		#print("_set_visible")
+		_change_state_to(CALC_STATE.VIS)
+		
+		_vox_v_mutex.lock()
+		visible = nv
+		_vox_v_mutex.unlock()
+		
+		_notify_state_change()
 
 # Accumulation buffer used by PaintOperations
-export(Array, float) var blend_buffer = [] setget _set_blend_buffer
+@export var blend_buffer : Array[float] = []:
+	set(nv):
+		_vox_b_mutex.lock()
+		blend_buffer = nv
+		_vox_b_mutex.unlock()
 
 # Can´t use export -> will save mesh data to file
 #export(Mesh) var mesh setget _set_mesh
-var mesh setget _set_mesh
+var mesh:
+	set(nv):
+		#push_warning("Can't set mesh: Read only. Use replace_mesh(...) instead ")
+		pass
 
-var has_uv = false setget _set_has_uv
+var has_uv = false:
+	set(nv):
+		#push_warning("Can't set mesh: Read only. Use replace_mesh(...) instead ")
+		pass
 
-# used for changing only materials later on
+# used for changing only materials when mesh is already calculated
 var material_table
 
 
@@ -58,7 +130,10 @@ enum CALC_STATE {
 
 #can´t use export: exports are saved to file and set upon loading scene
 #export(CALC_STATE) var calculation_state = CALC_STATE.NONE setget _set_calculation_state
-var calculation_state = CALC_STATE.NONE setget _set_calculation_state
+var calculation_state : CALC_STATE = CALC_STATE.NONE:
+	set(nv):
+		#push_warning("Can't set mesh: Read only. Use replace_mesh(...) instead ")
+		pass
 
 
 var _vox_m_mutex = Mutex.new()
@@ -66,91 +141,6 @@ var _vox_s_mutex = Mutex.new()
 var _vox_v_mutex = Mutex.new()
 var _vox_b_mutex = Mutex.new()
 var _mesh_mutex = Mutex.new()
-
-
-func _set_voxel_count(nv):
-	if nv.x == 0 or nv.y == 0 or nv.z == 0:
-		push_error("VoxelData size cannot be zero: %s. -> Ignored" % nv)
-		return
-	
-	#print("Setting VoxelData size to: %s" % nv)
-	
-	voxel_count = nv.floor() # round downwards
-	real_size = voxel_count * voxel_scale
-	total_count = voxel_count.x * voxel_count.y * voxel_count.z 
-	smallest_count = min(min(voxel_count.x,voxel_count.y),voxel_count.z)
-	largest_count = max(max(voxel_count.x,voxel_count.y),voxel_count.z)
-	
-	if calculation_state == CALC_STATE.INIT:
-		calculation_state = CALC_STATE.NONE
-	_change_state_to(CALC_STATE.INIT)
-	_notify_state_change()
-
-func _set_voxel_scale(nv):
-	voxel_scale = nv
-	# recalculate size
-	real_size = voxel_count * voxel_scale
-
-
-func _set_real_size(nv):
-	push_warning("'real_size' is read only. Use 'voxel_count' and 'voxel_scale' instead")
-
-func _set_total(nv):
-	push_warning("Can't set total. Read only")
-
-func _set_smallest_count(nv):
-	push_warning("Can't set smallest_count. Read only")
-
-func _set_largest_count(nv):
-	push_warning("Can't set largest_count. Read only.")
-
-
-func _set_material(nv):
-	#print("_set_material")
-	_change_state_to(CALC_STATE.VOXEL)
-	
-	_vox_m_mutex.lock()
-	material = nv
-	_vox_m_mutex.unlock()
-	
-	_notify_state_change()
-
-func _set_smooth(nv):
-	#print("_set_smooth")
-	_change_state_to(CALC_STATE.VOXEL)
-	
-	_vox_s_mutex.lock()
-	smooth = nv
-	_vox_s_mutex.unlock()
-	
-	_notify_state_change()
-
-func _set_blend_buffer(nv):	
-	_vox_b_mutex.lock()
-	blend_buffer = nv
-	_vox_b_mutex.unlock()
-
-func _set_visible(nv):
-	#print("_set_visible")
-	_change_state_to(CALC_STATE.VIS)
-	
-	_vox_v_mutex.lock()
-	visible = nv
-	_vox_v_mutex.unlock()
-	
-	_notify_state_change()
-
-func _set_mesh(nv):
-	#push_warning("Can't set mesh: Read only. Use replace_mesh(...) instead ")
-	pass
-
-func _set_has_uv(nv):
-	#push_warning("Can't set mesh: Read only. Use replace_mesh(...) instead ")
-	pass
-
-func _set_calculation_state(nv):
-	#push_warning("Can't set mesh: Read only. Use replace_mesh(...) instead ")
-	pass
 
 
 func replace_mesh(new_mesh, new_has_uv = false):
@@ -235,6 +225,4 @@ func _change_state_to(new_state):
 
 func _notify_state_change():
 	emit_signal("voxel_data_changed",calculation_state)
-	property_list_changed_notify()
-
-
+	notify_property_list_changed()

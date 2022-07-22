@@ -1,4 +1,4 @@
-tool
+@tool
 
 extends Panel
 
@@ -9,32 +9,30 @@ var editor_interface = null
 
 var voxel_node = null
 
-onready var remove_icon = preload("res://addons/voxel_hammer/ui/icons/Close.svg")
-onready var edit_icon = preload("res://addons/voxel_hammer/ui/icons/Edit.svg")
-onready var hidden_icon = preload("res://addons/voxel_hammer/ui/icons/GuiVisibilityHidden.svg")
-onready var visible_icon = preload("res://addons/voxel_hammer/ui/icons/GuiVisibilityVisible.svg")
-onready var up_icon = preload("res://addons/voxel_hammer/ui/icons/MoveUp.svg")
-onready var down_icon = preload("res://addons/voxel_hammer/ui/icons/MoveDown.svg")
+@onready var remove_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/Close.svg")
+@onready var edit_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/Edit.svg")
+@onready var hidden_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/GuiVisibilityHidden.svg")
+@onready var visible_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/GuiVisibilityVisible.svg")
+@onready var up_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/MoveUp.svg")
+@onready var down_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/MoveDown.svg")
 
-onready var add_button = $VBoxContainer/AddButton
-onready var tree = $VBoxContainer/Tree
+@onready var add_button = $VBoxContainer/AddButton
+@onready var tree = $VBoxContainer/Tree
 var tree_root
 
-var paint_stack = null setget _set_paint_stack
-
-
-func _set_paint_stack(nv):
-	#print("PaintStackEditor: setting paint stack")
-	if paint_stack:
-		if paint_stack.is_connected("operation_stack_changed", self, "_on_paint_stack_changed"):
-			paint_stack.disconnect("operation_stack_changed", self, "_on_paint_stack_changed")
-	
-	paint_stack = nv
-	
-	if paint_stack:
-		paint_stack.connect("operation_stack_changed", self, "_on_paint_stack_changed")
-	
-	populate_tree()
+var paint_stack = null:
+	set(nv):
+		#print("PaintStackEditor: setting paint stack")
+		if paint_stack:
+			if paint_stack.is_connected("operation_stack_changed", self, "_on_paint_stack_changed"):
+				paint_stack.disconnect("operation_stack_changed", self, "_on_paint_stack_changed")
+		
+		paint_stack = nv
+		
+		if paint_stack:
+			paint_stack.connect("operation_stack_changed", self, "_on_paint_stack_changed")
+		
+		populate_tree()
 
 
 func _on_paint_stack_changed():
@@ -100,18 +98,20 @@ func set_item_data(item, paint_op, index):
 	
 	var opname = "unimplemented"
 	var spec_info = ""
-	if paint_op is PaintOpPlane:
-		opname = "Plane"
-		spec_info = "%s, %s " % [paint_op.low, paint_op.high]
-	if paint_op is PaintOpGradient:
-		opname = "Gradient"
-		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
-	if paint_op is PaintOpGradientVector:
-		opname = "GradientVector"
-		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
-	if paint_op is PaintOpSimplexNoise:
-		opname = "Simplex Noise"
-		spec_info = "%s, %s, %s, %s " % [paint_op.lucanarity, paint_op.octaves, paint_op.period, paint_op.persistence]
+	
+	#TODO: Enable these / make smarter paint_op discovery that does not depend on knowing all classes here
+#	if paint_op is PaintOpPlane:
+#		opname = "Plane"
+#		spec_info = "%s, %s " % [paint_op.low, paint_op.high]
+#	if paint_op is PaintOpGradient:
+#		opname = "Gradient"
+#		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
+#	if paint_op is PaintOpGradientVector:
+#		opname = "GradientVector"
+#		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
+#	if paint_op is PaintOpSimplexNoise:
+#		opname = "Simplex Noise"
+#		spec_info = "%s, %s, %s, %s " % [paint_op.lucanarity, paint_op.octaves, paint_op.period, paint_op.persistence]
 	
 	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, smooth, spec_info])
 	
@@ -140,15 +140,17 @@ func _on_add_popup_selection(index):
 	
 	var paint_op = null
 	
-	match index:
-		0: # Plane
-			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 1)
-		1: # Gradient
-			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
-		2: # GradientVector
-			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
-		3: # Simplex noise
-			paint_op = PaintOpSimplexNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
+	
+	# TODO : enable these / make smarter
+#	match index:
+#		0: # Plane
+#			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 1)
+#		1: # Gradient
+#			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+#		2: # GradientVector
+#			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+#		3: # Simplex noise
+#			paint_op = PaintOpSimplexNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
 	
 	if paint_op:
 		paint_stack.add_paint_operation(paint_op)
@@ -169,7 +171,7 @@ func _on_Tree_button_pressed(item, column, id):
 			item.set_button(2,0, visible_icon)
 		else:
 			item.set_button(2,0, hidden_icon)
-		property_list_changed_notify()
+		notify_property_list_changed()
 	elif column == 3: # move up
 		paint_stack.move_paint_operation(paint_op,index-1)
 		populate_tree()

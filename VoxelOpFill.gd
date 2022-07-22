@@ -7,11 +7,11 @@ var new_smooth :int
 var start
 var end
 
-var mat_buffer : PoolIntArray
-var smooth_buffer : PoolByteArray
+var mat_buffer : PackedInt32Array = null
+var smooth_buffer : PackedByteArray = null
 
-func _init(voxel_data, voxel_configuration, material:int, smooth:int, start=null, end=null).(VoxelData.CALC_STATE.VOXEL, voxel_data, voxel_configuration): 
-	self.metadata.name = "VoxelOpFill"
+func _init(voxel_data, voxel_configuration, material:int, smooth:int, start=null, end=null):
+	super(VoxelData.CALC_STATE.VOXEL, voxel_data, voxel_configuration)
 	self.new_material=material
 	self.new_smooth=smooth
 	self.start=start
@@ -28,7 +28,7 @@ func prepare():
 	smooth_buffer = voxel_data.smooth#.duplicate()
 
 
-# This code is executed in another thread so it can not access voxel_node variable!
+# This code ispotentially  executed in another thread so it can not access voxel_node variable!
 func execute(thread_cache : Dictionary):
 	#print("!!! VoxelOpFill executing!")
 	match voxel_configuration.accel_mode:
@@ -40,13 +40,13 @@ func execute(thread_cache : Dictionary):
 
 # This code will be executed in the main thread so access to voxel_node is ok
 func finalize():
-	if !mat_buffer or !smooth_buffer:
+	if not mat_buffer or not smooth_buffer:
 		push_error("mat_buffer or smooth_buffer missing!")
 	voxel_data.material = mat_buffer
 	voxel_data.smooth = smooth_buffer
 
 
-# This code is executed in another thread so it can not access voxel_node variable!
+# This code is potentially executed in another thread so it can not access voxel_node variable!
 func fill():
 	#print("Filling...")
 	
