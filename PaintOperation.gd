@@ -1,17 +1,17 @@
-tool
+@tool
 
 extends Resource
 
 class_name PaintOperation
 
-# Abstract base class for paint operations
+# Abstract base class for all paint operations
 
-export(VoxelPaintStack.PAINT_MODE) var paint_mode = VoxelPaintStack.PAINT_MODE.NORMAL
-export(VoxelPaintStack.BLEND_MODE) var blend_mode = VoxelPaintStack.BLEND_MODE.NORMAL
-export(float, -10.0, 10.0, 0.01) var blend_amount = 1
-export(int, 1024) var material = 1
-export var smooth = false
-export var active = true
+@export var paint_mode : VoxelPaintStack.PAINT_MODE = VoxelPaintStack.PAINT_MODE.NORMAL
+@export var blend_mode : VoxelPaintStack.BLEND_MODE = VoxelPaintStack.BLEND_MODE.NORMAL
+@export_range(0.0, 10.0, 0.01) var blend_amount : float = 1.0
+@export_range(0, 1024, 1) var material : int = 1
+@export var smooth = false
+@export var active = true
 
 
 func _init(blend_mode = VoxelPaintStack.PAINT_MODE.NORMAL, material = 1, smooth = false):

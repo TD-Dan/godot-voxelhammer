@@ -1,15 +1,23 @@
-tool
+@tool
 
 extends Resource
 
 class_name VoxelPaintStack
 
-# Stack of Voxel paint operations
+#
+## Stack of Voxel paint operations
+#
+# Used for parametric generation of voxel geometry such as terrains and coloration patterns
+#
+
 
 signal operation_stack_changed
 
 # Array of PaintOperations
-export var operation_stack = Array() setget _set_operation_stack
+@export var operation_stack : Array = Array():
+	set(v):
+		operation_stack = v
+		emit_signal("operation_stack_changed")
 
 enum AXIS_PLANE {
 	X,
@@ -34,11 +42,12 @@ enum BLEND_MODE {
 	NONE,      # dont affect blend value
 }
 
-func _set_operation_stack(nv):
-	operation_stack = nv
-	emit_signal("operation_stack_changed")
 
 func add_paint_operation(paint_op):
+	# TODO: Parser error: enable this or get @export var operation_stack : Array[PaintOperation] at line 17 to work
+	# -> Wait for Godot 4.0 Beta to check if fixed
+	#if paint_op is PaintOperation:
+	#	error("paint_op needs to be subclass of PaintOperation")
 	operation_stack.append(paint_op)
 
 func remove_paint_operation(paint_op):
