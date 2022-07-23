@@ -9,7 +9,8 @@ var dock
 func _enter_tree():
 	print("VoxelHammer plugin loading...")
 	add_custom_type("VoxelConfiguration", "Resource", preload("VoxelConfiguration.gd"), preload("icon_vh.png"))
-	add_custom_type("VoxelPaintStack", "Resource", preload("VoxelPaintStack.gd"), preload("icon_vh.png"))
+	add_custom_type("VoxelData", "Resource", preload("VoxelData.gd"), preload("icon_vh.png"))
+	add_custom_type("VoxelInstance3D", "Node", preload("Node/VoxelInstance3D.gd"), preload("icon_vh.png"))
 	#add_custom_type("VoxelNode", "Spatial", preload("VoxelNode.gd"), preload("icon_vh.png"))
 	#add_custom_type("VoxelTerrain", "Spatial", preload("VoxelTerrain.gd"), preload("icon_vh.png"))
 	#add_custom_type("VoxelThing", "RigidBody", preload("VoxelThing.gd"), preload("icon_vh.png"))
@@ -31,10 +32,11 @@ func _enter_tree():
 func _exit_tree():
 	print("VoxelHammer plugin unloading...")
 	remove_custom_type("VoxelConfiguration")
-	remove_custom_type("VoxelPaintStack")
-	remove_custom_type("VoxelNode")
-	remove_custom_type("VoxelTerrain")
-	remove_custom_type("VoxelThing")
+	remove_custom_type("VoxelData")
+	#remove_custom_type("VoxelPaintStack")
+	#remove_custom_type("VoxelNode")
+	#remove_custom_type("VoxelTerrain")
+	#remove_custom_type("VoxelThing")
 
 	if dock:
 		remove_control_from_docks(dock)
