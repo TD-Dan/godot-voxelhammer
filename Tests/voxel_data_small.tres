@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_csmb7")
-size = Vector3i(3, 2, 2)
-voxels = [null, null, null, null, null, null, null, null, null, null, null, null]
+size = Vector3i(2, 2, 2)
+voxels = [null, null, null, null, null, null, null, null]
 persistent_data_dict = {}

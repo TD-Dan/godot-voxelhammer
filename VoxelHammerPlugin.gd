@@ -2,7 +2,7 @@
 
 extends EditorPlugin
 
-var eds
+var ed_sel
 
 var dock
 
@@ -16,9 +16,8 @@ func _enter_tree():
 	#add_custom_type("VoxelThing", "RigidBody", preload("VoxelThing.gd"), preload("icon_vh.png"))
 	name = "VoxelHammerPlugin"
 	
-	eds = get_editor_interface().get_selection()
-	
-	eds.connect("selection_changed", _on_selection_changed)
+	ed_sel = get_editor_interface().get_selection()
+	ed_sel.connect("selection_changed", _on_selection_changed)
 	
 	var dock_vh = preload("res://addons/TallDwarf/VoxelHammer/ui/VoxelHammerDock.tscn")
 	dock_vh.resource_local_to_scene = true
@@ -33,8 +32,8 @@ func _exit_tree():
 	print("VoxelHammer plugin unloading...")
 	remove_custom_type("VoxelConfiguration")
 	remove_custom_type("VoxelData")
+	remove_custom_type("VoxelInstance3D")
 	#remove_custom_type("VoxelPaintStack")
-	#remove_custom_type("VoxelNode")
 	#remove_custom_type("VoxelTerrain")
 	#remove_custom_type("VoxelThing")
 
@@ -46,15 +45,17 @@ func _exit_tree():
 
 
 func _on_selection_changed():
-	#print("VoxelHammerPlugin: selection changed")
-	# Returns an array of selected nodes
-	var selected = eds.get_selected_nodes() 
+	print("VoxelHammerPlugin: selection changed")
 	
-	if not selected.empty():
+	# Returns an array of selected nodes
+	var selected : Array[Node] = ed_sel.get_selected_nodes() 
+	
+	if not selected.is_empty():
 		# Always pick first node in selection
 		if dock:
 			var selected_node = selected[0]
-			dock.set_selection(selected_node)
+			print("setting sel")
+			dock.selection = selected_node
 	else:
 		if dock:
-			dock.set_selection(null)
+			dock.selection = null

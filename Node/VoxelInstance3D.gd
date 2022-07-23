@@ -134,17 +134,10 @@ func _ready():
 	if th_autoload_global:
 		print("Found TaskHammer plugin! Integrating...")
 	else:
-		push_warning("(OPTIONAL) TaskHammer Global Autoload NOT found. TaskHammer plugin installed correctly? Falling back to single thread execution..")
+		push_warning("(OPTIONAL) TaskHammer Global Autoload NOT found. TaskHammer plugin installed? Falling back to single thread execution..")
 	
 	mesh_child = MeshInstance3D.new()
 	add_child(mesh_child)
-	
-	# TODO: Test that these are actually connected in the setters above
-#	if not voxel_data.is_connected("voxel_data_changed", self, "_on_voxel_data_changed"):
-#		voxel_data.connect("voxel_data_changed", self, "_on_voxel_data_changed")
-#
-#	if not configuration.is_connected("voxel_configuration_changed", self, "_on_voxel_configuration_changed"):
-#		configuration.connect("voxel_configuration_changed", self, "_on_voxel_configuration_changed")
 	
 	advance_calculation_state()
 	
