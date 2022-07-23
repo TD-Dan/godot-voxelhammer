@@ -25,7 +25,6 @@ signal runtime_data_changed(what)
 		print("Setting VoxelData size to: %s" % nv)
 		
 		var total_size = nv.x * nv.y * nv.z
-		print("here")
 		voxels_mutex.lock()
 		voxels.clear()
 		voxels.resize(total_size)

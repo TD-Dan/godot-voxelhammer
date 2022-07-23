@@ -30,7 +30,7 @@ enum MESH_MODE {
 		mesh_mode = v
 		emit_signal("voxel_configuration_changed", "mesh_mode")
 
-# Select hardware acceleration mode to usu, will fall back to NONE if not available on target system
+# Select hardware acceleration mode to use, will fall back to NONE if not available on target system
 enum ACCEL_MODE {
 	NONE,
 	NATIVE,

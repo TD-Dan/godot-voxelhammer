@@ -26,9 +26,10 @@ signal mesh_ready
 			if not configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.connect("voxel_configuration_changed", _on_voxel_configuration_changed)
 		
+		# TODO: Implement
 		# force redraw of mesh
-		if voxel_data and voxel_data.calculation_state > VoxelData.CALC_STATE.MESH:
-			voxel_data.set_state(VoxelData.CALC_STATE.MESH-1)
+		#if voxel_data and voxel_data.calculation_state > VoxelData.CALC_STATE.MESH:
+		#	voxel_data.set_state(VoxelData.CALC_STATE.MESH-1)
 
 @export var voxel_data : Resource = VoxelData.new(): # : VoxelData
 	set(v):
@@ -89,24 +90,23 @@ var distance_to_tracked : float = 0
 var mesh_child
 
 
-var mesh_debug
-var debug_mesh_color = Color(0,0,0):
+# Debug line mesh that shows current mesh calculation status and size
+var _debug_mesh_child : MeshInstance3D = null
+var _debug_mesh_visible = false:
 	set(v):
-		debug_mesh_color = v
+		_debug_mesh_visible = v
+		if _debug_mesh_visible:
+			_update_debug_mesh()
+		else:
+			if _debug_mesh_child:
+				_debug_mesh_child.mesh = null
+var _debug_mesh_color = Color(0,0,0):
+	set(v):
+		_debug_mesh_color = v
 		#print("set debug mesh color to %s" % debug_mesh_color)
-		if show_debug_mesh:
-			create_debug_mesh()
-		else:
-			if mesh_debug:
-				mesh_debug.mesh = null
-var show_debug_mesh = false:
-	set(v):
-		show_debug_mesh = v
-		if show_debug_mesh:
-			create_debug_mesh()
-		else:
-			if mesh_debug:
-				mesh_debug.mesh = null
+		if _debug_mesh_visible:
+			_update_debug_mesh()
+
 
 
 var use_camera_for_priority = true
@@ -118,8 +118,6 @@ var ready_operations = []
 var mesh_is_ready = false
 
 
-
-
 func _init():
 	#print("VoxelNode init")
 	if not configuration:
@@ -128,7 +126,7 @@ func _init():
 
 func _ready():	
 	#print("VoxelNode: _ready")
-	show_debug_mesh = VoxelHammer.show_debug_gizmos
+	_debug_mesh_visible = VoxelHammer.show_debug_gizmos
 	VoxelHammer.connect("show_debug_gizmos_changed", _on_show_debug_gizmos_changed)
 	
 	# TODO: If TaskServer plugin is present connect to it
@@ -323,17 +321,18 @@ func on_work_is_ready(work_item):
 	ready_operations.push_back(work_item)
 
 
-func create_debug_mesh():
-	#print("Creating debug mesh...")
-	if not mesh_debug:
-		mesh_debug = MeshInstance3D.new()
-		add_child(mesh_debug)
+func _update_debug_mesh():
+	print("Creating debug mesh...")
+	if not _debug_mesh_child:
+		_debug_mesh_child = MeshInstance3D.new()
+		add_child(_debug_mesh_child)
 	
-	var size = voxel_data.real_size
+	var size = voxel_data.size * configuration.voxel_base_size
 	
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_LINES)
-	st.add_color(debug_mesh_color)
+	st.set_color(_debug_mesh_color)
+	
 	st.add_vertex(Vector3(0,0,0))
 	st.add_vertex(Vector3(size.x,0,0))
 	st.add_vertex(Vector3(0,size.y,0))
@@ -361,13 +360,13 @@ func create_debug_mesh():
 	st.add_vertex(Vector3(0,size.y,0))
 	st.add_vertex(Vector3(0,size.y,size.z))
 	
-	mesh_debug.mesh = st.commit()
-	mesh_debug.mesh.surface_set_material(0, load("res://addons/voxel_hammer/res/line.tres"))
+	_debug_mesh_child.mesh = st.commit()
+	_debug_mesh_child.mesh.surface_set_material(0, load("res://addons/TallDwarf/VoxelHammer/res/line.tres"))
 
 
 func _on_show_debug_gizmos_changed(value):
-	print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
-	show_debug_mesh = value
+	#print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
+	_debug_mesh_visible = value
 
 func _on_use_camera_for_priority_changed(value):
 	use_camera_for_priority = value
@@ -388,6 +387,8 @@ func _on_voxel_configuration_changed(what):
 					mesh_child.set_surface_material(i, configuration.materials[si])
 		"voxel_base_size":
 			recalc_mesh = true
+			if _debug_mesh_visible:
+				_update_debug_mesh()
 		"mesh_mode":
 			recalc_mesh = true
 		"accel_mode":
@@ -403,4 +404,6 @@ func _on_voxel_configuration_changed(what):
 func _on_voxels_changed():
 	print("VoxelNode: _on_voxels_changed")
 	
+	if _debug_mesh_visible:
+		_update_debug_mesh()
 	# TODO: recalculate Mesh
