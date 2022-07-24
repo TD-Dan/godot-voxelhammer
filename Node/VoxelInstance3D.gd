@@ -1,6 +1,6 @@
 @tool
 
-extends Node
+extends Node3D
 
 class_name VoxelInstance3D
 
@@ -44,12 +44,9 @@ signal mesh_ready
 			if not voxel_data.is_connected("voxels_changed", _on_voxels_changed):
 				voxel_data.connect("voxels_changed", _on_voxels_changed)
 
-var paint_stack : VoxelPaintStack = null:
+@export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(v):
 		paint_stack = v
-		if paint_stack:
-			if voxel_data:
-				voxel_data.clear()
 
  # apply voxel paint stack in local coordinates instead of world coordinates
 @export var voxel_paint_local = true

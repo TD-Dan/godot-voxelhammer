@@ -14,43 +14,38 @@ var editor_interface = null
 
 var selection = null:
 	set(nv):
-		print("VoxelHammerDock: setting selection")
+		#print("VoxelHammerDock: setting selection")
 		
 		#TODO enable / make smarter
 		
 		if nv is VoxelInstance3D:
 			selection = nv
-		elif nv is Node3D:
-			for c in nv.get_children():
-				if c is VoxelInstance3D:
-					selection = nv
-					break
+			selected_container.visible = true
+			selected_info.text = "Selection: %s" % selection
+			var vox_count = 0
+			if selection.voxel_data:
+				vox_count = selection.voxel_data.voxels.size()
+			selected_info_more.text = "Voxel count: %s \n" % vox_count
+			paint_stack_editor.paint_stack = selection.paint_stack
 	#	elif nv is VoxelThing:
 	#		_selection = nv.voxel_body
 	#	elif nv is VoxelTerrainChunk:
 	#		_selection = nv.voxel_body
 	#	elif nv is VoxelTerrain:
 	#		_selection = nv
+		elif nv:
+			selection = null
+			selected_container.visible = false
+			selected_info.text = "Selection: %s" % nv
+			selected_info_more.text = "Select a VoxelHammer node in editor to edit here"
+			paint_stack_editor.paint_stack = null
 		else:
 			selection = null
 			selected_container.visible = false
 			selected_info.text = "Selection: none"
-			selected_info_more.text = " "
+			selected_info_more.text = "Select a VoxelHammer node in editor to edit here"
 			paint_stack_editor.paint_stack = null
 	
-		if selection:
-			selected_container.visible = true
-			paint_stack_editor.paint_stack = selection.paint_stack
-			if selection is VoxelInstance3D:
-				selected_info.text = "Selection: VoxelInstance3D %s" % selection
-				var vox_count = 0
-				if selection.voxel_data:
-					vox_count = selection.voxel_data.total_count
-				selected_info_more.text = "Voxel count: %s \n" % vox_count
-	#		elif _selection is VoxelTerrain:
-	#			selected_info.text = "Selection: VoxelTerrain %s" % _selection
-	#			var vox_count = _selection.get_total_count()
-	#			selected_info_more.text = "Chunks: %s, Voxels: %s \n" % [_selection._chunks.size(), vox_count]
 		
 
 

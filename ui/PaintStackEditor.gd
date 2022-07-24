@@ -1,6 +1,6 @@
 @tool
 
-extends Panel
+extends Control
 
 signal paint_stack_changed
 
@@ -24,13 +24,13 @@ var paint_stack = null:
 	set(nv):
 		#print("PaintStackEditor: setting paint stack")
 		if paint_stack:
-			if paint_stack.is_connected("operation_stack_changed", self, "_on_paint_stack_changed"):
-				paint_stack.disconnect("operation_stack_changed", self, "_on_paint_stack_changed")
+			if paint_stack.is_connected("operation_stack_changed", _on_paint_stack_changed):
+				paint_stack.disconnect("operation_stack_changed", _on_paint_stack_changed)
 		
 		paint_stack = nv
 		
 		if paint_stack:
-			paint_stack.connect("operation_stack_changed", self, "_on_paint_stack_changed")
+			paint_stack.connect("operation_stack_changed", _on_paint_stack_changed)
 		
 		populate_tree()
 
@@ -45,17 +45,17 @@ func _init(voxel_node = null):
 
 
 func _ready():
-	tree.set_column_min_width(0,60)
-	tree.set_column_min_width(1,7)
-	tree.set_column_min_width(2,7)
-	tree.set_column_min_width(3,7)
-	tree.set_column_min_width(4,7)
-	tree.set_column_min_width(5,7)
+	tree.set_column_custom_minimum_width(0,60)
+	tree.set_column_custom_minimum_width(1,7)
+	tree.set_column_custom_minimum_width(2,7)
+	tree.set_column_custom_minimum_width(3,7)
+	tree.set_column_custom_minimum_width(4,7)
+	tree.set_column_custom_minimum_width(5,7)
 	
 	tree_root = tree.create_item()
 	
 	var add_popup = add_button.get_popup()
-	add_popup.connect("index_pressed",self,"_on_add_popup_selection")
+	add_popup.connect("index_pressed", _on_add_popup_selection)
 
 
 func populate_tree():

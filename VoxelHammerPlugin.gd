@@ -53,9 +53,7 @@ func _on_selection_changed():
 	if not selected.is_empty():
 		# Always pick first node in selection
 		if dock:
-			var selected_node = selected[0]
-			print("setting sel")
-			dock.selection = selected_node
+			dock.selection = selected[0]
 	else:
 		if dock:
 			dock.selection = null

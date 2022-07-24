@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://cub75t6i587n8"]
+
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/VoxelData.gd" id="1_lahfh"]
+
+[resource]
+script = ExtResource("1_lahfh")
+size = Vector3i(4, 4, 4)
+voxels = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+persistent_data_dict = {}
