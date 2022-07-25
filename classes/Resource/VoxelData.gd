@@ -20,6 +20,8 @@ signal voxel_data_changed(what)
 		
 		size = nv
 		
+		data.resize(get_voxel_count())
+	
 		clear()
 		
 		notify_data_change()
@@ -35,12 +37,13 @@ signal voxel_data_changed(what)
 
 var data_mutex = Mutex.new()
 
+func get_voxel_count():
+	return size.x*size.y*size.z
 
 # Clears all voxel data to zero
 func clear():
 	data_mutex.lock()
-	data.resize(0)
-	data.resize(size.x*size.y*size.z)
+	data.fill(0)
 	data_mutex.unlock()
 
 

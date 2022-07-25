@@ -10,13 +10,10 @@ var position_offset
 
 func _init(voxel_data, voxel_configuration, paint_stack, position_offset=Vector3(0,0,0)):
 	super(VoxelData.CALC_STATE.VOXEL, voxel_data, voxel_configuration)
-	self.metadata.name = "VoxelOpPaintStack"
+	self.name = "VoxelOpPaintStack"
 	self.paint_stack = paint_stack.duplicate()
 	self.position_offset = position_offset
 
-
-func to_string ():
-	return "[VoxelOpPaintStack]"
 
 
 # Runs in main node to prepare data

@@ -3,17 +3,15 @@ extends VoxelOperation
 class_name VoxelOpFill
 
 var new_material :int
-var new_smooth :int
 var start
 var end
 
 var mat_buffer : PackedInt32Array = null
 var smooth_buffer : PackedByteArray = null
 
-func _init(voxel_data, voxel_configuration, material:int, smooth:int, start=null, end=null):
-	super(VoxelData.CALC_STATE.VOXEL, voxel_data, voxel_configuration)
+func _init(voxel_instance : VoxelInstance3D, material:int, start=null, end=null):
+	super(VoxelOperation.CALCULATION_STATE.VOXEL, voxel_instance)
 	self.new_material=material
-	self.new_smooth=smooth
 	self.start=start
 	self.end = end
 

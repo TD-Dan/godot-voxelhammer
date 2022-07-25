@@ -8,7 +8,6 @@ signal show_debug_gizmos_changed(value)
 
 @export var default_configuration : Resource = preload("./res/default_voxel_configuration.tres")
 
-@export var use_camera_for_priority = true
 @export var show_debug_gizmos = false:
 	set(v):
 		show_debug_gizmos = v
