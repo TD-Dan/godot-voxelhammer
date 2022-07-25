@@ -9,12 +9,12 @@ var editor_interface = null
 
 var voxel_node = null
 
-@onready var remove_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/Close.svg")
-@onready var edit_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/Edit.svg")
-@onready var hidden_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/GuiVisibilityHidden.svg")
-@onready var visible_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/GuiVisibilityVisible.svg")
-@onready var up_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/MoveUp.svg")
-@onready var down_icon = preload("res://addons/TallDwarf/VoxelHammer/ui/icons/MoveDown.svg")
+@onready var remove_icon = preload("./icons/Close.svg")
+@onready var edit_icon = preload("./icons/Edit.svg")
+@onready var hidden_icon = preload("./icons/GuiVisibilityHidden.svg")
+@onready var visible_icon = preload("./icons/GuiVisibilityVisible.svg")
+@onready var up_icon = preload("./icons/MoveUp.svg")
+@onready var down_icon = preload("./icons/MoveDown.svg")
 
 @onready var add_button = $VBoxContainer/AddButton
 @onready var tree = $VBoxContainer/Tree

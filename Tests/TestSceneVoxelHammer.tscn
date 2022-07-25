@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://dguxeu0vktl0n"]
+
+[ext_resource type="Material" uid="uid://cy3iyc1vgtogu" path="res://materials/Default_world.tres" id="1_biel5"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_f7hbq"]
+material = ExtResource("1_biel5")
+size = Vector2(16, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_w4xxq"]
+size = Vector3(16, 0.01, 8)
+
+[node name="TestSceneEyeball" type="Node3D"]
+
+[node name="Structures" type="Node3D" parent="."]
+
+[node name="Plane" type="StaticBody3D" parent="Structures"]
+metadata/_edit_group_ = true
+
+[node name="PlaneMesh" type="MeshInstance3D" parent="Structures/Plane"]
+mesh = SubResource("PlaneMesh_f7hbq")
+
+[node name="PlaneShape" type="CollisionShape3D" parent="Structures/Plane"]
+shape = SubResource("BoxShape3D_w4xxq")
+
+[node name="Plane2" type="StaticBody3D" parent="Structures"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+metadata/_edit_group_ = true
+
+[node name="PlaneMesh" type="MeshInstance3D" parent="Structures/Plane2"]
+mesh = SubResource("PlaneMesh_f7hbq")
+
+[node name="PlaneShape" type="CollisionShape3D" parent="Structures/Plane2"]
+shape = SubResource("BoxShape3D_w4xxq")

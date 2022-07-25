@@ -1,9 +1,0 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://3euey2rbvsy8"]
-
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/VoxelData.gd" id="1_csmb7"]
-
-[resource]
-script = ExtResource("1_csmb7")
-size = Vector3i(2, 2, 2)
-voxels = [null, null, null, null, null, null, null, null]
-persistent_data_dict = {}

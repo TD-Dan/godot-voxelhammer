@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nbipb5ahb181"
-path="res://.godot/imported/RotateLeft.svg-cee97f2a3df086f1cbc6ac90471f2886.ctex"
+uid="uid://bj2fy4pims31w"
+path="res://.godot/imported/Close.svg-0669f10cdf9073141c04224497008b4d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/ui/icons/RotateLeft.svg"
-dest_files=["res://.godot/imported/RotateLeft.svg-cee97f2a3df086f1cbc6ac90471f2886.ctex"]
+source_file="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/Close.svg"
+dest_files=["res://.godot/imported/Close.svg-0669f10cdf9073141c04224497008b4d.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnpesvmv0c2ag"
-path="res://.godot/imported/icon_vh.png-54e745c9c0c51b75a3af17c30453b73f.ctex"
+uid="uid://dr4t4yn3pfn4w"
+path="res://.godot/imported/GuiVisibilityVisible.svg-277b973bba84652fd5240b000486fbdf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/icon_vh.png"
-dest_files=["res://.godot/imported/icon_vh.png-54e745c9c0c51b75a3af17c30453b73f.ctex"]
+source_file="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/GuiVisibilityVisible.svg"
+dest_files=["res://.godot/imported/GuiVisibilityVisible.svg-277b973bba84652fd5240b000486fbdf.ctex"]
 
 [params]
 
@@ -32,3 +32,4 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0

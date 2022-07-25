@@ -212,6 +212,10 @@ func update_distance_tracking():
 
 
 func advance_calculation_state():
+	
+	# SKIP THIS FOR NOW
+	return
+	
 	pass
 	
 	# TODO: Implement

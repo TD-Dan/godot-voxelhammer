@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dp7124506jx1d"
-path="res://.godot/imported/MoveUp.svg-18ebf44ec62b9fbbe9a4ad94987d1196.ctex"
+uid="uid://dverw0t3u6n87"
+path="res://.godot/imported/MoveDown.svg-fc30e440ce0bf3b9d5a6fcfd4d12709c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/ui/icons/MoveUp.svg"
-dest_files=["res://.godot/imported/MoveUp.svg-18ebf44ec62b9fbbe9a4ad94987d1196.ctex"]
+source_file="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/MoveDown.svg"
+dest_files=["res://.godot/imported/MoveDown.svg-fc30e440ce0bf3b9d5a6fcfd4d12709c.ctex"]
 
 [params]
 

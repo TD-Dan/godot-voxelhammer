@@ -8,18 +8,15 @@ var dock
 
 func _enter_tree():
 	print("VoxelHammer plugin loading...")
-	add_custom_type("VoxelConfiguration", "Resource", preload("VoxelConfiguration.gd"), preload("icon_vh.png"))
-	add_custom_type("VoxelData", "Resource", preload("VoxelData.gd"), preload("icon_vh.png"))
-	add_custom_type("VoxelInstance3D", "Node", preload("Node/VoxelInstance3D.gd"), preload("icon_vh.png"))
-	#add_custom_type("VoxelNode", "Spatial", preload("VoxelNode.gd"), preload("icon_vh.png"))
-	#add_custom_type("VoxelTerrain", "Spatial", preload("VoxelTerrain.gd"), preload("icon_vh.png"))
-	#add_custom_type("VoxelThing", "RigidBody", preload("VoxelThing.gd"), preload("icon_vh.png"))
+	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("VoxelData", "Resource", preload("./classes/Resource/VoxelData.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("VoxelInstance3D", "Node3D", preload("./classes/Node3D/VoxelInstance3D.gd"), preload("./res/icon_vh.png"))
 	name = "VoxelHammerPlugin"
 	
 	ed_sel = get_editor_interface().get_selection()
 	ed_sel.connect("selection_changed", _on_selection_changed)
 	
-	var dock_vh = preload("res://addons/TallDwarf/VoxelHammer/ui/VoxelHammerDock.tscn")
+	var dock_vh = preload("./classes/EditorUI/VoxelHammerDock.tscn")
 	dock_vh.resource_local_to_scene = true
 	dock = dock_vh.instantiate()
 	dock.editor_interface = get_editor_interface()

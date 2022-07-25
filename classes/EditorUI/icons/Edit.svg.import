@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0vyt3yd0tajp"
-path="res://.godot/imported/GuiVisibilityHidden.svg-300aacb425841b3c2a0a64683aedcddb.ctex"
+uid="uid://bnla6ylerkkog"
+path="res://.godot/imported/Edit.svg-55744294822009907d356aa10a432307.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/ui/icons/GuiVisibilityHidden.svg"
-dest_files=["res://.godot/imported/GuiVisibilityHidden.svg-300aacb425841b3c2a0a64683aedcddb.ctex"]
+source_file="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/Edit.svg"
+dest_files=["res://.godot/imported/Edit.svg-55744294822009907d356aa10a432307.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csailxdrfty2w"
-path="res://.godot/imported/Eraser.svg-b586044956fcfee9ac74f048d2ad5fe4.ctex"
+uid="uid://nbipb5ahb181"
+path="res://.godot/imported/RotateLeft.svg-77faa32abaaa8cc088b46261c61151a2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/ui/icons/Eraser.svg"
-dest_files=["res://.godot/imported/Eraser.svg-b586044956fcfee9ac74f048d2ad5fe4.ctex"]
+source_file="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/RotateLeft.svg"
+dest_files=["res://.godot/imported/RotateLeft.svg-77faa32abaaa8cc088b46261c61151a2.ctex"]
 
 [params]
 

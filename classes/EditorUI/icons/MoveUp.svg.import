@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dr4t4yn3pfn4w"
-path="res://.godot/imported/GuiVisibilityVisible.svg-e1b0451f3d15d139702c1ff6dfc22ae5.ctex"
+uid="uid://dp7124506jx1d"
+path="res://.godot/imported/MoveUp.svg-7b3fe8bdc5b8d31e5c6fd52dfa0f68f2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/ui/icons/GuiVisibilityVisible.svg"
-dest_files=["res://.godot/imported/GuiVisibilityVisible.svg-e1b0451f3d15d139702c1ff6dfc22ae5.ctex"]
+source_file="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/MoveUp.svg"
+dest_files=["res://.godot/imported/MoveUp.svg-7b3fe8bdc5b8d31e5c6fd52dfa0f68f2.ctex"]
 
 [params]
 
