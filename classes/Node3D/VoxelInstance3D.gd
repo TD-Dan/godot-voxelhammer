@@ -10,6 +10,8 @@ class_name VoxelInstance3D
 # Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
 #
 
+# Emitted when data is modified
+signal data_changed(what)
 # emitted when compilation of mesh (+ uv + normals and all) is complete
 signal mesh_ready
 
@@ -32,14 +34,14 @@ signal mesh_ready
 	set(nv):
 		#print("_set_voxel_data")
 		if voxel_data:
-			if voxel_data.is_connected("voxels_changed", _on_voxels_changed):
-				voxel_data.disconnect("voxels_changed", _on_voxels_changed)
+			if voxel_data.is_connected("voxel_data_changed", _on_voxels_changed):
+				voxel_data.disconnect("voxel_data_changed", _on_voxels_changed)
 		
 		voxel_data = nv
 		
 		if voxel_data:
-			if not voxel_data.is_connected("voxels_changed", _on_voxels_changed):
-				voxel_data.connect("voxels_changed", _on_voxels_changed)
+			if not voxel_data.is_connected("voxel_data_changed", _on_voxels_changed):
+				voxel_data.connect("voxel_data_changed", _on_voxels_changed)
 
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
@@ -48,6 +50,9 @@ signal mesh_ready
 			if voxel_data:
 				voxel_data.clear()
 
+
+var vis_buffer = null
+var visibility_count = null
 
 var mesh_child
 
@@ -75,7 +80,6 @@ var pending_operations = []
 var current_operation : VoxelOperation = null
 var ready_operations = []
 
-var mesh_is_ready = false
 
 
 func _init():
@@ -126,18 +130,25 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 	#print("Add voxel op: %s" % str(vox_op.new_value))
 	
 	# Remove all higher state calculations from pending operations, as they are now made invalid
+	if current_operation and current_operation.calculation_level > vox_op.calculation_level:
+		print("removing higher current op: %s" % str(current_operation))
+		current_operation.cancel = true
+		current_operation = null
 	for op in pending_operations:
-		if op.calculation_level >= vox_op.calculation_level:
+		if op.calculation_level > vox_op.calculation_level:
+			print("removing higher op: %s" % str(op))
 			op.cancel = true
 			pending_operations.erase(op)
 	
 	vox_op.voxel_instance = self
 	pending_operations.push_back(vox_op)
+	
 	_advance_operation_stack()
 
 func _advance_operation_stack():
-	#print("advance_operation_stack")
+	print("advance_operation_stack, stack: %s" % str(pending_operations))
 	if not current_operation:
+		print("popping from stack")
 		current_operation = pending_operations.pop_front()
 		if current_operation:
 			match configuration.thread_mode:
@@ -161,7 +172,7 @@ func on_work_is_ready(work_item):
 
 
 func _update_debug_mesh():
-	print("Creating debug mesh...")
+	#print("Creating debug mesh...")
 	if not _debug_mesh_child:
 		_debug_mesh_child = MeshInstance3D.new()
 		add_child(_debug_mesh_child)
@@ -214,9 +225,19 @@ func _on_voxel_configuration_changed(what):
 	pass
 
 func _on_voxels_changed():
-	print("VoxelNode: _on_voxels_changed")
+	print("VoxelInstance3D: _on_voxels_changed [0]=%s" % str(voxel_data.data[0]))
+
+	_debug_mesh_color = Color(0.5,0,0)
+
+	emit_signal("data_changed", "voxels")
+
+	# recalculate Mesh if no other vox operations pending
+	if not current_operation and pending_operations.is_empty():
+		push_voxel_operation(VoxelOpVisibility.new())
+
+func notify_visibility_calculated():
+	print("VoxelInstance3D: visibility calculated: %s visible voxels" % str(visibility_count))
 	
-	if _debug_mesh_visible:
-		_update_debug_mesh()
+	_debug_mesh_color = Color(1,0.5,0)
 	
-	# TODO: recalculate Mesh
+	emit_signal("data_changed", "vis_buffer")

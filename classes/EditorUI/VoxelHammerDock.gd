@@ -17,11 +17,17 @@ var editor_interface = null
 var selection = null:
 	set(nv):
 		#print("VoxelHammerDock: setting selection")
+		if selection and selection.is_connected("data_changed", _on_selection_data_changed):
+			selection.disconnect("data_changed", _on_selection_data_changed)
 		
 		#TODO enable / make smarter
 		
 		if nv is VoxelInstance3D:
 			selection = nv
+			
+			if not selection.is_connected("data_changed", _on_selection_data_changed):
+				selection.connect("data_changed", _on_selection_data_changed)
+				
 			voxel_edit_tools.visible = true
 			selected_container.visible = true
 			selected_info.text = "Selection: %s" % selection
@@ -36,21 +42,31 @@ var selection = null:
 	#		_selection = nv.voxel_body
 	#	elif nv is VoxelTerrain:
 	#		_selection = nv
-		elif nv:
-			selection = null
-			voxel_edit_tools.visible = false
-			selected_container.visible = false
-			selected_info.text = "Selection: %s" % nv
-			selected_info_more.text = "Select a VoxelHammer node in editor to edit here"
-			paint_stack_editor.paint_stack = null
 		else:
 			selection = null
 			voxel_edit_tools.visible = false
 			selected_container.visible = false
-			selected_info.text = "Selection: none"
-			selected_info_more.text = "Select a VoxelHammer node in editor to edit here"
 			paint_stack_editor.paint_stack = null
+		
+		_update_selected_info_text()
 
+func _on_selection_data_changed(what):
+	#print("detected change in selected data: %s !" % str(what))
+	_update_selected_info_text()
+
+func _update_selected_info_text():
+	if selection:
+		selected_info.text = "Selection: %s" % selection
+		var vox_count = 0
+		if selection.voxel_data:
+			vox_count = selection.voxel_data.get_voxel_count()
+		selected_info_more.text = "Voxel count: %s" % vox_count
+		if selection.vis_buffer:
+			selected_info_more.text += ", Visible: %s" % selection.visibility_count
+	
+	else:
+		selected_info.text = "Selection: none"
+		selected_info_more.text = "Select a VoxelHammer node in editor to edit here"
 
 
 func _ready():
@@ -86,9 +102,7 @@ func _on_EditGlobalsButton_pressed():
 
 
 func _on_button_clear_pressed():
-	var sel : VoxelInstance3D = selection
-	sel.voxel_data.clear()
-	sel.notify_property_list_changed()
+	selection.voxel_data.clear()
 
 
 func _on_button_fill_pressed():

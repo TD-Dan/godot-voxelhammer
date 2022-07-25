@@ -6,6 +6,6 @@
 script = ExtResource("1_xtxim")
 materials = []
 voxel_base_size = 1.0
-mesh_mode = 3
+mesh_mode = 0
 accel_mode = 0
 thread_mode = 0

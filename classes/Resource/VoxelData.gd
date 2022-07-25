@@ -10,7 +10,7 @@ class_name VoxelData
 # Stores only voxel data and does not know about any other stuff as configurations,meshes or voxel sizes
 
 
-signal voxel_data_changed(what)
+signal voxel_data_changed
 
 @export var size : Vector3i = Vector3i(8,8,8):
 	set(nv):
@@ -24,7 +24,7 @@ signal voxel_data_changed(what)
 	
 		clear()
 		
-		notify_data_changed()
+		#notify_data_changed()
 
 
 @export var data : PackedInt64Array = PackedInt64Array():
@@ -33,7 +33,7 @@ signal voxel_data_changed(what)
 		data = nv
 		data_mutex.unlock()
 		
-		notify_data_changed()
+		#notify_data_changed()
 
 var data_mutex = Mutex.new()
 
@@ -45,6 +45,8 @@ func clear():
 	data_mutex.lock()
 	data.fill(0)
 	data_mutex.unlock()
+	emit_signal("voxel_data_changed")
+	notify_property_list_changed()
 
 func notify_data_changed():
 	emit_signal("voxel_data_changed")

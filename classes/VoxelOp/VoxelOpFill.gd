@@ -26,7 +26,7 @@ func run_operation():
 
 # This code is potentially executed in another thread!
 func fill(data : PackedInt64Array, size : Vector3i, value : int, start = null, end = null):
-	#print("Filling with %s" % value)
+	print("Filling with %s ..." % value)
 	
 	var sx :int = size.x
 	var sy :int = size.y
@@ -39,7 +39,4 @@ func fill(data : PackedInt64Array, size : Vector3i, value : int, start = null, e
 					if x >= start.x and x < end.x and y >= start.y and y < end.y and z >= start.z and z < end.z:
 						data[x + y*sx + z*sx*sy] = value
 	else:
-		for z in range(sz):
-			for y in range(sy):
-				for x in range(sx):
-					data[x + y*sx + z*sx*sy] = value
+		data.fill(value)
