@@ -42,7 +42,7 @@ func _exit_tree():
 
 
 func _on_selection_changed():
-	print("VoxelHammerPlugin: selection changed")
+	#print("VoxelHammerPlugin: selection changed")
 	
 	# Returns an array of selected nodes
 	var selected : Array[Node] = ed_sel.get_selected_nodes() 

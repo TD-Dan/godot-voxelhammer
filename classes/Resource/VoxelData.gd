@@ -24,7 +24,7 @@ signal voxel_data_changed(what)
 	
 		clear()
 		
-		notify_data_change()
+		notify_data_changed()
 
 
 @export var data : PackedInt64Array = PackedInt64Array():
@@ -33,7 +33,7 @@ signal voxel_data_changed(what)
 		data = nv
 		data_mutex.unlock()
 		
-		notify_data_change()
+		notify_data_changed()
 
 var data_mutex = Mutex.new()
 
@@ -46,7 +46,6 @@ func clear():
 	data.fill(0)
 	data_mutex.unlock()
 
-
-func notify_data_change():
+func notify_data_changed():
 	emit_signal("voxel_data_changed")
 	notify_property_list_changed()

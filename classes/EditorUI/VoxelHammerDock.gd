@@ -93,8 +93,7 @@ func _on_button_clear_pressed():
 
 func _on_button_fill_pressed():
 	var mat = voxel_edit_material.value
-	var sel : VoxelInstance3D = selection
-	sel.push_voxel_operation(VoxelOpFill.new(sel, mat))
+	selection.push_voxel_operation(VoxelOpFill.new(mat))
 
 
 func _on_button_paint_toggled(button_pressed):

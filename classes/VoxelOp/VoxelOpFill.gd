@@ -1,87 +1,45 @@
+@tool
+
 extends VoxelOperation
 
 class_name VoxelOpFill
 
-var new_material :int
+var new_value
 var start
 var end
 
-var mat_buffer : PackedInt32Array = null
-var smooth_buffer : PackedByteArray = null
 
-func _init(voxel_instance : VoxelInstance3D, material:int, start=null, end=null):
-	super(VoxelOperation.CALCULATION_STATE.VOXEL, voxel_instance)
-	self.new_material=material
-	self.start=start
-	self.end = end
+func _init(fill_value:int, start=null, end=null):
+	super("VoxelOpFill", VoxelOperation.CALCULATION_LEVEL.VOXEL)
+	new_value = fill_value
+	start = start
+	end = end
 
+# This code is potentially executed in another thread!
+func run_operation():
+	if voxel_instance.voxel_data.data_mutex.try_lock() == OK:
+		fill(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, new_value, start, end)
+		voxel_instance.voxel_data.data_mutex.unlock()
+		voxel_instance.voxel_data.call_deferred("notify_data_changed")
+	else:
+		push_warning("VoxelOpFill: Can't get lock on voxel data!")
 
-func to_string ():
-	return "[VoxelOpFill]"
-
-
-# Runs in main node to prepare data
-func prepare():
-	mat_buffer = voxel_data.material#.duplicate()
-	smooth_buffer = voxel_data.smooth#.duplicate()
-
-
-# This code ispotentially  executed in another thread so it can not access voxel_node variable!
-func execute(thread_cache : Dictionary):
-	#print("!!! VoxelOpFill executing!")
-	match voxel_configuration.accel_mode:
-		VoxelConfiguration.ACCEL_MODE.NONE:
-			fill()
-		VoxelConfiguration.ACCEL_MODE.NATIVE:
-			fill_native()
-
-
-# This code will be executed in the main thread so access to voxel_node is ok
-func finalize():
-	#if not mat_buffer or not smooth_buffer:
-	#	push_error("mat_buffer or smooth_buffer missing!")
-	voxel_data.material = mat_buffer
-	voxel_data.smooth = smooth_buffer
-
-
-# This code is potentially executed in another thread so it can not access voxel_node variable!
-func fill():
-	#print("Filling...")
+# This code is potentially executed in another thread!
+func fill(data : PackedInt64Array, size : Vector3i, value : int, start = null, end = null):
+	#print("Filling with %s" % value)
 	
-	var sx :int = voxel_data.voxel_count.x
-	var sy :int = voxel_data.voxel_count.y
-	var sz :int = voxel_data.voxel_count.z
-	
+	var sx :int = size.x
+	var sy :int = size.y
+	var sz :int = size.z
 	
 	if start != null and end != null:
 		for z in range(sz):
 			for y in range(sy):
 				for x in range(sx):
 					if x >= start.x and x < end.x and y >= start.y and y < end.y and z >= start.z and z < end.z:
-						mat_buffer[x + y*sx + z*sx*sy] = new_material
-						if new_smooth != null:
-							smooth_buffer[x + y*sx + z*sx*sy] = new_smooth
+						data[x + y*sx + z*sx*sy] = value
 	else:
 		for z in range(sz):
 			for y in range(sy):
 				for x in range(sx):
-					mat_buffer[x + y*sx + z*sx*sy] = new_material
-					if new_smooth != null:
-						smooth_buffer[x + y*sx + z*sx*sy] = new_smooth
-
-func fill_native():
-	var native_worker = VoxelHammer.native_worker
-	if not native_worker:
-		push_error("VoxelOpVisibility: No native worker found. Falling back to ACCEL_MODE.NONE")
-		fill()
-		return
-	
-	if !start:
-		start = Vector3(0,0,0)
-	if !end:
-		end = voxel_data.voxel_count
-	
-	var retarray = native_worker.create_fill(voxel_data.voxel_count, start, end, new_material, new_smooth, mat_buffer, smooth_buffer)
-	
-	mat_buffer = retarray[0]
-	smooth_buffer = retarray[1]
+					data[x + y*sx + z*sx*sy] = value

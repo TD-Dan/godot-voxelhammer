@@ -26,9 +26,7 @@ signal mesh_ready
 			if not configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.connect("voxel_configuration_changed", _on_voxel_configuration_changed)
 		
-		# force redraw of mesh
-		if voxel_data and voxel_data.calculation_state > VoxelData.CALC_STATE.MESH:
-			voxel_data.set_state(VoxelData.CALC_STATE.MESH-1)
+		# TODO: force redraw of mesh
 
 @export var voxel_data : Resource = VoxelData.new(): # : VoxelData
 	set(nv):
@@ -74,7 +72,7 @@ var _debug_mesh_color : Color = Color(0,0,0):
 
 
 var pending_operations = []
-var current_operation = null
+var current_operation : VoxelOperation = null
 var ready_operations = []
 
 var mesh_is_ready = false
@@ -83,13 +81,17 @@ var mesh_is_ready = false
 func _init():
 	#print("VoxelNode init")
 	if not configuration:
-		configuration = VoxelHammer.default_configuration
+		var vh = get_node_or_null("/root/VoxelHammer")
+		if vh:
+			configuration = vh.default_configuration
 
 
 func _ready():	
 	#print("VoxelNode: _ready")
-	_debug_mesh_visible = VoxelHammer.show_debug_gizmos
-	VoxelHammer.connect("show_debug_gizmos_changed", _on_show_debug_gizmos_changed)
+	var vh = get_node_or_null("/root/VoxelHammer")
+	if vh:
+		_debug_mesh_visible = vh.show_debug_gizmos
+		vh.connect("show_debug_gizmos_changed", _on_show_debug_gizmos_changed)
 	
 	# TODO: If TaskServer plugin is present connect to it
 	var th_autoload_global = get_node_or_null("/root/TaskHammer")
@@ -118,9 +120,10 @@ func _exit_tree():
 
 func push_voxel_operation(vox_op : VoxelOperation):
 	call_deferred("_deferred_push_voxel_op", vox_op)
+	#print("Push voxel op: %s" % str(vox_op.new_value))
 
 func _deferred_push_voxel_op(vox_op : VoxelOperation):
-	#print("Add voxel op: %s" % vox_op.to_string())
+	#print("Add voxel op: %s" % str(vox_op.new_value))
 	
 	# Remove all higher state calculations from pending operations, as they are now made invalid
 	for op in pending_operations:
@@ -128,8 +131,27 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 			op.cancel = true
 			pending_operations.erase(op)
 	
+	vox_op.voxel_instance = self
 	pending_operations.push_back(vox_op)
+	_advance_operation_stack()
 
+func _advance_operation_stack():
+	#print("advance_operation_stack")
+	if not current_operation:
+		current_operation = pending_operations.pop_front()
+		if current_operation:
+			match configuration.thread_mode:
+				VoxelConfiguration.THREAD_MODE.NONE:
+					current_operation.run_operation()
+					current_operation = null
+				VoxelConfiguration.THREAD_MODE.SIMPLE:
+					pass
+				VoxelConfiguration.THREAD_MODE.TASKSERVER:
+					pass
+					# TODO use TaskServer if available
+		else:
+			print("no current op")
+	
 
 func on_work_is_ready(work_item):
 	#print("!!! VoxelNode got work item %s back!" % work_item.ticket)
@@ -192,7 +214,7 @@ func _on_voxel_configuration_changed(what):
 	pass
 
 func _on_voxels_changed():
-	#print("VoxelNode: _on_voxels_changed")
+	print("VoxelNode: _on_voxels_changed")
 	
 	if _debug_mesh_visible:
 		_update_debug_mesh()
