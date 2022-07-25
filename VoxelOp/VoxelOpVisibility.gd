@@ -4,11 +4,12 @@ class_name VoxelOpVisibility
 
 
 
-var mat_buffer : PoolIntArray
-var vis_buffer : PoolByteArray
+var mat_buffer : PackedInt32Array
+var vis_buffer : PackedByteArray
 
 
-func _init(voxel_data, voxel_configuration).(VoxelData.CALC_STATE.VIS, voxel_data, voxel_configuration):
+func _init(voxel_data, voxel_configuration):
+	super(VoxelData.CALC_STATE.VIS, voxel_data, voxel_configuration)
 	self.metadata.name = "VoxelOpVisibility"
 
 func to_string ():
@@ -35,8 +36,8 @@ func execute(thread_cache : Dictionary):
 # This code will be executed in the main thread so acces to voxel_node is ok
 func finalize():
 	#print("!!! VoxelOpVisibility finalizing...")
-	if !vis_buffer:
-		push_error("vis_buffer missing!")
+	#if !vis_buffer:
+	#	push_error("vis_buffer missing!")
 	voxel_data.visible = vis_buffer
 
 

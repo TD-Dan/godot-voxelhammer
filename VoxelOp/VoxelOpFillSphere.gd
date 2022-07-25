@@ -5,7 +5,8 @@ class_name VoxelOpFillSphere
 var center = Vector3(0,0,0)
 var radius = 0
 
-func _init(voxel_data, voxel_configuration, material,smooth,center,radius,start=null,end=null).(voxel_data, voxel_configuration, material,smooth,start,end):
+func _init(voxel_data, voxel_configuration, material,smooth,center,radius,start=null,end=null):
+	super(voxel_data, voxel_configuration, material,smooth,start,end)
 	self.metadata.name = "VoxelOpFillSphere"
 	self.center = Vector3(center.x-0.5,center.y-0.5,center.z-0.5)
 	self.radius = radius

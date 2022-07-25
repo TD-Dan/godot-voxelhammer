@@ -9,7 +9,8 @@ var surface_materials = {}
 
 var new_mesh
 
-func _init(voxel_data, voxel_configuration).(VoxelData.CALC_STATE.UV, voxel_data, voxel_configuration): 
+func _init(voxel_data, voxel_configuration):
+	super(VoxelData.CALC_STATE.UV, voxel_data, voxel_configuration)
 	self.metadata.name = "VoxelOpCreateUV"
 
 
@@ -52,7 +53,7 @@ func calculate_uvs_box():
 			cancel = true
 			break
 		var st = SurfaceTool.new()
-		var uv = PoolVector2Array()
+		var uv = PackedVector2Array()
 		var vertex_count = surface[Mesh.ARRAY_VERTEX].size()
 		uv.resize(vertex_count)
 

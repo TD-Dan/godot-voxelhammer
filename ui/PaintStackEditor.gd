@@ -98,20 +98,18 @@ func set_item_data(item, paint_op, index):
 	
 	var opname = "unimplemented"
 	var spec_info = ""
-	
-	#TODO: Enable these / make smarter paint_op discovery that does not depend on knowing all classes here
-#	if paint_op is PaintOpPlane:
-#		opname = "Plane"
-#		spec_info = "%s, %s " % [paint_op.low, paint_op.high]
-#	if paint_op is PaintOpGradient:
-#		opname = "Gradient"
-#		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
-#	if paint_op is PaintOpGradientVector:
-#		opname = "GradientVector"
-#		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
-#	if paint_op is PaintOpSimplexNoise:
-#		opname = "Simplex Noise"
-#		spec_info = "%s, %s, %s, %s " % [paint_op.lucanarity, paint_op.octaves, paint_op.period, paint_op.persistence]
+	if paint_op is PaintOpPlane:
+		opname = "Plane"
+		spec_info = "%s, %s " % [paint_op.low, paint_op.high]
+	if paint_op is PaintOpGradient:
+		opname = "Gradient"
+		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
+	if paint_op is PaintOpGradientVector:
+		opname = "GradientVector"
+		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
+	if paint_op is PaintOpSimplexNoise:
+		opname = "Simplex Noise"
+		spec_info = "%s, %s, %s, %s " % [paint_op.lucanarity, paint_op.octaves, paint_op.period, paint_op.persistence]
 	
 	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, smooth, spec_info])
 	
@@ -140,17 +138,15 @@ func _on_add_popup_selection(index):
 	
 	var paint_op = null
 	
-	
-	# TODO : enable these / make smarter
-#	match index:
-#		0: # Plane
-#			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 1)
-#		1: # Gradient
-#			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
-#		2: # GradientVector
-#			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
-#		3: # Simplex noise
-#			paint_op = PaintOpSimplexNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
+	match index:
+		0: # Plane
+			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 1)
+		1: # Gradient
+			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+		2: # GradientVector
+			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+		3: # Simplex noise
+			paint_op = PaintOpSimplexNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
 	
 	if paint_op:
 		paint_stack.add_paint_operation(paint_op)
@@ -181,4 +177,3 @@ func _on_Tree_button_pressed(item, column, id):
 	elif column == 5: # remove
 		paint_stack.remove_paint_operation(paint_op)
 		item.free()
-

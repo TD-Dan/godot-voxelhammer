@@ -1,8 +1,12 @@
 extends RefCounted #inherit RefCounted for automatic memory management, more lightweight than Node
 
-#implements TaskServerWorkItem
-
 class_name VoxelOperation
+
+#### KWAK! implements TaskServerWorkItem:
+var cancel = false
+
+####
+
 
 var voxel_data
 

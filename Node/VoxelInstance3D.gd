@@ -14,39 +14,41 @@ class_name VoxelInstance3D
 signal mesh_ready
 
 @export var configuration : Resource:#VoxelConfiguration:
-	set(v):
+	set(nv):
 		#print("set configuration to %s" % new_value)
 		if configuration:
 			if configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.disconnect("voxel_configuration_changed", _on_voxel_configuration_changed)
 		
-		configuration = v
+		configuration = nv
 		
 		if configuration:
 			if not configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.connect("voxel_configuration_changed", _on_voxel_configuration_changed)
 		
-		# TODO: Implement
 		# force redraw of mesh
-		#if voxel_data and voxel_data.calculation_state > VoxelData.CALC_STATE.MESH:
-		#	voxel_data.set_state(VoxelData.CALC_STATE.MESH-1)
+		if voxel_data and voxel_data.calculation_state > VoxelData.CALC_STATE.MESH:
+			voxel_data.set_state(VoxelData.CALC_STATE.MESH-1)
 
 @export var voxel_data : Resource = VoxelData.new(): # : VoxelData
-	set(v):
+	set(nv):
 		#print("_set_voxel_data")
 		if voxel_data:
 			if voxel_data.is_connected("voxels_changed", _on_voxels_changed):
 				voxel_data.disconnect("voxels_changed", _on_voxels_changed)
 		
-		voxel_data = v
+		voxel_data = nv
 		
 		if voxel_data:
 			if not voxel_data.is_connected("voxels_changed", _on_voxels_changed):
 				voxel_data.connect("voxels_changed", _on_voxels_changed)
 
 @export var paint_stack : Resource  = null: #VoxelPaintStack
-	set(v):
-		paint_stack = v
+	set(nv):
+		paint_stack = nv
+		if paint_stack:
+			if voxel_data:
+				voxel_data.clear()
 
  # apply voxel paint stack in local coordinates instead of world coordinates
 @export var voxel_paint_local = true
@@ -59,8 +61,8 @@ enum DISTANCE_MODE {
 }
 
 @export var distance_tracking : DISTANCE_MODE = DISTANCE_MODE.OFF:
-	set(v):
-		distance_tracking = v
+	set(nv):
+		distance_tracking = nv
 		if not distance_tracking and mesh_child and not mesh_child.visible:
 			mesh_child.visible = true
 
@@ -68,16 +70,16 @@ enum DISTANCE_MODE {
 var _distance_update_skip_frames : int = 30
 var _skip_counter : int = 0
 @export var distance_update_interval_seconds = 1.0:
-	set(v):
-		distance_update_interval_seconds = max(1.0/60.0, v)
+	set(nv):
+		distance_update_interval_seconds = max(1.0/60.0, nv)
 		_distance_update_skip_frames = 60.0 * distance_update_interval_seconds
 
 var distance_tracked_node : Node3D = null
 var distance_to_tracked : float = 0
 
 @export var lod_tracking = false:
-	set(v):
-		lod_tracking = v
+	set(nv):
+		lod_tracking = nv
 		if lod_tracking and not distance_tracking:
 			push_warning("VoxelNode: lod_tracking enabled while distance_tracking is OFF! LOD tracking will not update!")
 
@@ -97,7 +99,7 @@ var _debug_mesh_visible = false:
 		else:
 			if _debug_mesh_child:
 				_debug_mesh_child.mesh = null
-var _debug_mesh_color = Color(0,0,0):
+var _debug_mesh_color : Color = Color(0,0,0):
 	set(v):
 		_debug_mesh_color = v
 		#print("set debug mesh color to %s" % debug_mesh_color)
@@ -216,81 +218,81 @@ func advance_calculation_state():
 	
 	#print("VoxelNode: Advance calculation state from %s" % VoxelData.CALC_STATE.keys()[voxel_data.calculation_state])
 	#print_stack()
-	
+
 	# Cancel all operations creater than new calculation state
-#	for op in pending_operations + [current_operation] + ready_operations:
-#		if op and op.calculation_level > voxel_data.calculation_state:
-#			if op.calculation_level > VoxelData.CALC_STATE.VOXEL: # Dont cancel voxel operations
-#				op.cancel = true
-#
-#	#Advance one state further on mesh calculation
-#	match voxel_data.calculation_state:
-#
-#		VoxelData.CALC_STATE.INIT:
-#			_set_debug_mesh_color(Color(0.5,0,0))
-#			mesh_is_ready = false
-#			if paint_stack:
-#				var position_offset = Vector3(0,0,0)
-#				if !voxel_paint_local:
-#					position_offset = global_transform.origin * voxel_data.voxel_scale
-#				add_voxel_op(VoxelOpPaintStack.new(self.voxel_data, configuration, paint_stack, position_offset))
-#
-#		VoxelData.CALC_STATE.VOXEL:
-#			# Voxel data has been set
-#			_set_debug_mesh_color(Color(1,0.5,0))
-#			mesh_is_ready = false
-#
-#			# Advance to VIS state if 
-#			#  - no additional VOXEL level operations pending
-#			#  - vis calculation not already waiting
-#			var do_vis = true
-#			for op in pending_operations + [current_operation] + ready_operations:
-#				if op:
-#					if op.calculation_level <= VoxelData.CALC_STATE.VIS:
-#						do_vis = false
-#
-#			if do_vis:
-#				add_voxel_op(VoxelOpVisibility.new(self.voxel_data, self.configuration))
-#
-#		VoxelData.CALC_STATE.VIS:
-#			# Voxel visibility has been calculated
-#			_set_debug_mesh_color(Color(1,1,0))
-#			mesh_is_ready = false
-#
-#			# Advance to MESH state if 
-#			#  - no additional VIS level operations pending
-#			#  - mesh calculation not already waiting
-#			var do_mesh = true
-#			for op in pending_operations + [current_operation] + ready_operations:
-#				if op:
-#					if op.calculation_level <= VoxelData.CALC_STATE.MESH:
-#						do_mesh = false
-#
-#			if do_mesh:
-#				add_voxel_op(VoxelOpCreateMesh.new(self.voxel_data,self.configuration))
-#
-#		VoxelData.CALC_STATE.MESH:
-#			# Voxel mesh has been calculated
-#			_set_debug_mesh_color(Color(0,0,1))
-#			mesh_is_ready = false
-#
-#			# Advance to UV state if 
-#			#  - no additional MESH level operations pending
-#			#  - uv calculation not already waiting
-#			var do_uv = true
-#			for op in pending_operations + [current_operation] + ready_operations:
-#				if op:
-#					if op.calculation_level <= VoxelData.CALC_STATE.UV:
-#						do_uv = false
-#
-#			if do_uv:
-#				add_voxel_op(VoxelOpCreateUV.new(self.voxel_data, self.configuration))
-#
-#		VoxelData.CALC_STATE.UV:
-#			if not mesh_is_ready:
-#				mesh_is_ready = true
-#				_set_debug_mesh_color(Color(1,1,1,0.25))
-#				emit_signal("mesh_ready")
+	for op in pending_operations + [current_operation] + ready_operations:
+		if op and op.calculation_level > voxel_data.calculation_state:
+			if op.calculation_level > VoxelData.CALC_STATE.VOXEL: # Dont cancel voxel operations
+				op.cancel = true
+
+	#Advance one state further on mesh calculation
+	match voxel_data.calculation_state:
+
+		VoxelData.CALC_STATE.INIT:
+			_debug_mesh_color = Color(0.5,0,0)
+			mesh_is_ready = false
+			if paint_stack:
+				var position_offset = Vector3(0,0,0)
+				if !voxel_paint_local:
+					position_offset = global_transform.origin * voxel_data.voxel_scale
+				add_voxel_op(VoxelOpPaintStack.new(self.voxel_data, configuration, paint_stack, position_offset))
+
+		VoxelData.CALC_STATE.VOXEL:
+			# Voxel data has been set
+			_debug_mesh_color = Color(1,0.5,0)
+			mesh_is_ready = false
+
+			# Advance to VIS state if 
+			#  - no additional VOXEL level operations pending
+			#  - vis calculation not already waiting
+			var do_vis = true
+			for op in pending_operations + [current_operation] + ready_operations:
+				if op:
+					if op.calculation_level <= VoxelData.CALC_STATE.VIS:
+						do_vis = false
+
+			if do_vis:
+				add_voxel_op(VoxelOpVisibility.new(self.voxel_data, self.configuration))
+
+		VoxelData.CALC_STATE.VIS:
+			# Voxel visibility has been calculated
+			_debug_mesh_color = Color(1,1,0)
+			mesh_is_ready = false
+
+			# Advance to MESH state if 
+			#  - no additional VIS level operations pending
+			#  - mesh calculation not already waiting
+			var do_mesh = true
+			for op in pending_operations + [current_operation] + ready_operations:
+				if op:
+					if op.calculation_level <= VoxelData.CALC_STATE.MESH:
+						do_mesh = false
+
+			if do_mesh:
+				add_voxel_op(VoxelOpCreateMesh.new(self.voxel_data,self.configuration))
+
+		VoxelData.CALC_STATE.MESH:
+			# Voxel mesh has been calculated
+			_debug_mesh_color = Color(0,0,1)
+			mesh_is_ready = false
+
+			# Advance to UV state if 
+			#  - no additional MESH level operations pending
+			#  - uv calculation not already waiting
+			var do_uv = true
+			for op in pending_operations + [current_operation] + ready_operations:
+				if op:
+					if op.calculation_level <= VoxelData.CALC_STATE.UV:
+						do_uv = false
+
+			if do_uv:
+				add_voxel_op(VoxelOpCreateUV.new(self.voxel_data, self.configuration))
+
+		VoxelData.CALC_STATE.UV:
+			if not mesh_is_ready:
+				mesh_is_ready = true
+				_debug_mesh_color = Color(1,1,1,0.25)
+				emit_signal("mesh_ready")
 
 
 func add_voxel_op(vox_op : VoxelOperation):

@@ -4,9 +4,9 @@ extends VoxelOperation
 class_name VoxelOpCreateMesh 
 
 
-var material_buffer : PoolIntArray
-var smooth_buffer : PoolByteArray
-var vis_buffer : PoolByteArray
+var material_buffer : PackedInt32Array
+var smooth_buffer : PackedByteArray
+var vis_buffer : PackedByteArray
 var mesh_buffer
 var material_table
 
@@ -14,7 +14,8 @@ var vocm_cache_name ="VoxelOpCreateMesh"
 var cube_cache_name ="CubeCache"
 
 
-func _init(voxel_data,voxel_configuration).(VoxelData.CALC_STATE.MESH, voxel_data, voxel_configuration): 
+func _init(voxel_data,voxel_configuration):
+	super(VoxelData.CALC_STATE.MESH, voxel_data, voxel_configuration)
 	self.metadata.name = "VoxelOpCreateMesh"
 
 

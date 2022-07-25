@@ -40,8 +40,8 @@ func execute(thread_cache : Dictionary):
 
 # This code will be executed in the main thread so access to voxel_node is ok
 func finalize():
-	if not mat_buffer or not smooth_buffer:
-		push_error("mat_buffer or smooth_buffer missing!")
+	#if not mat_buffer or not smooth_buffer:
+	#	push_error("mat_buffer or smooth_buffer missing!")
 	voxel_data.material = mat_buffer
 	voxel_data.smooth = smooth_buffer
 

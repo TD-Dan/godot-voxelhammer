@@ -24,7 +24,7 @@ var selection = null:
 			selected_info.text = "Selection: %s" % selection
 			var vox_count = 0
 			if selection.voxel_data:
-				vox_count = selection.voxel_data.voxels.size()
+				vox_count = selection.voxel_data.total_count
 			selected_info_more.text = "Voxel count: %s \n" % vox_count
 			paint_stack_editor.paint_stack = selection.paint_stack
 	#	elif nv is VoxelThing:
