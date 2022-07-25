@@ -1,12 +1,12 @@
 [gd_scene load_steps=3 format=3 uid="uid://dpo4hewo6er6c"]
 
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/ui/VoxelHammerDock.gd" id="1_n56u6"]
-[ext_resource type="PackedScene" uid="uid://crnxvjidwoar5" path="res://addons/TallDwarf/VoxelHammer/ui/PaintStackEditor.tscn" id="2_y1nfv"]
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/VoxelHammerDock.gd" id="1_guxvn"]
+[ext_resource type="PackedScene" uid="uid://crnxvjidwoar5" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/PaintStackEditor.tscn" id="2_4p7xf"]
 
 [node name="VoxelHammer" type="Control"]
 anchor_right = 0.177
 anchor_bottom = 0.597
-script = ExtResource("1_n56u6")
+script = ExtResource("1_guxvn")
 
 [node name="Panel" type="Panel" parent="."]
 anchor_right = 1.0
@@ -67,9 +67,7 @@ text = "Paint Stack:"
 [node name="RepaintButton" type="Button" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer"]
 text = "Edit in inspector"
 
-[node name="PaintStackEditor" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer" instance=ExtResource("2_y1nfv")]
-anchor_right = 0.0
-anchor_bottom = 0.0
+[node name="PaintStackEditor" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer" instance=ExtResource("2_4p7xf")]
 
 [connection signal="pressed" from="Panel/VBoxContainer/EditGlobalsButton" to="." method="_on_EditGlobalsButton_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer/RepaintButton" to="." method="_on_RepaintButton_pressed"]
