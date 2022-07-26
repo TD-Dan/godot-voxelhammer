@@ -15,7 +15,6 @@ func run_operation():
 		calculate_visibility(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size)
 		voxel_instance.voxel_data.data_mutex.unlock()
 		voxel_instance.vis_buffer = vis_buffer
-		voxel_instance.visibility_count = vis_buffer.count(1)
 		voxel_instance.call_deferred("notify_visibility_calculated")
 	else:
 		push_warning("VoxelOpVisibility: Can't get lock on voxel data!")

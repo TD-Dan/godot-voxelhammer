@@ -61,8 +61,11 @@ func _update_selected_info_text():
 		if selection.voxel_data:
 			vox_count = selection.voxel_data.get_voxel_count()
 		selected_info_more.text = "Voxel count: %s" % vox_count
-		if selection.vis_buffer:
+		if selection.visibility_count != null:
 			selected_info_more.text += ", Visible: %s" % selection.visibility_count
+			
+		if selection.mesh_surfaces_count != null:
+			selected_info_more.text += ", Surfaces-Faces: %s-%s" % [selection.mesh_surfaces_count, selection.mesh_faces_count]
 	
 	else:
 		selected_info.text = "Selection: none"

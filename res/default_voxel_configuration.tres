@@ -1,11 +1,19 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://bvhuwmnl8rsp7"]
+[gd_resource type="Resource" load_steps=5 format=3 uid="uid://bvhuwmnl8rsp7"]
 
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelConfiguration.gd" id="1_xtxim"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uthxc"]
+albedo_color = Color(1, 0.509804, 0.780392, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bebdy"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3hi8p"]
+albedo_color = Color(0.423529, 0.423529, 0.423529, 1)
+
 [resource]
 script = ExtResource("1_xtxim")
-materials = []
+materials = [SubResource("StandardMaterial3D_uthxc"), SubResource("StandardMaterial3D_bebdy"), SubResource("StandardMaterial3D_3hi8p")]
 voxel_base_size = 1.0
-mesh_mode = 0
+mesh_mode = 1
 accel_mode = 0
 thread_mode = 0

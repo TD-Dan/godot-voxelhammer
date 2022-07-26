@@ -58,10 +58,12 @@ signal mesh_ready
 				voxel_data.clear()
 
 
-var vis_buffer = null
+var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
-var mesh_child
+var mesh_child : MeshInstance3D
+var mesh_surfaces_count = null
+var mesh_faces_count = null
 
 
 # Debug linemesh that shows current mesh calculation status and size
@@ -128,6 +130,10 @@ func _exit_tree():
 func _to_string():
 	return "[VoxelInstance3D:%s]" % get_instance_id()
 
+
+func set_mesh(new_mesh:Mesh):
+	mesh_child.mesh = new_mesh
+	emit_signal("mesh_ready")
 
 var my_self_bug_check_hack
 func push_voxel_operation(vox_op : VoxelOperation):
@@ -246,13 +252,31 @@ func _on_voxels_changed():
 
 	emit_signal("data_changed", "voxels")
 
-	# recalculate Mesh if no other vox operations pending
+	# recalculate Visibility if no other vox operations pending
 	if not current_operation and pending_operations.is_empty():
 		call_deferred("push_voxel_operation",VoxelOpVisibility.new())
 
 func notify_visibility_calculated():
+	visibility_count = vis_buffer.count(1)
+		
 	print("%s: visibility calculated: %s visible voxels" % [self,str(visibility_count)])
 	
 	_debug_mesh_color = Color(1,0.5,0)
 	
 	emit_signal("data_changed", "vis_buffer")
+	
+	# Calculate Mesh if no other operations pending
+	if not current_operation and pending_operations.is_empty():
+		call_deferred("push_voxel_operation",VoxelOpCreateMesh.new())
+
+
+func notify_mesh_calculated():
+	mesh_surfaces_count = 0
+	mesh_faces_count = 0
+	if mesh_child.mesh:
+		mesh_surfaces_count = mesh_child.mesh.get_surface_count()
+		mesh_faces_count = mesh_child.mesh.get_faces().size()
+	
+	print("%s: mesh calculated: %s surfaces, %s faces" % [self, str(mesh_surfaces_count), str(mesh_faces_count)])
+	
+	emit_signal("data_changed", "mesh")

@@ -27,6 +27,7 @@ func _init(name:String, calculation_level:CALCULATION_LEVEL):
 	self.calculation_level = calculation_level
 	
 
+# Virtual
 func run_operation():
 	pass
 
