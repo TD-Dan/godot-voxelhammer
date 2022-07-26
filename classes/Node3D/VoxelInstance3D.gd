@@ -137,10 +137,9 @@ func set_mesh(new_mesh:Mesh):
 
 var my_self_bug_check_hack
 func push_voxel_operation(vox_op : VoxelOperation):
-	#print("VoxelInstance3D %s: push_voxel_operation %s" % [self,vox_op])
+	print("%s: push_voxel_operation %s" % [self,vox_op])
 	my_self_bug_check_hack = self
 	call_deferred("_deferred_push_voxel_op", vox_op)
-	#_deferred_push_voxel_op(vox_op)
 
 func _deferred_push_voxel_op(vox_op : VoxelOperation):
 	# Remove all higher state calculations from pending operations, as they are now made invalid
@@ -160,6 +159,8 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 	
 	_advance_operation_stack()
 
+var thread_working : Mutex
+
 func _advance_operation_stack():
 	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
 	if not current_operation:
@@ -169,16 +170,30 @@ func _advance_operation_stack():
 			print("VoxelInstance3D %s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
 			match configuration.thread_mode:
 				VoxelConfiguration.THREAD_MODE.NONE:
+					print("%s: running operation (blocking main thread)..." % self)
+					var run_start_us = Time.get_ticks_usec()
 					current_operation.run_operation()
 					current_operation = null
+					var delta_time_us = Time.get_ticks_usec() - run_start_us
+					print("%s: finished in %s seconds" % [self, delta_time_us/1000000.0])
 				VoxelConfiguration.THREAD_MODE.SIMPLE:
-					pass
+					var thread = Thread.new()
+					thread.start(_run_op_thread.bind(current_operation))
 				VoxelConfiguration.THREAD_MODE.TASKSERVER:
 					pass
 					# TODO use TaskServer if available
 		else:
 			print("no current op")
+
+func _run_op_thread(op : VoxelOperation):
+	print("[Thread:%s]: running operation ..." % OS.get_thread_caller_id())
+	var run_start_us = Time.get_ticks_usec()
 	
+	op.run_operation()
+	
+	var delta_time_us = Time.get_ticks_usec() - run_start_us
+	print("[Thread:%s]: finished in %s seconds" % [OS.get_thread_caller_id(), delta_time_us/1000000.0])
+	current_operation = null
 
 func on_work_is_ready(work_item):
 	#print("!!! VoxelNode got work item %s back!" % work_item.ticket)
@@ -246,7 +261,7 @@ func _on_voxels_changed():
 		print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
 		return
 	
-	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
+	print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
 	
 	_debug_mesh_color = Color(0.5,0,0)
 

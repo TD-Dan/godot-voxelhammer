@@ -28,4 +28,4 @@ materials = [SubResource("StandardMaterial3D_uthxc"), SubResource("StandardMater
 voxel_base_size = 1.0
 mesh_mode = 1
 accel_mode = 0
-thread_mode = 0
+thread_mode = 1

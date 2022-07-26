@@ -101,13 +101,14 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						#print("added surface tool %s" % material_at_index)
 						surface_tools[material_at_index] = SurfaceTool.new()
 						surface_tools[material_at_index].begin(Mesh.PRIMITIVE_TRIANGLES)
+						#surface_tools[material_at_index].set_smooth_group(1)
 					var st = surface_tools[material_at_index]
 					
 					# TODO: implement as check from configuration materials
 #					if smooth_buffer[ci]:
-#						surface_tools[material_at_index].set_smooth_group(true)
+#						surface_tools[material_at_index].set_smooth_group(1)
 #					else:
-#						surface_tools[material_at_index].add_smooth_group(false)
+#						surface_tools[material_at_index].set_smooth_group(0)
 							
 					#var subtimer = DebugTimer.new("Sub")
 					for i in cube_vertices.size():
