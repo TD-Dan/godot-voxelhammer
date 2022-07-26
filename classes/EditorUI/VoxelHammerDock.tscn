@@ -44,51 +44,54 @@ offset_top = 103.0
 offset_right = 339.0
 offset_bottom = 107.0
 
-[node name="VoxelEditTools" type="HBoxContainer" parent="Panel/VBoxContainer"]
-visible = false
+[node name="VoxelEditTools" type="HFlowContainer" parent="Panel/VBoxContainer"]
 offset_top = 111.0
 offset_right = 339.0
-offset_bottom = 142.0
-alignment = 1
+offset_bottom = 177.0
 
 [node name="ButtonClear" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 12.0
-offset_right = 61.0
+offset_right = 49.0
 offset_bottom = 31.0
 text = "Clear"
 
 [node name="ButtonFill" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 65.0
-offset_right = 95.0
+offset_left = 53.0
+offset_right = 83.0
 offset_bottom = 31.0
 text = "Fill"
 
 [node name="ButtonPaint" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 99.0
-offset_right = 166.0
+offset_left = 87.0
+offset_right = 154.0
 offset_bottom = 31.0
 toggle_mode = true
 text = "Paint"
 icon = ExtResource("3_32rcu")
 
 [node name="Label" type="Label" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 170.0
+offset_left = 158.0
 offset_top = 2.0
-offset_right = 240.0
+offset_right = 228.0
 offset_bottom = 28.0
 size_flags_horizontal = 8
 text = "material:"
 
 [node name="SpinBoxMaterial" type="SpinBox" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 243.938
-offset_right = 327.0
+offset_left = 231.938
+offset_right = 315.0
 offset_bottom = 31.0
 size_flags_horizontal = 8
 
+[node name="ButtonMesh" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
+offset_top = 35.0
+offset_right = 76.0
+offset_bottom = 66.0
+text = "Re-mesh"
+
 [node name="HSeparator2" type="HSeparator" parent="Panel/VBoxContainer"]
-offset_top = 111.0
+offset_top = 181.0
 offset_right = 339.0
-offset_bottom = 115.0
+offset_bottom = 185.0
 
 [node name="SelectedScrollContainer" type="ScrollContainer" parent="Panel/VBoxContainer"]
 visible = false
@@ -131,4 +134,5 @@ offset_bottom = 490.0
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonClear" to="." method="_on_button_clear_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonFill" to="." method="_on_button_fill_pressed"]
 [connection signal="toggled" from="Panel/VBoxContainer/VoxelEditTools/ButtonPaint" to="." method="_on_button_paint_toggled"]
+[connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonMesh" to="." method="_on_button_mesh_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer/RepaintButton" to="." method="_on_RepaintButton_pressed"]

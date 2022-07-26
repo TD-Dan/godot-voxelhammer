@@ -115,3 +115,7 @@ func _on_button_fill_pressed():
 
 func _on_button_paint_toggled(button_pressed):
 	pass # Replace with function body.
+
+
+func _on_button_mesh_pressed():
+	selection.push_voxel_operation(VoxelOpVisibility.new())

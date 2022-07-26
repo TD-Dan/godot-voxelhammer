@@ -52,12 +52,26 @@ func run_operation():
 
 
 #Vertices of a cube
-const cube_vertices = [[0,0,0],[1,0,0],[0,1,0],[1,0,0],[1,1,0],[0,1,0], #left
-				[1,0,1],[0,1,1],[1,1,1],[0,0,1],[0,1,1],[1,0,1], #right
-				[0,0,0],[0,0,1],[1,0,0],[1,0,1],[1,0,0],[0,0,1], #bottom
-				[0,1,0],[1,1,0],[0,1,1],[1,1,1],[0,1,1],[1,1,0], #top
-				[0,0,0],[0,1,0],[0,0,1],[0,1,0],[0,1,1],[0,0,1], #front
-				[1,0,0],[1,0,1],[1,1,0],[1,0,1],[1,1,1],[1,1,0]] #back
+const cube_vertices = [[0,0,0],[1,0,0],[0,1,0],[1,0,0],[1,1,0],[0,1,0], #left -Z
+				[1,0,1],[0,1,1],[1,1,1],[0,0,1],[0,1,1],[1,0,1], #right +Z
+				[0,0,0],[0,0,1],[1,0,0],[1,0,1],[1,0,0],[0,0,1], #bottom -Y
+				[0,1,0],[1,1,0],[0,1,1],[1,1,1],[0,1,1],[1,1,0], #top +Y
+				[0,0,0],[0,1,0],[0,0,1],[0,1,0],[0,1,1],[0,0,1], #front -X
+				[1,0,0],[1,0,1],[1,1,0],[1,0,1],[1,1,1],[1,1,0]] #back +X
+
+const cube_normals = [[0,0,-1],[0,0,-1],[0,0,-1],[0,0,-1],[0,0,-1],[0,0,-1], #left -Z
+				[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1], #right +Z
+				[0,-1,0],[0,-1,0],[0,-1,0],[0,-1,0],[0,-1,0],[0,-1,0], #bottom -Y
+				[0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0], #top +Y
+				[-1,0,0],[-1,0,0],[-1,0,0],[-1,0,0],[-1,0,0],[-1,0,0], #front -X
+				[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,0,0],[1,0,0]] #back +X
+
+const cube_uvs = [[0,0],[1,0],[0,1],[1,0],[1,1],[0,1], #left -Z
+				[0,0],[1,1],[0,1],[1,0],[1,1],[0,0], #right +Z
+				[0,0],[0,1],[1,0],[1,1],[1,0],[0,1], #bottom -Y !fix
+				[0,0],[1,0],[0,1],[1,1],[0,1],[1,0], #top +Y
+				[0,0],[1,0],[0,1],[1,0],[1,1],[0,1], #front -X !fix
+				[0,0],[1,0],[0,1],[1,0],[1,1],[0,1]] #back +X
 
 func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray, size : Vector3i):
 	print("Constructing CUBES mesh...")
@@ -97,7 +111,8 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 							
 					#var subtimer = DebugTimer.new("Sub")
 					for i in cube_vertices.size():
-						st.set_uv(Vector2(1-cube_vertices[i][0],1-cube_vertices[i][2]))
+						st.set_uv(Vector2(1-cube_uvs[i][0],1-cube_uvs[i][1]))
+						st.set_normal(Vector3(cube_normals[i][0],cube_normals[i][1],cube_normals[i][2]))
 						st.add_vertex(Vector3(cube_vertices[i][0]+x,cube_vertices[i][1]+y,cube_vertices[i][2]+z))
 					
 					#subtimer.end()
@@ -106,8 +121,8 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	var i = 0
 	material_table = {}
 	for key in surface_tools.keys():
-		surface_tools[key].index()
-		surface_tools[key].generate_normals()
+		#surface_tools[key].index()
+		#surface_tools[key].generate_normals()
 		surface_tools[key].generate_tangents()
 		mesh_buffer.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_tools[key].commit_to_arrays())
 		material_table[i] = key
