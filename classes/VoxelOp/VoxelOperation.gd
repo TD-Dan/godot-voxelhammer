@@ -25,9 +25,10 @@ var calculation_level = 0
 func _init(name:String, calculation_level:CALCULATION_LEVEL):
 	self.name = name
 	self.calculation_level = calculation_level
+	
 
 func run_operation():
 	pass
 
-func to_string():
-	return name
+func _to_string():
+	return "[%s:%s]" % [name,get_instance_id()]

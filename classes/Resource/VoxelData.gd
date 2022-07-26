@@ -37,6 +37,9 @@ signal voxel_data_changed
 
 var data_mutex = Mutex.new()
 
+func _to_string():
+	return "[VoxelData:%s]" % get_instance_id()
+	
 func get_voxel_count():
 	return size.x*size.y*size.z
 
@@ -49,5 +52,6 @@ func clear():
 	notify_property_list_changed()
 
 func notify_data_changed():
+	#print("%s: notify_data_changed" % [self])
 	emit_signal("voxel_data_changed")
 	notify_property_list_changed()

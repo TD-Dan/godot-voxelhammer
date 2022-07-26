@@ -18,12 +18,15 @@ signal mesh_ready
 @export var configuration : Resource:#VoxelConfiguration:
 	set(nv):
 		#print("set configuration to %s" % new_value)
+		
+		# Disconnect from previous configuration
 		if configuration:
 			if configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.disconnect("voxel_configuration_changed", _on_voxel_configuration_changed)
 		
 		configuration = nv
 		
+		# Connect to new configuration
 		if configuration:
 			if not configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.connect("voxel_configuration_changed", _on_voxel_configuration_changed)
@@ -33,15 +36,19 @@ signal mesh_ready
 @export var voxel_data : Resource = VoxelData.new(): # : VoxelData
 	set(nv):
 		#print("_set_voxel_data")
+		
+		# Disconnect from previous voxel_data
 		if voxel_data:
 			if voxel_data.is_connected("voxel_data_changed", _on_voxels_changed):
 				voxel_data.disconnect("voxel_data_changed", _on_voxels_changed)
 		
 		voxel_data = nv
 		
+		# Connect to new voxel_data
 		if voxel_data:
 			if not voxel_data.is_connected("voxel_data_changed", _on_voxels_changed):
 				voxel_data.connect("voxel_data_changed", _on_voxels_changed)
+				print("VoxelInstance3D %s: connect %s" % [self,voxel_data])
 
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
@@ -81,21 +88,17 @@ var current_operation : VoxelOperation = null
 var ready_operations = []
 
 
-
-func _init():
-	#print("VoxelNode init")
-	if not configuration:
-		var vh = get_node_or_null("/root/VoxelHammer")
-		if vh:
-			configuration = vh.default_configuration
-
-
-func _ready():	
+func _ready():
 	#print("VoxelNode: _ready")
+	
+	# Connect to VoxelHammer autoload
 	var vh = get_node_or_null("/root/VoxelHammer")
 	if vh:
 		_debug_mesh_visible = vh.show_debug_gizmos
 		vh.connect("show_debug_gizmos_changed", _on_show_debug_gizmos_changed)
+			
+		if not configuration:
+			configuration = vh.default_configuration
 	
 	# TODO: If TaskServer plugin is present connect to it
 	var th_autoload_global = get_node_or_null("/root/TaskHammer")
@@ -104,6 +107,7 @@ func _ready():
 	else:
 		push_warning("(OPTIONAL) TaskHammer Global Autoload NOT found. TaskHammer plugin installed? Falling back to single thread execution..")
 	
+	
 	mesh_child = MeshInstance3D.new()
 	add_child(mesh_child)
 	
@@ -111,7 +115,8 @@ func _ready():
 
 
 func _exit_tree():
-	#print("cancel pending work items")
+	#print("VoxelInstance3D %s: _exit_tree" % self)
+	
 	if current_operation:
 		current_operation.cancel = true
 	for op in ready_operations:
@@ -120,15 +125,18 @@ func _exit_tree():
 		op.cancel = true
 
 
+func _to_string():
+	return "[VoxelInstance3D:%s]" % get_instance_id()
 
 
+var my_self_bug_check_hack
 func push_voxel_operation(vox_op : VoxelOperation):
+	#print("VoxelInstance3D %s: push_voxel_operation %s" % [self,vox_op])
+	my_self_bug_check_hack = self
 	call_deferred("_deferred_push_voxel_op", vox_op)
-	#print("Push voxel op: %s" % str(vox_op.new_value))
+	#_deferred_push_voxel_op(vox_op)
 
 func _deferred_push_voxel_op(vox_op : VoxelOperation):
-	#print("Add voxel op: %s" % str(vox_op.new_value))
-	
 	# Remove all higher state calculations from pending operations, as they are now made invalid
 	if current_operation and current_operation.calculation_level > vox_op.calculation_level:
 		print("removing higher current op: %s" % str(current_operation))
@@ -141,16 +149,18 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 			pending_operations.erase(op)
 	
 	vox_op.voxel_instance = self
+	
 	pending_operations.push_back(vox_op)
 	
 	_advance_operation_stack()
 
 func _advance_operation_stack():
-	print("advance_operation_stack, stack: %s" % str(pending_operations))
+	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
 	if not current_operation:
-		print("popping from stack")
+		#print("popping from stack %s" % str(current_operation))
 		current_operation = pending_operations.pop_front()
 		if current_operation:
+			print("VoxelInstance3D %s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
 			match configuration.thread_mode:
 				VoxelConfiguration.THREAD_MODE.NONE:
 					current_operation.run_operation()
@@ -219,24 +229,29 @@ func _on_show_debug_gizmos_changed(value):
 	_debug_mesh_visible = value
 
 func _on_voxel_configuration_changed(what):
-	#print("VoxelNode: _on_voxel_configuration_changed %s" % what)
+	print("VoxelNode: _on_voxel_configuration_changed %s" % what)
 
-	# TODO:force recalculation of mesh
-	pass
+	# Force recalculation of mesh
+	_on_voxels_changed()
 
 func _on_voxels_changed():
-	print("VoxelInstance3D: _on_voxels_changed [0]=%s" % str(voxel_data.data[0]))
-
+	if not my_self_bug_check_hack:
+		# TODO: check if this Godot bug in signal emitting has been fixed
+		print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
+		return
+	
+	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
+	
 	_debug_mesh_color = Color(0.5,0,0)
 
 	emit_signal("data_changed", "voxels")
 
 	# recalculate Mesh if no other vox operations pending
 	if not current_operation and pending_operations.is_empty():
-		push_voxel_operation(VoxelOpVisibility.new())
+		call_deferred("push_voxel_operation",VoxelOpVisibility.new())
 
 func notify_visibility_calculated():
-	print("VoxelInstance3D: visibility calculated: %s visible voxels" % str(visibility_count))
+	print("%s: visibility calculated: %s visible voxels" % [self,str(visibility_count)])
 	
 	_debug_mesh_color = Color(1,0.5,0)
 	

@@ -22,7 +22,7 @@ func run_operation():
 
 
 func calculate_visibility(data : PackedInt64Array, size : Vector3i):
-	print("Calculating visibility...")
+	#print("Calculating visibility...")
 	
 	var sx :int = size.x
 	var sy :int = size.y

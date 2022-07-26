@@ -17,6 +17,7 @@ func _init(fill_value:int, start=null, end=null):
 
 # This code is potentially executed in another thread!
 func run_operation():
+	print("%s: run_operation on %s" % [self,voxel_instance])
 	if voxel_instance.voxel_data.data_mutex.try_lock() == OK:
 		fill(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, new_value, start, end)
 		voxel_instance.voxel_data.data_mutex.unlock()
@@ -26,7 +27,7 @@ func run_operation():
 
 # This code is potentially executed in another thread!
 func fill(data : PackedInt64Array, size : Vector3i, value : int, start = null, end = null):
-	print("Filling with %s ..." % value)
+	#print("Filling with %s ..." % value)
 	
 	var sx :int = size.x
 	var sy :int = size.y
