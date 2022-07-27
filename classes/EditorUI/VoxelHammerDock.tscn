@@ -17,10 +17,20 @@ anchor_bottom = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="EditGlobalsButton" type="Button" parent="Panel/VBoxContainer"]
+[node name="HFlowContainer" type="HFlowContainer" parent="Panel/VBoxContainer"]
 offset_right = 339.0
 offset_bottom = 31.0
+
+[node name="EditGlobalsButton" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
+offset_right = 157.0
+offset_bottom = 31.0
 text = "Edit Global settings"
+
+[node name="AddVoxInstance" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
+offset_left = 161.0
+offset_right = 333.0
+offset_bottom = 31.0
+text = "Add VoxelInstance3D"
 
 [node name="HSeparator3" type="HSeparator" parent="Panel/VBoxContainer"]
 offset_top = 35.0
@@ -130,7 +140,8 @@ offset_top = 35.0
 offset_right = 339.0
 offset_bottom = 490.0
 
-[connection signal="pressed" from="Panel/VBoxContainer/EditGlobalsButton" to="." method="_on_EditGlobalsButton_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/EditGlobalsButton" to="." method="_on_EditGlobalsButton_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/AddVoxInstance" to="." method="_on_add_vox_instance_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonClear" to="." method="_on_button_clear_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonFill" to="." method="_on_button_fill_pressed"]
 [connection signal="toggled" from="Panel/VBoxContainer/VoxelEditTools/ButtonPaint" to="." method="_on_button_paint_toggled"]

@@ -4,7 +4,7 @@ extends Control
 
 
 
-var editor_interface = null
+var editor_interface : EditorInterface
 
 @onready var selected_info = $Panel/VBoxContainer/SelectedInfo
 @onready var selected_info_more = $Panel/VBoxContainer/SelectedMoreInfo
@@ -119,3 +119,21 @@ func _on_button_paint_toggled(button_pressed):
 
 func _on_button_mesh_pressed():
 	selection.push_voxel_operation(VoxelOpVisibility.new())
+
+
+func _on_add_vox_instance_pressed():
+	# TODO: Add UndoRedo
+	# Get current selection
+	var scene_root = editor_interface.get_edited_scene_root()
+	var new_owner =  editor_interface.get_edited_scene_root()
+	
+	var new_parent = scene_root
+	var sel = editor_interface.get_selection().get_selected_nodes()
+	if not sel.is_empty():
+		new_parent = sel[0]
+	
+	if new_parent:
+		var new_vox = load("res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.tscn").instantiate()
+		new_parent.add_child(new_vox)
+		new_vox.owner = new_owner
+

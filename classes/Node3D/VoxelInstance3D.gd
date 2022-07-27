@@ -59,14 +59,26 @@ signal mesh_ready
 				voxel_data.clear()
 
 
+var col_sibling
+
+enum COLLISION_MODE{
+	NONE,
+	CUBE,
+	CONVEX_MESH,
+	CONCAVE_MESH
+}
+@export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
+	set(nv):
+		generate_collision_sibling = nv
+		if not generate_collision_sibling and col_sibling:
+			col_sibling.queue_free()
+			col_sibling = null
+
+
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
-var mesh_child : MeshInstance3D:
-	set(v):
-		print("setting mesh_child to %s" % v)
-		mesh_child = v
-		notify_property_list_changed()
+@onready var mesh_child : MeshInstance3D  = $MeshInstance3D
 
 var mesh_surfaces_count = null
 var mesh_faces_count = null
@@ -95,7 +107,6 @@ var pending_operations = []
 var current_operation : VoxelOperation = null
 var ready_operations = []
 
-
 func _ready():
 	#print("VoxelNode: _ready")
 	
@@ -117,14 +128,14 @@ func _ready():
 			push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
 			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
-	mesh_child = MeshInstance3D.new()
-	add_child(mesh_child)
-	
 	# Calculate Visibility (and Mesh) 
 	call_deferred("push_voxel_operation",VoxelOpVisibility.new())
-		
+	
 	#print("VoxelNode: _ready is done")
 
+func _enter_tree():
+	if col_sibling:
+		get_parent().add_child(col_sibling)
 
 func _exit_tree():
 	#print("VoxelInstance3D %s: _exit_tree" % self)
@@ -135,12 +146,16 @@ func _exit_tree():
 		op.cancel = true
 	for op in pending_operations:
 		op.cancel = true
+	
+	if col_sibling:
+		get_parent().remove_child(col_sibling)
 
 
 func _to_string():
 	return "[VoxelInstance3D:%s]" % get_instance_id()
 
 
+# used by VoxelOpCreateMesh to call_deferred
 func set_mesh(new_mesh:Mesh):
 	mesh_child.mesh = new_mesh
 	emit_signal("mesh_ready")
@@ -258,6 +273,15 @@ func _update_debug_mesh():
 func _on_show_debug_gizmos_changed(value):
 	#print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
 	_debug_mesh_visible = value
+	
+	if col_sibling:
+		if value:
+			get_parent().remove_child(col_sibling)
+			get_parent().add_child(col_sibling)
+			col_sibling.owner = get_tree().edited_scene_root
+		else:
+			get_parent().remove_child(col_sibling)
+			col_sibling.owner = null
 
 func _on_voxel_configuration_changed(what):
 	print("VoxelNode: _on_voxel_configuration_changed %s" % what)
@@ -296,12 +320,49 @@ func notify_visibility_calculated():
 
 
 func notify_mesh_calculated():
+	
+	_debug_mesh_color = Color(0,0.5,0)
+	
 	mesh_surfaces_count = 0
 	mesh_faces_count = 0
 	if mesh_child.mesh:
 		mesh_surfaces_count = mesh_child.mesh.get_surface_count()
 		mesh_faces_count = mesh_child.mesh.get_faces().size()
 	
+	_debug_mesh_color = Color(0,1.0,0)
 	print("%s: mesh calculated: %s surfaces, %s faces" % [self, str(mesh_surfaces_count), str(mesh_faces_count)])
-	
+
+	var start_time = Time.get_ticks_usec()
+	if generate_collision_sibling and not col_sibling:
+		col_sibling = CollisionShape3D.new()
+		print("%s: Adding Collision sibling %s" % [self, col_sibling])
+		get_parent().add_child(col_sibling)
+		# if editor set as owner to view in scenetree
+		if Engine.is_editor_hint() and VoxelHammer.show_debug_gizmos:
+			col_sibling.owner = get_tree().edited_scene_root
+
+	if col_sibling:
+		# Orient as self
+		# TODO check if scaled and warn that collision dont work with scaled Shapes
+		col_sibling.transform = self.transform
+		
+		match generate_collision_sibling:
+			COLLISION_MODE.NONE:
+				push_warning("%s: Something wrong with logic, this should not happen!")
+			COLLISION_MODE.CUBE:
+				col_sibling.shape = BoxShape3D.new()
+				col_sibling.shape.size = voxel_data.size
+				col_sibling.translate_object_local(Vector3(voxel_data.size)/2.0)
+			COLLISION_MODE.CONVEX_MESH:
+				col_sibling.shape = mesh_child.mesh.create_convex_shape(true, false)
+			COLLISION_MODE.CONCAVE_MESH:
+				col_sibling.shape = mesh_child.mesh.create_trimesh_shape()
+			_:
+				push_warning("%s: Unsupported collision mode: %s!" % generate_collision_sibling)
+				
+		var delta_time = Time.get_ticks_usec() - start_time
+		print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(col_sibling.shape)])
+
+	_debug_mesh_color = Color(0.5,1.0,0.5)
+		
 	emit_signal("data_changed", "mesh")
