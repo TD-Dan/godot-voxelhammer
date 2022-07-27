@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" load_steps=3 format=3 uid="uid://qdfs2qt8trs"]
+
+[ext_resource type="Texture2D" uid="uid://drdje8uqd8y50" path="res://addons/TallDwarf/VoxelHammer/res/TestPattern.png" id="1_svk40"]
+[ext_resource type="Texture2D" uid="uid://ch75ryyv1xh2u" path="res://addons/TallDwarf/VoxelHammer/res/TestPatternNormal.png" id="2_gx0gx"]
+
+[resource]
+albedo_texture = ExtResource("1_svk40")
+normal_enabled = true
+normal_texture = ExtResource("2_gx0gx")
+texture_filter = 2

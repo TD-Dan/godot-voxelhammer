@@ -1,30 +1,14 @@
-[gd_resource type="Resource" load_steps=9 format=3 uid="uid://bvhuwmnl8rsp7"]
+[gd_resource type="Resource" load_steps=6 format=3 uid="uid://bvhuwmnl8rsp7"]
 
-[ext_resource type="Texture2D" uid="uid://drdje8uqd8y50" path="res://addons/TallDwarf/VoxelHammer/res/TestPattern.png" id="1_symbv"]
+[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/TallDwarf/VoxelHammer/res/mat_error.tres" id="1_be1cv"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelConfiguration.gd" id="1_xtxim"]
-[ext_resource type="Texture2D" uid="uid://ch75ryyv1xh2u" path="res://addons/TallDwarf/VoxelHammer/res/TestPatternNormal.png" id="2_y1ikp"]
-[ext_resource type="Texture2D" uid="uid://c8qrdmjj81dcr" path="res://addons/TallDwarf/VoxelHammer/res/benchmark.png" id="3_383s7"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uthxc"]
-albedo_color = Color(1, 0.509804, 0.780392, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bebdy"]
-albedo_texture = ExtResource("1_symbv")
-normal_enabled = true
-normal_texture = ExtResource("2_y1ikp")
-texture_filter = 0
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3hi8p"]
-albedo_color = Color(0.423529, 0.423529, 0.423529, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p0xbu"]
-albedo_color = Color(0.423529, 0.423529, 0.423529, 1)
-albedo_texture = ExtResource("3_383s7")
-texture_filter = 2
+[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres" id="2_tg0ia"]
+[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/TallDwarf/VoxelHammer/res/mat_white.tres" id="3_dwx35"]
+[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres" id="4_kje3t"]
 
 [resource]
 script = ExtResource("1_xtxim")
-materials = [SubResource("StandardMaterial3D_uthxc"), SubResource("StandardMaterial3D_bebdy"), SubResource("StandardMaterial3D_3hi8p"), SubResource("StandardMaterial3D_p0xbu")]
+materials = [ExtResource("1_be1cv"), ExtResource("2_tg0ia"), ExtResource("3_dwx35"), ExtResource("4_kje3t")]
 voxel_base_size = 1.0
 mesh_mode = 1
 accel_mode = 0

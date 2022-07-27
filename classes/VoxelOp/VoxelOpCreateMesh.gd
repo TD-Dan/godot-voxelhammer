@@ -43,6 +43,8 @@ func run_operation():
 			var si = material_table[j]
 			if si >= voxel_instance.configuration.materials.size():
 				si = 0
+			if not voxel_instance.configuration.materials[si]:
+				push_warning("%s: VoxelConfiguration material table is empty!")
 			mesh_buffer.surface_set_material(j, voxel_instance.configuration.materials[si])
 		
 		voxel_instance.call_deferred("set_mesh", mesh_buffer)
