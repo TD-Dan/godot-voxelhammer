@@ -8,22 +8,13 @@ var blend_buffer
 var paint_stack
 var position_offset
 
-func _init(voxel_data, voxel_configuration, paint_stack, position_offset=Vector3(0,0,0)):
-	super(VoxelData.CALC_STATE.VOXEL, voxel_data, voxel_configuration)
-	self.name = "VoxelOpPaintStack"
-	self.paint_stack = paint_stack.duplicate()
+func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
+	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+10)
+	self.paint_stack = paint_stack
 	self.position_offset = position_offset
 
 
-
-# Runs in main node to prepare data
-func prepare():
-	mat_buffer = voxel_data.material.duplicate()
-	smooth_buffer = voxel_data.smooth.duplicate()
-	blend_buffer = voxel_data.blend_buffer.duplicate()
-
-
-# This code is executed in another thread so it can not access voxel_node variable!
+# This code is potentially executed in another thread!
 func execute(thread_cache : Dictionary):
 	#print("!!! VoxelOpVisibility executing!")
 	do_paint_stack()

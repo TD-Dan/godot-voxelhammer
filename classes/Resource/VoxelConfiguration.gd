@@ -18,7 +18,7 @@ signal voxel_configuration_changed(what)
 		voxel_base_size = v
 		emit_signal("voxel_configuration_changed", "voxel_base_size")
 
-# Mesh generation mode. Use FAST, others are used for development purposes
+# Mesh generation mode
 enum MESH_MODE {
 	NONE,
 	CUBES,

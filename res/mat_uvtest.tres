@@ -7,4 +7,5 @@
 albedo_texture = ExtResource("1_svk40")
 normal_enabled = true
 normal_texture = ExtResource("2_gx0gx")
+uv1_triplanar = true
 texture_filter = 2
