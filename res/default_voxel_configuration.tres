@@ -1,14 +1,14 @@
 [gd_resource type="Resource" load_steps=6 format=3 uid="uid://bvhuwmnl8rsp7"]
 
-[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/TallDwarf/VoxelHammer/res/mat_error.tres" id="1_be1cv"]
+[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/TallDwarf/VoxelHammer/res/mat_error.tres" id="1_cgsr6"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelConfiguration.gd" id="1_xtxim"]
-[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres" id="2_tg0ia"]
-[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/TallDwarf/VoxelHammer/res/mat_white.tres" id="3_dwx35"]
-[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres" id="4_kje3t"]
+[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres" id="2_6dbqp"]
+[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres" id="3_ing4u"]
+[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/TallDwarf/VoxelHammer/res/mat_white.tres" id="4_c0uap"]
 
 [resource]
 script = ExtResource("1_xtxim")
-materials = [ExtResource("1_be1cv"), ExtResource("2_tg0ia"), ExtResource("3_dwx35"), ExtResource("4_kje3t")]
+materials = [ExtResource("1_cgsr6"), ExtResource("2_6dbqp"), ExtResource("3_ing4u"), ExtResource("4_c0uap")]
 voxel_base_size = 1.0
 mesh_mode = 1
 accel_mode = 0

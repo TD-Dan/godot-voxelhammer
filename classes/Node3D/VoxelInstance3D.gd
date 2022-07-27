@@ -62,7 +62,7 @@ signal mesh_ready
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
-@export var mesh_child : MeshInstance3D:
+var mesh_child : MeshInstance3D:
 	set(v):
 		print("setting mesh_child to %s" % v)
 		mesh_child = v
@@ -120,6 +120,9 @@ func _ready():
 	mesh_child = MeshInstance3D.new()
 	add_child(mesh_child)
 	
+	# Calculate Visibility (and Mesh) 
+	call_deferred("push_voxel_operation",VoxelOpVisibility.new())
+		
 	#print("VoxelNode: _ready is done")
 
 

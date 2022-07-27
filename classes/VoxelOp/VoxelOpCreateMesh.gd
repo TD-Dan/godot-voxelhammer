@@ -39,13 +39,15 @@ func run_operation():
 		voxel_instance.call_deferred("set_mesh", null)
 	else:
 		# Assign right materials from configuration
-		for j in range(material_table.size()):
-			var si = material_table[j]
-			if si >= voxel_instance.configuration.materials.size():
-				si = 0
-			if not voxel_instance.configuration.materials[si]:
+		var conf_materials =  voxel_instance.configuration.materials
+		if conf_materials.size() == 0:
 				push_warning("%s: VoxelConfiguration material table is empty!")
-			mesh_buffer.surface_set_material(j, voxel_instance.configuration.materials[si])
+		else:
+			for j in range(material_table.size()):
+				var si = material_table[j]
+				if si >= conf_materials.size():
+					si = 0
+				mesh_buffer.surface_set_material(j, conf_materials[si])
 		
 		voxel_instance.call_deferred("set_mesh", mesh_buffer)
 	
