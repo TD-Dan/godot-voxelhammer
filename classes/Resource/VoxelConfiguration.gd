@@ -53,3 +53,7 @@ enum THREAD_MODE {
 	set(v):
 		thread_mode = v
 		emit_signal("voxel_configuration_changed", "thread_mode")
+
+
+func _to_string():
+	return "[VoxelConfiguration:%s]" % get_instance_id()

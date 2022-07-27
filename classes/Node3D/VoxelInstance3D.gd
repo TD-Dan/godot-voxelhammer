@@ -30,6 +30,7 @@ signal mesh_ready
 		if configuration:
 			if not configuration.is_connected("voxel_configuration_changed", _on_voxel_configuration_changed):
 				configuration.connect("voxel_configuration_changed", _on_voxel_configuration_changed)
+				#print("%s: connect %s" % [self,configuration])
 		
 		# TODO: force redraw of mesh
 
@@ -48,7 +49,7 @@ signal mesh_ready
 		if voxel_data:
 			if not voxel_data.is_connected("voxel_data_changed", _on_voxels_changed):
 				voxel_data.connect("voxel_data_changed", _on_voxels_changed)
-				print("VoxelInstance3D %s: connect %s" % [self,voxel_data])
+				#print("%s: connect %s" % [self,voxel_data])
 
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
@@ -61,7 +62,12 @@ signal mesh_ready
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
-var mesh_child : MeshInstance3D
+@export var mesh_child : MeshInstance3D:
+	set(v):
+		print("setting mesh_child to %s" % v)
+		mesh_child = v
+		notify_property_list_changed()
+
 var mesh_surfaces_count = null
 var mesh_faces_count = null
 
@@ -107,8 +113,9 @@ func _ready():
 	if th_autoload_global:
 		print("Found TaskHammer plugin! Integrating...")
 	else:
-		push_warning("(OPTIONAL) TaskHammer Global Autoload NOT found. TaskHammer plugin installed? Falling back to single thread execution..")
-	
+		if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.TASKSERVER:
+			push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
+			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
 	mesh_child = MeshInstance3D.new()
 	add_child(mesh_child)
