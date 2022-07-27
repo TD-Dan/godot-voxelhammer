@@ -1,4 +1,4 @@
-tool
+@tool
 
 extends Node
 
@@ -6,18 +6,20 @@ extends Node
 
 signal show_debug_gizmos_changed(value)
 
-export(Resource) var default_configuration = preload("res://addons/voxel_hammer/default_voxel_configuration.tres")
+@export var default_configuration : Resource = preload("./res/default_voxel_configuration.tres")
 
-export var use_camera_for_priority = true
-export var show_debug_gizmos = false setget _set_show_debug_gizmos
+@export var show_debug_gizmos = false:
+	set(v):
+		show_debug_gizmos = v
+		emit_signal("show_debug_gizmos_changed", show_debug_gizmos)
 
-var native_rust_worker_script = preload("res://addons/voxel_hammer/gdnative/NativeWorkerRust.gdns")
+var native_rust_worker_script = null
 var native_worker = null
 
-func _set_show_debug_gizmos(nv):
-	show_debug_gizmos = nv
-	emit_signal("show_debug_gizmos_changed", show_debug_gizmos)
 
 func _enter_tree():
-	native_worker = native_rust_worker_script.new()
-	add_child(native_worker)
+	if File.new().file_exists("res://addons/TallDwarf/VoxelHammer-NativeRust/gdnative/NativeWorkerRust.gdns"):
+		print("VoxelHammer found VoxelHammer-NativeRust plugin")
+		native_rust_worker_script = load("res://addons/TallDwarf/VoxelHammer-NativeRust/gdnative/NativeWorkerRust.gdns")
+		native_worker = native_rust_worker_script.new()
+		add_child(native_worker)

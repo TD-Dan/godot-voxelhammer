@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://scbihkr00e7x"]
+
+[resource]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+specular_mode = 4
+vertex_color_use_as_albedo = true
+disable_receive_shadows = true
+point_size = 3.0
