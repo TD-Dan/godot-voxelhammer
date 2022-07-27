@@ -1,11 +1,9 @@
-[gd_scene load_steps=23 format=3 uid="uid://coxd8ng5ejoml"]
+[gd_scene load_steps=21 format=3 uid="uid://c4fvio7x7judy"]
 
 [ext_resource type="Material" uid="uid://cy3iyc1vgtogu" path="res://materials/Default_world.tres" id="1_biel5"]
 [ext_resource type="PackedScene" uid="uid://b5fa6m6t14mp" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.tscn" id="2_1qj2a"]
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.gd" id="4_jpvo8"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelData.gd" id="4_q3a27"]
 [ext_resource type="Material" uid="uid://bfpv45gqj8nvl" path="res://materials/Default_object.tres" id="5_jbedj"]
-[ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/TallDwarf/VoxelHammer/res/default_voxel_configuration.tres" id="5_yket0"]
 [ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/TallDwarf/VoxelHammer/res/mat_error.tres" id="6_pobnm"]
 [ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres" id="7_31b5m"]
 [ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres" id="8_5qxp1"]
@@ -47,7 +45,7 @@ data = PackedInt64Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 script = ExtResource("10_rs32o")
 materials = [ExtResource("6_pobnm"), ExtResource("7_31b5m"), ExtResource("8_5qxp1"), ExtResource("9_t7035")]
 voxel_base_size = 1.0
-mesh_mode = 1
+mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
 
@@ -109,10 +107,8 @@ transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0, 0, -10)
 voxel_data = SubResource("Resource_x42ii")
 generate_collision_sibling = 2
 
-[node name="@VoxelInstance3D@22674" type="Node3D" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
+[node name="@VoxelInstance3D@22674" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.38832)
-script = ExtResource("4_jpvo8")
-configuration = ExtResource("5_yket0")
 voxel_data = SubResource("Resource_i65m2")
 
 [node name="VoxelInstance3D4" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]

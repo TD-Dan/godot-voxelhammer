@@ -112,6 +112,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 					
 					# Reminder to not test:
 					# NO UV:s! Mesh generation is faster without and triplanar texturing makes things so much more easier
+					# Triplanar causes flickering when material sampling is 'nearest'
 					# NO append_from(): Its ~20-100x slower than add_vertex
 					
 					for i in cube_vertices.size():
