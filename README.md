@@ -1,6 +1,9 @@
+
 <img src="https://github.com/kupoli/godot_voxelhammer-examples/blob/main/screenshots/screencap%20220109.jpg">
 
 # godot_voxelhammer
+
+<img src="https://badgen.net/badge/Godot/v%204.0-alpha12/blue?icon=https://godotengine.org/themes/godotengine/assets/press/icon_monochrome_dark.svg"> <img src="https://badgen.net/badge/license/MIT/blue">
 
 ! DONT USE YET: MULTIPLE COMMITS INCOMING !
 
