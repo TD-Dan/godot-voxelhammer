@@ -341,8 +341,8 @@ func notify_mesh_calculated():
 		if Engine.is_editor_hint():
 			var vh = get_node_or_null("/root/VoxelHammer")
 			if vh:
-				vh.show_debug_gizmos
-				col_sibling.owner = get_tree().edited_scene_root
+				if vh.show_debug_gizmos:
+					col_sibling.owner = get_tree().edited_scene_root
 			else:
 				push_error("Cant connect to VoxelHammer Autoload")
 
