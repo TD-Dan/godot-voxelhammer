@@ -150,6 +150,22 @@ func _exit_tree():
 	if col_sibling:
 		get_parent().remove_child(col_sibling)
 
+func _notification(what):
+	match what:
+		NOTIFICATION_PARENTED:
+			var parent = get_parent()
+			if parent.has_signal("input_event"):
+				print("%s: parented to %s: connecting to input_event" % [self,parent])
+				parent.connect("input_event", _on_input_event)
+		NOTIFICATION_UNPARENTED:
+			var parent = get_parent()
+			if parent.has_signal("input_event"):
+				print("%s: unparented from %s: disconnecting from input_event" % [self,parent])
+				parent.disconnect("input_event", _on_input_event)
+
+func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int):
+	if event.get_class() != "InputEventMouseMotion":
+		print("Got from %s: %s @ %s towards %s in %s" % [camera,event,position,normal,shape_idx])
 
 func _to_string():
 	return "[VoxelInstance3D:%s]" % get_instance_id()

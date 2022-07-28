@@ -14,6 +14,9 @@ var editor_interface : EditorInterface
 @onready var voxel_edit_material = $Panel/VBoxContainer/VoxelEditTools/SpinBoxMaterial
 @onready var paint_stack_editor = $Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/PaintStackEditor
 
+@onready var button_paint = $Panel/VBoxContainer/VoxelEditTools/ButtonPaint
+var mousemode_paint = false
+
 var selection = null:
 	set(nv):
 		#print("VoxelHammerDock: setting selection")
@@ -21,6 +24,8 @@ var selection = null:
 			selection.disconnect("data_changed", _on_selection_data_changed)
 		
 		#TODO enable / make smarter
+		
+		button_paint.button_pressed = false
 		
 		if nv is VoxelInstance3D:
 			selection = nv
@@ -79,6 +84,41 @@ func _ready():
 	paint_stack_editor.editor_interface = editor_interface
 
 
+
+func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
+	#if event.get_class() != "InputEventMouseMotion":
+		#print("got input %s" % event.get_class())
+	
+	if mousemode_paint:
+		match event.get_class():
+			"InputEventKey":
+				if Input.is_action_pressed("ui_cancel"):
+					button_paint.button_pressed = false
+					return true
+			"InputEventMouseButton":
+				var event_mb : InputEventMouseButton = event
+
+				# Need to manually pick in tool mode and VoxelInstnce picking logic not running
+
+				if selection and event_mb.button_index == 1:
+					print("%s: got input %s" % [self,str(event)])
+					var mouse_pos = event.position
+					var camera = viewport_camera
+					
+					var ray_length = 1000.0
+					var from = camera.project_ray_origin(mouse_pos)
+					var to = from + camera.project_ray_normal(mouse_pos) * ray_length
+					var space_state = selection.get_viewport().find_world_3d().get_direct_space_state()
+					var params = PhysicsRayQueryParameters3D.new()
+					params.from = from
+					params.to = to
+					var results =  space_state.intersect_ray(params)
+					
+					print(results)
+					return true
+	return false
+
+
 func _on_paint_stack_changed():
 	print("VoxelHammerDock: paint stack changed")
 	if selection:
@@ -114,7 +154,7 @@ func _on_button_fill_pressed():
 
 
 func _on_button_paint_toggled(button_pressed):
-	pass # Replace with function body.
+	mousemode_paint = button_pressed
 
 
 func _on_button_mesh_pressed():
@@ -122,6 +162,7 @@ func _on_button_mesh_pressed():
 
 
 func _on_add_vox_instance_pressed():
+	button_paint.button_pressed = false
 	# TODO: Add UndoRedo
 	# Get current selection
 	var scene_root = editor_interface.get_edited_scene_root()

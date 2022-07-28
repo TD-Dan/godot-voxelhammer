@@ -41,6 +41,14 @@ func _exit_tree():
 	remove_autoload_singleton("VoxelHammer")
 
 
+func _handles(object: Variant):
+	#print("_handles? : %s" % str(object))
+	if object is VoxelInstance3D:
+		return true
+
+func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
+	return dock._forward_3d_gui_input(viewport_camera,event)
+
 func _on_selection_changed():
 	#print("VoxelHammerPlugin: selection changed")
 	

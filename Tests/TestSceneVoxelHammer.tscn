@@ -89,29 +89,29 @@ shape = SubResource("BoxShape3D_w4xxq")
 
 [node name="Basic Tests" type="Node3D" parent="."]
 
-[node name="UVTest" type="StaticBody3D" parent="Basic Tests"]
+[node name="UV_COLTest" type="StaticBody3D" parent="Basic Tests"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -1)
 
-[node name="VoxelInstance3D" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
+[node name="VoxelInstance3D" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 1.86162, 0, 0.507553)
 voxel_data = SubResource("Resource_3hsp2")
 generate_collision_sibling = 1
 
-[node name="VoxelInstance3D2" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
+[node name="VoxelInstance3D2" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 0.19665, 4.76837e-07, -4.29504)
 voxel_data = SubResource("Resource_1muqo")
-generate_collision_sibling = 1
+generate_collision_sibling = 3
 
-[node name="VoxelInstance3D3" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
+[node name="VoxelInstance3D3" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0, 0, -10)
 voxel_data = SubResource("Resource_x42ii")
 generate_collision_sibling = 2
 
-[node name="@VoxelInstance3D@22674" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
+[node name="@VoxelInstance3D@22674" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.38832)
 voxel_data = SubResource("Resource_i65m2")
 
-[node name="VoxelInstance3D4" parent="Basic Tests/UVTest" instance=ExtResource("2_1qj2a")]
+[node name="VoxelInstance3D4" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -11)
 configuration = SubResource("Resource_q8fwt")
 voxel_data = SubResource("Resource_s3kkn")
