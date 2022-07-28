@@ -129,7 +129,7 @@ func _ready():
 			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
 	# Calculate Visibility (and Mesh) 
-	call_deferred("push_voxel_operation",VoxelOpVisibility.new())
+	remesh()
 	
 	#print("VoxelNode: _ready is done")
 
@@ -170,11 +170,31 @@ func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal:
 func _to_string():
 	return "[VoxelInstance3D:%s]" % get_instance_id()
 
+# Set single voxel. Thread safe. Index safe. return true on succces
+func set_voxel(pos : Vector3i, value : int) -> bool:
+	var ret = false
+	voxel_data.data_mutex.lock()
+	
+	if pos.x < 0 or pos.y < 0 or pos.z < 0 or \
+		pos.x > voxel_data.size.x or pos.y > voxel_data.size.y or pos.z > voxel_data.size.z:
+		push_warning("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, position, voxel_data.size])
+		if Engine.is_editor_hint():
+			print("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, position, voxel_data.size])
+	else:
+		voxel_data.data[voxel_data.vector3i_to_index(pos)] = value
+		ret = true
+	
+	voxel_data.data_mutex.unlock()
+	return ret
 
 # used by VoxelOpCreateMesh to call_deferred
 func set_mesh(new_mesh:Mesh):
 	mesh_child.mesh = new_mesh
 	emit_signal("mesh_ready")
+
+# Force redraw of mesh
+func remesh():
+	push_voxel_operation(VoxelOpVisibility.new())
 
 var my_self_bug_check_hack
 func push_voxel_operation(vox_op : VoxelOperation):
@@ -200,7 +220,7 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 	
 	_advance_operation_stack()
 
-var thread_working : Mutex
+var current_thread : Thread
 
 func _advance_operation_stack():
 	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
@@ -319,7 +339,7 @@ func _on_voxels_changed():
 
 	# recalculate Visibility if no other vox operations pending
 	if not current_operation and pending_operations.is_empty():
-		call_deferred("push_voxel_operation",VoxelOpVisibility.new())
+		remesh()
 
 func notify_visibility_calculated():
 	visibility_count = vis_buffer.count(1)

@@ -43,6 +43,16 @@ func _to_string():
 func get_voxel_count():
 	return size.x*size.y*size.z
 
+func xyz_to_index(x:int,y:int,z:int) -> int: return x + y*size.x + z*size.x*size.y
+func vector3i_to_index(vec : Vector3i) -> int: return vec.x + vec.y*size.x + vec.z*size.x*size.y
+func index_to_vector3i(i:int) -> Vector3i: # HOX! Untested!
+	var ret : Vector3i = Vector3i()
+	ret.x = i / (size.y * size.z)
+	var w = i % (size.y * size.z)
+	ret.y = w / size.z
+	ret.z = w % size.z
+	return ret
+
 # Clears all voxel data to zero
 func clear():
 	data_mutex.lock()

@@ -113,8 +113,12 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 					params.from = from
 					params.to = to
 					var results =  space_state.intersect_ray(params)
-					
-					print(results)
+					#print(results)
+					if results.size() > 0:
+						var pos = selection.to_local(results["position"])
+						var mat = voxel_edit_material.value
+						selection.set_voxel(pos, mat)
+						selection.remesh()
 					return true
 	return false
 
@@ -158,7 +162,7 @@ func _on_button_paint_toggled(button_pressed):
 
 
 func _on_button_mesh_pressed():
-	selection.push_voxel_operation(VoxelOpVisibility.new())
+	selection.remesh()
 
 
 func _on_add_vox_instance_pressed():

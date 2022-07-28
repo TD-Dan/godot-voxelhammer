@@ -16,7 +16,7 @@ func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
 
 # This code is potentially executed in another thread!
 func execute(thread_cache : Dictionary):
-	#print("!!! VoxelOpVisibility executing!")
+	#print("!!! VoxelOpPaintStack executing!")
 	do_paint_stack()
 
 
