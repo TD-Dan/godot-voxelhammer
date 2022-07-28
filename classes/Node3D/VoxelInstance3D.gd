@@ -338,8 +338,13 @@ func notify_mesh_calculated():
 		print("%s: Adding Collision sibling %s" % [self, col_sibling])
 		get_parent().add_child(col_sibling)
 		# if editor set as owner to view in scenetree
-		if Engine.is_editor_hint() and VoxelHammer.show_debug_gizmos:
-			col_sibling.owner = get_tree().edited_scene_root
+		if Engine.is_editor_hint():
+			var vh = get_node_or_null("/root/VoxelHammer")
+			if vh:
+				vh.show_debug_gizmos
+				col_sibling.owner = get_tree().edited_scene_root
+			else:
+				push_error("Cant connect to VoxelHammer Autoload")
 
 	if col_sibling:
 		# Orient as self

@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c4fvio7x7judy"]
+[gd_scene load_steps=21 format=3 uid="uid://yuxo6btsfjb5"]
 
 [ext_resource type="Material" uid="uid://cy3iyc1vgtogu" path="res://materials/Default_world.tres" id="1_biel5"]
 [ext_resource type="PackedScene" uid="uid://b5fa6m6t14mp" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.tscn" id="2_1qj2a"]
@@ -33,7 +33,7 @@ data = PackedInt64Array(1, 1, 1, 2, 2, 2, 2, 2, 0, 3, 3, 0, 3, 1, 1, 0, 1, 1, 3,
 resource_local_to_scene = true
 script = ExtResource("4_q3a27")
 size = Vector3i(3, 3, 3)
-data = PackedInt64Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
 
 [sub_resource type="Resource" id="Resource_i65m2"]
 resource_local_to_scene = true
