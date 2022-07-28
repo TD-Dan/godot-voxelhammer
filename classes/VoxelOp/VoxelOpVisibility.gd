@@ -11,8 +11,10 @@ func _init():
 
 # This code is potentially executed in another thread!
 func run_operation():
+	if cancel: return
 	if voxel_instance.voxel_data.data_mutex.try_lock() == OK:
 		calculate_visibility(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size)
+		if cancel: return
 		voxel_instance.voxel_data.data_mutex.unlock()
 		voxel_instance.vis_buffer = vis_buffer
 		voxel_instance.call_deferred("notify_visibility_calculated")
@@ -21,7 +23,7 @@ func run_operation():
 
 
 func calculate_visibility(data : PackedInt64Array, size : Vector3i):
-	print("Calculating visibility...")
+	#print("Calculating visibility...")
 	
 	var sx :int = size.x
 	var sy :int = size.y
@@ -31,6 +33,7 @@ func calculate_visibility(data : PackedInt64Array, size : Vector3i):
 	
 	for z in range(sz):
 		for y in range(sy):
+			if cancel: return
 			for x in range(sx):
 				var ci = x + y*sx + z*sx*sy
 				if !data[ci]:

@@ -105,7 +105,7 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 					var mouse_pos = event.position
 					var camera = viewport_camera
 					
-					var ray_length = 1000.0
+					var ray_length = 100.0
 					var from = camera.project_ray_origin(mouse_pos)
 					var to = from + camera.project_ray_normal(mouse_pos) * ray_length
 					var space_state = selection.get_viewport().find_world_3d().get_direct_space_state()
@@ -113,11 +113,16 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 					params.from = from
 					params.to = to
 					var results =  space_state.intersect_ray(params)
-					#print(results)
+					print(results)
 					if results.size() > 0:
-						var pos = selection.to_local(results["position"])
+						var pos : Vector3 = selection.to_local(results["position"])
+						print(pos)
+						var norm = results["normal"]
+						print(norm)
+						print(pos.floor())
 						var mat = voxel_edit_material.value
-						selection.set_voxel(pos, mat)
+						selection.set_voxel(pos.floor(), mat)
+						print("here")
 						selection.remesh()
 					return true
 	return false

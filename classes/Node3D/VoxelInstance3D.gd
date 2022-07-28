@@ -176,10 +176,10 @@ func set_voxel(pos : Vector3i, value : int) -> bool:
 	voxel_data.data_mutex.lock()
 	
 	if pos.x < 0 or pos.y < 0 or pos.z < 0 or \
-		pos.x > voxel_data.size.x or pos.y > voxel_data.size.y or pos.z > voxel_data.size.z:
-		push_warning("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, position, voxel_data.size])
+		pos.x >= voxel_data.size.x or pos.y >= voxel_data.size.y or pos.z >= voxel_data.size.z:
+		push_warning("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, pos, voxel_data.size])
 		if Engine.is_editor_hint():
-			print("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, position, voxel_data.size])
+			print("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, pos, voxel_data.size])
 	else:
 		voxel_data.data[voxel_data.vector3i_to_index(pos)] = value
 		ret = true
@@ -247,13 +247,16 @@ func _advance_operation_stack():
 			print("no current op")
 
 func _run_op_thread(op : VoxelOperation):
-	print("[Thread:%s]: running operation ..." % OS.get_thread_caller_id())
+	#print("[Thread:%s]: running operation ..." % OS.get_thread_caller_id())
 	var run_start_us = Time.get_ticks_usec()
 	
 	op.run_operation()
 	
 	var delta_time_us = Time.get_ticks_usec() - run_start_us
-	print("[Thread:%s]: finished \t\t%s in \t\t%s seconds" % [OS.get_thread_caller_id(), op, delta_time_us/1000000.0])
+	if op.cancel:
+		print("[Thread:%s]: CANCELLED \t\t%s in \t\t%s seconds" % [OS.get_thread_caller_id(), op, delta_time_us/1000000.0])
+	else:
+		print("[Thread:%s]: finished \t\t%s in \t\t%s seconds" % [OS.get_thread_caller_id(), op, delta_time_us/1000000.0])
 	current_operation = null
 
 func on_work_is_ready(work_item):

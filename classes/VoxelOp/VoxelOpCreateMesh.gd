@@ -13,7 +13,9 @@ func _init():
 
 # This code is executed in another thread so it can not access voxel_node variable!
 func run_operation():
-	print("%s: run_operation on %s" % [self,voxel_instance])
+	if cancel: return
+	
+	#print("%s: run_operation on %s" % [self,voxel_instance])
 	#print("!!! VoxelOpCreateMesh executing!")
 	var mesh_empty = false
 	
@@ -35,6 +37,8 @@ func run_operation():
 				mesh_empty = true
 		
 	
+	if cancel: return
+		
 	if mesh_empty:
 		voxel_instance.call_deferred("set_mesh", null)
 	else:
@@ -77,7 +81,7 @@ const cube_uvs = [[0,0],[1,0],[0,1],[1,0],[1,1],[0,1], #left -Z
 				[0,0],[1,0],[0,1],[1,0],[1,1],[0,1]] #back +X
 
 func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray, size : Vector3i):
-	print("Constructing CUBES mesh...")
+	#print("Constructing CUBES mesh...")
 	# Creates cubes mesh from voxel data
 	
 	# Create one SurfaceTool per material
@@ -94,6 +98,9 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	for z in range(sz):
 		for y in range(sy):
 			for x in range(sx):
+				
+				if cancel: return
+		
 				var ci : int = x + y*sx + z*sx*sy
 				material_at_index = data[ci]
 				
@@ -150,7 +157,7 @@ const cube_face_front = [[0,0,0],[0,1,0],[0,0,1],[0,1,0],[0,1,1],[0,0,1]]  # -z
 const cube_face_back = [[1,0,0],[1,0,1],[1,1,0],[1,0,1],[1,1,1],[1,1,0]]   # z
 
 func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray, size : Vector3i):
-	print("Constructing FACES mesh...")
+	#print("Constructing FACES mesh...")
 	# Creates face mesh from voxel data
 	
 	# Create one SurfaceTool per material
@@ -169,6 +176,9 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	for x in range(sx):
 		for y in range(sy):
 			for z in range(sz):
+				
+				if cancel: return
+				
 				var ci : int = x + y*sx + z*sx*sy
 				var material_at_index = data[ci]
 				var visible_at_index = vis_buffer[ci]
