@@ -59,7 +59,7 @@ signal mesh_ready
 				voxel_data.clear()
 
 
-var col_sibling
+var _col_sibling # only one editing this value is _update_collision_sibling!
 
 enum COLLISION_MODE{
 	NONE,
@@ -70,9 +70,8 @@ enum COLLISION_MODE{
 @export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
 	set(nv):
 		generate_collision_sibling = nv
-		if not generate_collision_sibling and col_sibling:
-			col_sibling.queue_free()
-			col_sibling = null
+		_update_collision_sibling()
+
 
 
 var vis_buffer : PackedByteArray = PackedByteArray()
@@ -128,17 +127,16 @@ func _ready():
 			push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
 			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
-	# Calculate Visibility (and Mesh) 
+	# Calculate Visibility (which updates mesh and collision sibling) 
 	remesh()
 	
 	#print("VoxelNode: _ready is done")
 
 func _enter_tree():
-	if col_sibling:
-		get_parent().add_child(col_sibling)
+	_update_collision_sibling() # !important! needs to be updated incase we are inside editor
 
 func _exit_tree():
-	#print("VoxelInstance3D %s: _exit_tree" % self)
+	print("VoxelInstance3D %s: _exit_tree" % self)
 	
 	if current_operation:
 		current_operation.cancel = true
@@ -147,21 +145,30 @@ func _exit_tree():
 	for op in pending_operations:
 		op.cancel = true
 	
-	if col_sibling:
-		get_parent().remove_child(col_sibling)
+	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor
 
 func _notification(what):
 	match what:
 		NOTIFICATION_PARENTED:
 			var parent = get_parent()
 			if parent.has_signal("input_event"):
-				print("%s: parented to %s: connecting to input_event" % [self,parent])
+				#print("%s: parented to %s: connecting to input_event" % [self,parent])
 				parent.connect("input_event", _on_input_event)
 		NOTIFICATION_UNPARENTED:
 			var parent = get_parent()
 			if parent.has_signal("input_event"):
-				print("%s: unparented from %s: disconnecting from input_event" % [self,parent])
+				#print("%s: unparented from %s: disconnecting from input_event" % [self,parent])
 				parent.disconnect("input_event", _on_input_event)
+		NOTIFICATION_EDITOR_PRE_SAVE:
+			# Prevent debug view of _col_sibling from being saved into file
+			#print("%s: PRE_SAVE")
+			if _col_sibling and _col_sibling.owner:
+				_col_sibling.owner = null
+		NOTIFICATION_EDITOR_POST_SAVE:
+			#print("%s: POST_SAVE")
+			# Restore debug view of _col_sibling after save
+			if _col_sibling:
+				_update_collision_sibling()
 
 func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int):
 	if event.get_class() != "InputEventMouseMotion":
@@ -309,18 +316,66 @@ func _update_debug_mesh():
 	_debug_mesh_child.mesh.surface_set_material(0, load("res://addons/TallDwarf/VoxelHammer/res/line.tres"))
 
 
+func _update_collision_sibling():
+	if not is_inside_tree():
+		print("Not inside tree: do nothing.")
+		return
+	if not generate_collision_sibling:
+		if _col_sibling:
+			_col_sibling.queue_free() # removes from parent so no need to call get_parent().remove_child(_col_sibling)
+			_col_sibling = null
+	else: # generate_collision_sibling != false
+		if not _col_sibling:
+			if Engine.is_editor_hint():
+				if get_parent() == get_tree().edited_scene_root:
+					push_warning("Cant add collision sibling to top level node! Set to NONE.")
+					generate_collision_sibling = COLLISION_MODE.NONE
+					return
+			
+			_col_sibling = CollisionShape3D.new()
+			print("%s: Adding Collision sibling %s" % [self, _col_sibling])
+			get_parent().call_deferred("add_child",_col_sibling)
+		
+		# if in editor update owner to view in scenetree
+		if Engine.is_editor_hint():
+			if _debug_mesh_visible:
+					_col_sibling.owner = get_tree().edited_scene_root
+			else:
+				_col_sibling.owner = null
+		
+		# generate the collision shape
+		var start_time = Time.get_ticks_usec()
+		# Orient same as self
+		# TODO check if scaled and warn that collision dont work with scaled Shapes
+		_col_sibling.transform = self.transform
+		_col_sibling.shape = null
+		
+		match generate_collision_sibling:
+			COLLISION_MODE.NONE:
+				push_warning("%s: Something wrong with logic, this should not happen!")
+			COLLISION_MODE.CUBE:
+				_col_sibling.shape = BoxShape3D.new()
+				_col_sibling.shape.size = voxel_data.size
+				_col_sibling.translate_object_local(Vector3(voxel_data.size)/2.0)
+			COLLISION_MODE.CONVEX_MESH:
+				if mesh_child and mesh_child.mesh:
+					_col_sibling.shape = mesh_child.mesh.create_convex_shape(true, false)
+			COLLISION_MODE.CONCAVE_MESH:
+				if mesh_child and mesh_child.mesh:
+					_col_sibling.shape = mesh_child.mesh.create_trimesh_shape()
+			_:
+				push_warning("%s: Unsupported collision mode: %s!" % generate_collision_sibling)
+				
+		var delta_time = Time.get_ticks_usec() - start_time
+		if _col_sibling.shape:
+			print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
+			_debug_mesh_color = Color(0.5,1.0,0.5)
+	
 func _on_show_debug_gizmos_changed(value):
 	#print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
 	_debug_mesh_visible = value
 	
-	if col_sibling:
-		if value:
-			get_parent().remove_child(col_sibling)
-			get_parent().add_child(col_sibling)
-			col_sibling.owner = get_tree().edited_scene_root
-		else:
-			get_parent().remove_child(col_sibling)
-			col_sibling.owner = null
+	_update_collision_sibling() # ! important ! updates editor as owner of _col_sibling
 
 func _on_voxel_configuration_changed(what):
 	print("VoxelNode: _on_voxel_configuration_changed %s" % what)
@@ -370,43 +425,7 @@ func notify_mesh_calculated():
 	
 	_debug_mesh_color = Color(0,1.0,0)
 	print("%s: mesh calculated: %s surfaces, %s faces" % [self, str(mesh_surfaces_count), str(mesh_faces_count)])
-
-	var start_time = Time.get_ticks_usec()
-	if generate_collision_sibling and not col_sibling:
-		col_sibling = CollisionShape3D.new()
-		print("%s: Adding Collision sibling %s" % [self, col_sibling])
-		get_parent().add_child(col_sibling)
-		# if editor set as owner to view in scenetree
-		if Engine.is_editor_hint():
-			var vh = get_node_or_null("/root/VoxelHammer")
-			if vh:
-				if vh.show_debug_gizmos:
-					col_sibling.owner = get_tree().edited_scene_root
-			else:
-				push_error("Cant connect to VoxelHammer Autoload")
-
-	if col_sibling:
-		# Orient as self
-		# TODO check if scaled and warn that collision dont work with scaled Shapes
-		col_sibling.transform = self.transform
-		
-		match generate_collision_sibling:
-			COLLISION_MODE.NONE:
-				push_warning("%s: Something wrong with logic, this should not happen!")
-			COLLISION_MODE.CUBE:
-				col_sibling.shape = BoxShape3D.new()
-				col_sibling.shape.size = voxel_data.size
-				col_sibling.translate_object_local(Vector3(voxel_data.size)/2.0)
-			COLLISION_MODE.CONVEX_MESH:
-				col_sibling.shape = mesh_child.mesh.create_convex_shape(true, false)
-			COLLISION_MODE.CONCAVE_MESH:
-				col_sibling.shape = mesh_child.mesh.create_trimesh_shape()
-			_:
-				push_warning("%s: Unsupported collision mode: %s!" % generate_collision_sibling)
-				
-		var delta_time = Time.get_ticks_usec() - start_time
-		print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(col_sibling.shape)])
-
-	_debug_mesh_color = Color(0.5,1.0,0.5)
-		
+	
+	_update_collision_sibling()
+	
 	emit_signal("data_changed", "mesh")
