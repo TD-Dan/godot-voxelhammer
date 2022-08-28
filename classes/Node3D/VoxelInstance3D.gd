@@ -328,7 +328,7 @@ func _update_collision_sibling():
 		if not _col_sibling:
 			if Engine.is_editor_hint():
 				if get_parent() == get_tree().edited_scene_root:
-					push_warning("Cant add collision sibling to top level node! Set to NONE.")
+					push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node. Set to NONE.")
 					generate_collision_sibling = COLLISION_MODE.NONE
 					return
 			_col_sibling = CollisionShape3D.new()
