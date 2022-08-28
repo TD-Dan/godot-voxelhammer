@@ -324,14 +324,13 @@ func _update_collision_sibling():
 		if _col_sibling:
 			_col_sibling.queue_free() # removes from parent so no need to call get_parent().remove_child(_col_sibling)
 			_col_sibling = null
-	else: # generate_collision_sibling != false
+	else: # generate_collision_sibling
 		if not _col_sibling:
 			if Engine.is_editor_hint():
 				if get_parent() == get_tree().edited_scene_root:
 					push_warning("Cant add collision sibling to top level node! Set to NONE.")
 					generate_collision_sibling = COLLISION_MODE.NONE
 					return
-			
 			_col_sibling = CollisionShape3D.new()
 			print("%s: Adding Collision sibling %s" % [self, _col_sibling])
 			get_parent().call_deferred("add_child",_col_sibling)
@@ -339,7 +338,7 @@ func _update_collision_sibling():
 		# if in editor update owner to view in scenetree
 		if Engine.is_editor_hint():
 			if _debug_mesh_visible:
-					_col_sibling.owner = get_tree().edited_scene_root
+				_col_sibling.owner = get_tree().edited_scene_root
 			else:
 				_col_sibling.owner = null
 		
