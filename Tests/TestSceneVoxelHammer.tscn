@@ -107,7 +107,7 @@ transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0, 0, -10)
 voxel_data = SubResource("Resource_x42ii")
 generate_collision_sibling = 3
 
-[node name="@VoxelInstance3D@22674" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
+[node name="VoxelInstance3D4" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.38832)
 voxel_data = SubResource("Resource_i65m2")
 

@@ -8,5 +8,4 @@ metallic = 0.12
 metallic_specular = 0.16
 uv1_scale = Vector3(0.063, 0.063, 0.063)
 uv1_triplanar = true
-uv1_triplanar_sharpness = 20.0
 texture_filter = 2
