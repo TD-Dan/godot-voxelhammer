@@ -18,8 +18,10 @@ var native_worker = null
 
 
 func _enter_tree():
-	if File.new().file_exists("res://addons/TallDwarf/VoxelHammer-NativeRust/gdnative/NativeWorkerRust.gdns"):
-		print("VoxelHammer found VoxelHammer-NativeRust plugin")
-		native_rust_worker_script = load("res://addons/TallDwarf/VoxelHammer-NativeRust/gdnative/NativeWorkerRust.gdns")
-		native_worker = native_rust_worker_script.new()
-		add_child(native_worker)
+	pass
+	#TODO move gdnative to GD4 GDExtension
+	#if File.new().file_exists("res://addons/TallDwarf/VoxelHammer-NativeRust/gdnative/NativeWorkerRust.gdns"):
+	#	print("VoxelHammer found VoxelHammer-NativeRust plugin")
+	#	native_rust_worker_script = load("res://addons/TallDwarf/VoxelHammer-NativeRust/gdnative/NativeWorkerRust.gdns")
+	#	native_worker = native_rust_worker_script.new()
+	#	add_child(native_worker)

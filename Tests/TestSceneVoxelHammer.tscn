@@ -17,25 +17,25 @@ size = Vector2(16, 8)
 [sub_resource type="BoxShape3D" id="BoxShape3D_w4xxq"]
 size = Vector3(16, 0.01, 8)
 
-[sub_resource type="Resource" id="Resource_3hsp2"]
+[sub_resource type="Resource" id="Resource_6puus"]
 resource_local_to_scene = true
 script = ExtResource("4_q3a27")
 size = Vector3i(1, 1, 1)
 data = PackedInt64Array(1, 1, 1, 2, 2, 2, 2, 2, 0, 3, 3, 0, 3, 1, 1, 0, 1, 1, 3, 3, 0, 3, 3, 1, 0, 1, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="Resource_1muqo"]
+[sub_resource type="Resource" id="Resource_2g5g0"]
 resource_local_to_scene = true
 script = ExtResource("4_q3a27")
 size = Vector3i(3, 3, 4)
 data = PackedInt64Array(1, 1, 1, 2, 2, 2, 2, 2, 0, 3, 3, 0, 3, 1, 1, 0, 1, 1, 3, 3, 0, 3, 3, 1, 0, 1, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="Resource_x42ii"]
+[sub_resource type="Resource" id="Resource_ro31o"]
 resource_local_to_scene = true
 script = ExtResource("4_q3a27")
 size = Vector3i(3, 3, 3)
 data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
 
-[sub_resource type="Resource" id="Resource_i65m2"]
+[sub_resource type="Resource" id="Resource_7g8n8"]
 resource_local_to_scene = true
 script = ExtResource("4_q3a27")
 size = Vector3i(1, 1, 1)
@@ -43,13 +43,13 @@ data = PackedInt64Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 
 [sub_resource type="Resource" id="Resource_q8fwt"]
 script = ExtResource("10_rs32o")
-materials = [ExtResource("6_pobnm"), ExtResource("7_31b5m"), ExtResource("8_5qxp1"), ExtResource("9_t7035")]
+materials = Array[Material]([ExtResource("6_pobnm"), ExtResource("7_31b5m"), ExtResource("8_5qxp1"), ExtResource("9_t7035")])
 voxel_base_size = 1.0
 mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
 
-[sub_resource type="Resource" id="Resource_s3kkn"]
+[sub_resource type="Resource" id="Resource_rbye3"]
 resource_local_to_scene = true
 script = ExtResource("4_q3a27")
 size = Vector3i(4, 4, 4)
@@ -94,32 +94,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -1)
 
 [node name="VoxelInstance3D" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 1.86162, 0, 0.507553)
-voxel_data = SubResource("Resource_3hsp2")
+voxel_data = SubResource("Resource_6puus")
 generate_collision_sibling = 1
 
 [node name="VoxelInstance3D2" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866025, 0.19665, 4.76837e-07, -4.29504)
-voxel_data = SubResource("Resource_1muqo")
+voxel_data = SubResource("Resource_2g5g0")
 generate_collision_sibling = 3
 
 [node name="VoxelInstance3D3" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0, 0, -10)
-voxel_data = SubResource("Resource_x42ii")
+voxel_data = SubResource("Resource_ro31o")
 generate_collision_sibling = 3
 
 [node name="VoxelInstance3D4" parent="Basic Tests/UV_COLTest" instance=ExtResource("2_1qj2a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.38832)
-voxel_data = SubResource("Resource_i65m2")
+voxel_data = SubResource("Resource_7g8n8")
 
 [node name="BigChunk" type="StaticBody3D" parent="Basic Tests"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -12)
 
 [node name="VoxelInstance3D4" parent="Basic Tests/BigChunk" instance=ExtResource("2_1qj2a")]
 configuration = SubResource("Resource_q8fwt")
-voxel_data = SubResource("Resource_s3kkn")
+voxel_data = SubResource("Resource_rbye3")
 generate_collision_sibling = 3
 
-[node name="Sphere" type="RigidDynamicBody3D" parent="."]
+[node name="Sphere" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.36718, 1.38425, -1.50251)
 mass = 10.0
 physics_material_override = SubResource("PhysicsMaterial_dqaby")

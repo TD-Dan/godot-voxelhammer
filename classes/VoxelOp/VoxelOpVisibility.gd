@@ -12,7 +12,7 @@ func _init():
 # This code is potentially executed in another thread!
 func run_operation():
 	if cancel: return
-	if voxel_instance.voxel_data.data_mutex.try_lock() == OK:
+	if voxel_instance.voxel_data.data_mutex.try_lock():
 		calculate_visibility(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size)
 		if cancel: return
 		voxel_instance.voxel_data.data_mutex.unlock()
