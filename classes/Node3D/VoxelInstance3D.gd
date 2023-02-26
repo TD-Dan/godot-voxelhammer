@@ -101,6 +101,7 @@ var _debug_mesh_color : Color = Color(0,0,0):
 			_update_debug_mesh()
 
 
+var current_thread : Thread = null
 
 var pending_operations = []
 var current_operation : VoxelOperation = null
@@ -108,6 +109,8 @@ var ready_operations = []
 
 func _ready():
 	#print("VoxelNode: _ready")
+	
+	current_thread = null
 	
 	# Connect to VoxelHammer autoload
 	var vh = get_node_or_null("/root/VoxelHammer")
@@ -227,7 +230,6 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 	
 	_advance_operation_stack()
 
-var current_thread : Thread
 
 func _advance_operation_stack():
 	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
@@ -245,14 +247,15 @@ func _advance_operation_stack():
 					var delta_time_us = Time.get_ticks_usec() - run_start_us
 					print("%s: finished \t\t%s in \t\t%s seconds" % [self, current_operation, delta_time_us/1000000.0])
 				VoxelConfiguration.THREAD_MODE.SIMPLE:
-					var thread = Thread.new()
-					thread.start(_run_op_thread.bind(current_operation))
+					current_thread = Thread.new()
+					current_thread.start(_run_op_thread.bind(current_operation))
 				VoxelConfiguration.THREAD_MODE.TASKSERVER:
 					pass
 					# TODO use TaskServer if available
 		else:
 			print("no current op")
 
+# Run operation in local simple thread mode
 func _run_op_thread(op : VoxelOperation):
 	#print("[Thread:%s]: running operation ..." % OS.get_thread_caller_id())
 	var run_start_us = Time.get_ticks_usec()
@@ -271,6 +274,10 @@ func on_work_is_ready(work_item):
 	
 	pending_operations.erase(work_item)
 	ready_operations.push_back(work_item)
+	
+	if current_thread:
+		current_thread.wait_to_finish()
+		current_thread = null
 
 
 func _update_debug_mesh():
