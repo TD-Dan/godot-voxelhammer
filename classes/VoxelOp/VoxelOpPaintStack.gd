@@ -24,18 +24,18 @@ func execute(thread_cache : Dictionary):
 func finalize():
 	if !mat_buffer or !smooth_buffer:
 		push_error("mat_buffer or smooth_buffer missing!")
-	voxel_data.material = mat_buffer
-	voxel_data.smooth = smooth_buffer
-	voxel_data.blend_buffer = blend_buffer
+	voxel_instance.voxel_data.material = mat_buffer
+	voxel_instance.voxel_data.smooth = smooth_buffer
+	voxel_instance.voxel_data.blend_buffer = blend_buffer
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
 func do_paint_stack():
 	#print("Applying Voxel Paint stack...")
 	
-	var sx :int = voxel_data.voxel_count.x
-	var sy :int = voxel_data.voxel_count.y
-	var sz :int = voxel_data.voxel_count.z
+	var sx :int = voxel_instance.voxel_data.voxel_count.x
+	var sy :int = voxel_instance.voxel_data.voxel_count.y
+	var sz :int = voxel_instance.voxel_data.voxel_count.z
 	
 	for op in paint_stack.operation_stack:
 		if op.active:
