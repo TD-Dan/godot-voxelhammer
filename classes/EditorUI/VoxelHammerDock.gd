@@ -66,10 +66,10 @@ func _update_selected_info_text():
 		if selection.voxel_data:
 			vox_count = selection.voxel_data.get_voxel_count()
 		selected_info_more.text = "Voxel count: %s" % vox_count
-		if selection.visibility_count != null:
+		if "visibility_count" in selection:
 			selected_info_more.text += ", Visible: %s" % selection.visibility_count
-			
-		if selection.mesh_surfaces_count != null:
+		
+		if "mesh_surfaces_count" in selection:
 			selected_info_more.text += ", Surfaces-Faces: %s-%s" % [selection.mesh_surfaces_count, selection.mesh_faces_count]
 	
 	else:
@@ -82,7 +82,6 @@ func _ready():
 	# TODO: enable
 	#paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
 	paint_stack_editor.editor_interface = editor_interface
-
 
 
 func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):

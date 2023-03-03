@@ -77,7 +77,7 @@ enum COLLISION_MODE{
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
-@onready var mesh_child : MeshInstance3D  = $MeshInstance3D
+var mesh_child : MeshInstance3D
 
 var mesh_surfaces_count = null
 var mesh_faces_count = null
@@ -109,6 +109,14 @@ var ready_operations = []
 
 func _ready():
 	#print("VoxelNode: _ready")
+	mesh_child = get_node_or_null("MeshInstance3D")
+	if not mesh_child:
+		mesh_child = MeshInstance3D.new()
+		mesh_child.name = "MeshInstance3D"
+		add_child(mesh_child)
+		# if in editor update owner to view it scenetree and enable selection of this object
+		if Engine.is_editor_hint():
+			mesh_child.owner = get_tree().edited_scene_root
 	
 	current_thread = null
 	
@@ -325,7 +333,7 @@ func _update_debug_mesh():
 
 func _update_collision_sibling():
 	if not is_inside_tree():
-		print("Not inside tree: do nothing.")
+		#print("Not inside tree: do nothing.")
 		return
 	if not generate_collision_sibling:
 		if _col_sibling:
@@ -338,9 +346,15 @@ func _update_collision_sibling():
 					push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node. Set to NONE.")
 					generate_collision_sibling = COLLISION_MODE.NONE
 					return
-			_col_sibling = CollisionShape3D.new()
-			print("%s: Adding Collision sibling %s" % [self, _col_sibling])
-			get_parent().call_deferred("add_child",_col_sibling)
+			_col_sibling = get_parent().get_node_or_null("collision_sibling_for_VoxelInstance3D")
+			if _col_sibling:
+				print("Found collision sibling from parent")
+				_col_sibling = get_parent().get_node("collision_sibling_for_VoxelInstance3D")
+			else:
+				_col_sibling = CollisionShape3D.new()
+				_col_sibling.name = "collision_sibling_for_VoxelInstance3D"
+				print("%s: Adding Collision sibling %s" % [self, _col_sibling])
+				get_parent().call_deferred("add_child",_col_sibling)
 		
 		# if in editor update owner to view in scenetree
 		if Engine.is_editor_hint():
