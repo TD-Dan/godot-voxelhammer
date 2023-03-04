@@ -9,3 +9,4 @@ metallic_specular = 0.16
 uv1_scale = Vector3(0.063, 0.063, 0.063)
 uv1_triplanar = true
 texture_filter = 2
+grow_amount = 0.256
