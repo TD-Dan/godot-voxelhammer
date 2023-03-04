@@ -346,13 +346,13 @@ func _update_collision_sibling():
 					push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node. Set to NONE.")
 					generate_collision_sibling = COLLISION_MODE.NONE
 					return
-			_col_sibling = get_parent().get_node_or_null("collision_sibling_for_VoxelInstance3D")
+			_col_sibling = get_parent().get_node_or_null("VoxelShape3D")
 			if _col_sibling:
 				print("Found collision sibling from parent")
-				_col_sibling = get_parent().get_node("collision_sibling_for_VoxelInstance3D")
+				_col_sibling = get_parent().get_node("VoxelShape3D")
 			else:
 				_col_sibling = CollisionShape3D.new()
-				_col_sibling.name = "collision_sibling_for_VoxelInstance3D"
+				_col_sibling.name = "VoxelShape3D"
 				print("%s: Adding Collision sibling %s" % [self, _col_sibling])
 				get_parent().call_deferred("add_child",_col_sibling)
 		
