@@ -17,6 +17,9 @@ var editor_interface : EditorInterface
 @onready var button_paint = $Panel/VBoxContainer/VoxelEditTools/ButtonPaint
 var mousemode_paint = false
 
+@onready var paint_marker_scene = preload("res://addons/TallDwarf/VoxelHammer/res/paint_marker.tscn")
+var paint_marker : Node3D
+
 var selection = null:
 	set(nv):
 		#print("VoxelHammerDock: setting selection")
@@ -82,6 +85,8 @@ func _ready():
 	# TODO: enable
 	#paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
 	paint_stack_editor.editor_interface = editor_interface
+	
+	paint_marker = paint_marker_scene.instantiate()
 
 
 func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
@@ -97,10 +102,10 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 			"InputEventMouseButton":
 				var event_mb : InputEventMouseButton = event
 
-				# Need to manually pick in tool mode and VoxelInstnce picking logic not running
+				# Need to manually pick in tool mode and VoxelInstance picking logic not running
 
-				if selection and event_mb.button_index == 1:
-					print("%s: got input %s" % [self,str(event)])
+				if selection and event_mb.button_index == 1 and event_mb.is_pressed():
+					#print("%s: got input %s" % [self,str(event)])
 					var mouse_pos = event.position
 					var camera = viewport_camera
 					
@@ -115,13 +120,21 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 					print(results)
 					if results.size() > 0:
 						var pos : Vector3 = selection.to_local(results["position"])
-						print(pos)
 						var norm = results["normal"]
-						print(norm)
-						print(pos.floor())
+						#print(norm)
+						#print(pos.floor())
 						var mat = voxel_edit_material.value
-						selection.set_voxel(pos.floor(), mat)
-						print("here")
+						
+						if mat == 0:
+							pos = (pos - norm/2).floor()
+						else:
+							pos = (pos + norm/2).floor()
+						
+						print(pos)
+						
+						paint_marker.global_position = selection.to_global(pos)
+						
+						selection.set_voxel(pos, mat)
 						selection.remesh()
 					return true
 	return false
@@ -163,6 +176,14 @@ func _on_button_fill_pressed():
 
 func _on_button_paint_toggled(button_pressed):
 	mousemode_paint = button_pressed
+	
+	var scene_root = editor_interface.get_edited_scene_root()
+	if mousemode_paint:
+		scene_root.add_child(paint_marker)
+		#paint_marker.owner = scene_root
+	else:
+		scene_root.remove_child(paint_marker)
+		#paint_marker.owner = null
 
 
 func _on_button_mesh_pressed():
@@ -182,7 +203,8 @@ func _on_add_vox_instance_pressed():
 		new_parent = sel[0]
 	
 	if new_parent:
-		var new_vox = load("res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.tscn").instantiate()
+		var new_vox = VoxelInstance3D.new()
+		new_vox.name = "VoxelInstance3D"
 		new_parent.add_child(new_vox)
 		new_vox.owner = new_owner
 
