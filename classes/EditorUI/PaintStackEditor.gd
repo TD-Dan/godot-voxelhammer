@@ -108,9 +108,9 @@ func set_item_data(item, paint_op, index):
 	if paint_op is PaintOpGradientVector:
 		opname = "GradientVector"
 		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
-	if paint_op is PaintOpSimplexNoise:
-		opname = "Simplex Noise"
-		spec_info = "%s, %s, %s, %s " % [paint_op.lucanarity, paint_op.octaves, paint_op.period, paint_op.persistence]
+	if paint_op is PaintOpNoise:
+		opname = "Noise"
+		spec_info = " "
 	
 	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, smooth, spec_info])
 	
@@ -147,7 +147,7 @@ func _on_add_popup_selection(index):
 		2: # GradientVector
 			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
 		3: # Simplex noise
-			paint_op = PaintOpSimplexNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
+			paint_op = PaintOpNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
 	
 	if paint_op:
 		paint_stack.add_paint_operation(paint_op)

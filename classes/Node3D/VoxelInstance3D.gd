@@ -78,6 +78,8 @@ enum COLLISION_MODE{
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
+var smooth_buffer : PackedByteArray = PackedByteArray()
+
 var mesh_child : MeshInstance3D
 
 var mesh_surfaces_count = null

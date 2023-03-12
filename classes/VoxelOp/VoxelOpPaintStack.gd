@@ -5,6 +5,10 @@ class_name VoxelOpPaintStack
 var paint_stack
 var position_offset
 
+
+var blend_buffer : PackedFloat32Array = PackedFloat32Array()
+var smooth_buffer : PackedByteArray = PackedByteArray()
+
 func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
 	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+10)
 	self.paint_stack = paint_stack
@@ -15,21 +19,26 @@ func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
 func run_operation():
 	#print("!!! VoxelOpPaintStack executing!")
 	if voxel_instance.voxel_data.data_mutex.try_lock():
-		do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.blend, voxel_instance.voxel_data.smooth,\
-						voxel_instance.voxel_data.size, paint_stack, position_offset)
+		do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, paint_stack, position_offset)
+		
 		voxel_instance.voxel_data.data_mutex.unlock()
+		# voxel_instance.smooth_buffer = smooth_buffer # No need to save as nobody else uses this buffer
+		voxel_instance.smooth_buffer = smooth_buffer
 		voxel_instance.voxel_data.call_deferred("notify_data_changed")
 	else:
 		push_warning("VoxelOpFill: Can't get lock on voxel data!")
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func do_paint_stack(data : PackedInt32Array, blend : PackedFloat32Array, smooth : PackedInt32Array, size : Vector3i, value : int, start = null, end = null):
+func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3):
 	print("Applying Voxel Paint stack...")
 	
 	var sx :int = size.x
 	var sy :int = size.y
 	var sz :int = size.z
+	
+	blend_buffer.resize(data.size())
+	smooth_buffer.resize(data.size())
 	
 	for op in paint_stack.operation_stack:
 		if op.active:
@@ -99,7 +108,7 @@ func do_paint_stack(data : PackedInt32Array, blend : PackedFloat32Array, smooth 
 							dot = 1 - dot
 							blend_change = dot
 						
-						if op is PaintOpSimplexNoise:
+						if op is PaintOpNoise:
 							cull_test = true
 							blend_change = (op.noise.get_noise_3d(x+position_offset.x, y+position_offset.y, z+position_offset.z) + 1.0)
 						
@@ -131,19 +140,19 @@ func do_paint_stack(data : PackedInt32Array, blend : PackedFloat32Array, smooth 
 							if blend_buffer[x + y*sx + z*sx*sy] and blend_buffer[x + y*sx + z*sx*sy] >= 1:
 								match op.paint_mode:
 									VoxelPaintStack.PAINT_MODE.NORMAL:
-										mat_buffer[x + y*sx + z*sx*sy] = op.material
-										smooth_buffer[x + y*sx + z*sx*sy] = op.smooth
-									VoxelPaintStack.PAINT_MODE.REPLACE:
-										if mat_buffer[x + y*sx + z*sx*sy]:
-											mat_buffer[x + y*sx + z*sx*sy] = op.material
-											smooth_buffer[x + y*sx + z*sx*sy] = op.smooth
-									VoxelPaintStack.PAINT_MODE.ADD:
-										if not mat_buffer[x + y*sx + z*sx*sy]:
-											mat_buffer[x + y*sx + z*sx*sy] = op.material
-											smooth_buffer[x + y*sx + z*sx*sy] = op.smooth
+										data[x + y*sx + z*sx*sy] = op.material
+										smooth_buffer[x + y*sx + z*sx*sy] = int(op.smooth)
+									VoxelPaintStack.PAINT_MODE.REPLACE: # draw only if voxel already exists
+										if data[x + y*sx + z*sx*sy]:
+											data[x + y*sx + z*sx*sy] = op.material
+											smooth_buffer[x + y*sx + z*sx*sy] = int(op.smooth)
+									VoxelPaintStack.PAINT_MODE.ADD: # draw only if voxel is empty
+										if not data[x + y*sx + z*sx*sy]:
+											data[x + y*sx + z*sx*sy] = op.material
+											smooth_buffer[x + y*sx + z*sx*sy] = int(op.smooth)
 									VoxelPaintStack.PAINT_MODE.ERASE:
-										if mat_buffer[x + y*sx + z*sx*sy]:
-											mat_buffer[x + y*sx + z*sx*sy] = 0
+										if data[x + y*sx + z*sx*sy]:
+											data[x + y*sx + z*sx*sy] = 0
 									VoxelPaintStack.PAINT_MODE.NONE:
 										pass
 
