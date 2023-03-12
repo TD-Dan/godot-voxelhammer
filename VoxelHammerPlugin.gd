@@ -12,6 +12,7 @@ func _enter_tree():
 	add_custom_type("VoxelData", "Resource", preload("./classes/Resource/VoxelData.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelInstance3D", "Node3D", preload("./classes/Node3D/VoxelInstance3D.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelBody3D", "StaticBody3D", preload("./classes/Node3D/VoxelBody3D.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("VoxelPaintStack", "Resource", preload("./classes/PaintOp/VoxelPaintStack.gd"), preload("./res/icon_vh.png"))
 	name = "VoxelHammerPlugin"
 	
 	ed_sel = get_editor_interface().get_selection()
@@ -31,7 +32,7 @@ func _exit_tree():
 	remove_custom_type("VoxelConfiguration")
 	remove_custom_type("VoxelData")
 	remove_custom_type("VoxelInstance3D")
-	#remove_custom_type("VoxelPaintStack")
+	remove_custom_type("VoxelPaintStack")
 	#remove_custom_type("VoxelTerrain")
 	#remove_custom_type("VoxelThing")
 

@@ -53,6 +53,7 @@ func _ready():
 	tree.set_column_custom_minimum_width(5,7)
 	
 	tree_root = tree.create_item()
+	tree.connect("button_clicked", _on_Tree_button_pressed)
 	
 	var add_popup = add_button.get_popup()
 	add_popup.connect("index_pressed", _on_add_popup_selection)
@@ -155,8 +156,8 @@ func _on_add_popup_selection(index):
 	commit_tree()
 
 
-func _on_Tree_button_pressed(item, column, id):
-	#print("Tree: button pressed")
+func _on_Tree_button_pressed(item, column, id, mouse_button_index):
+	print("Tree: button pressed")
 	var paint_op : PaintOperation = item.get_metadata(0)
 	var index = item.get_metadata(1)
 	if column == 1 and Engine.is_editor_hint() and editor_interface: # edit in inspector

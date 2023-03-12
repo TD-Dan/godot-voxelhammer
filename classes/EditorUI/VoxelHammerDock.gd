@@ -82,8 +82,7 @@ func _update_selected_info_text():
 
 func _ready():
 	selected_container.visible = false
-	# TODO: enable
-	#paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
+	paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
 	paint_stack_editor.editor_interface = editor_interface
 	
 	paint_marker = paint_marker_scene.instantiate()

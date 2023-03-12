@@ -57,6 +57,7 @@ signal mesh_ready
 		if paint_stack:
 			if voxel_data:
 				voxel_data.clear()
+				push_voxel_operation(VoxelOpPaintStack.new(paint_stack, global_position))
 
 
 var _col_sibling # only one editing this value is _update_collision_sibling!

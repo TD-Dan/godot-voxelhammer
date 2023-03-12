@@ -2,9 +2,6 @@ extends VoxelOperation
 
 class_name VoxelOpPaintStack
 
-var mat_buffer
-var smooth_buffer
-var blend_buffer
 var paint_stack
 var position_offset
 
@@ -15,27 +12,24 @@ func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
 
 
 # This code is potentially executed in another thread!
-func execute(thread_cache : Dictionary):
+func run_operation():
 	#print("!!! VoxelOpPaintStack executing!")
-	do_paint_stack()
-
-
-# This code will be executed in the main thread so access to voxel_node is ok
-func finalize():
-	if !mat_buffer or !smooth_buffer:
-		push_error("mat_buffer or smooth_buffer missing!")
-	voxel_instance.voxel_data.material = mat_buffer
-	voxel_instance.voxel_data.smooth = smooth_buffer
-	voxel_instance.voxel_data.blend_buffer = blend_buffer
+	if voxel_instance.voxel_data.data_mutex.try_lock():
+		do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.blend, voxel_instance.voxel_data.smooth,\
+						voxel_instance.voxel_data.size, paint_stack, position_offset)
+		voxel_instance.voxel_data.data_mutex.unlock()
+		voxel_instance.voxel_data.call_deferred("notify_data_changed")
+	else:
+		push_warning("VoxelOpFill: Can't get lock on voxel data!")
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func do_paint_stack():
-	#print("Applying Voxel Paint stack...")
+func do_paint_stack(data : PackedInt32Array, blend : PackedFloat32Array, smooth : PackedInt32Array, size : Vector3i, value : int, start = null, end = null):
+	print("Applying Voxel Paint stack...")
 	
-	var sx :int = voxel_instance.voxel_data.voxel_count.x
-	var sy :int = voxel_instance.voxel_data.voxel_count.y
-	var sz :int = voxel_instance.voxel_data.voxel_count.z
+	var sx :int = size.x
+	var sy :int = size.y
+	var sz :int = size.z
 	
 	for op in paint_stack.operation_stack:
 		if op.active:
