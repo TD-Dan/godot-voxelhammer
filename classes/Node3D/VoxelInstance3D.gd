@@ -203,6 +203,7 @@ func set_voxel(pos : Vector3i, value : int) -> bool:
 			print("%s: Trying to set voxel at %s wich is out of bounds of size %s" % [self, pos, voxel_data.size])
 	else:
 		voxel_data.data[voxel_data.vector3i_to_index(pos)] = value
+		voxel_data.notify_data_changed()
 		ret = true
 	
 	voxel_data.data_mutex.unlock()
