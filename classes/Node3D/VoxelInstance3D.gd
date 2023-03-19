@@ -282,7 +282,7 @@ func _run_op_thread(op : VoxelOperation):
 	current_operation = null
 
 func on_work_is_ready(work_item):
-	#print("!!! VoxelNode got work item %s back!" % work_item.ticket)
+	print("!!! VoxelNode got work item %s back!" % work_item.ticket)
 	
 	pending_operations.erase(work_item)
 	ready_operations.push_back(work_item)
@@ -408,6 +408,7 @@ func _on_voxel_configuration_changed(what):
 	_on_voxels_changed()
 
 func _on_voxels_changed():
+	print("VoxelInstance3D: _on_voxels_changed")
 	if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
 		print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)

@@ -22,9 +22,9 @@ func _process(delta):
 func _on_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.is_pressed():
 		if paint_mode:
-			#print("Got "+str(event)+ " " + str(position) + " " + str(normal))
-			var pos : Vector3 = position#to_local(position)
-			var norm = normal #transform * normal
+			print("Got "+str(event)+ " " + str(position) + " " + str(normal))
+			var pos : Vector3 = to_local(position)
+			var norm = (transform * normal).normalize()
 			var mat = -1
 			
 			if event.button_index == 1:
@@ -34,10 +34,8 @@ func _on_input_event(camera, event, position, normal, shape_idx):
 				pos = (pos - norm/2).floor()
 				mat = 0
 			
-			print(pos)
-			print(norm)
+			print("Localised position: " + str(pos) + ", normal:" + str(norm))
 			
 			if mat >= 0:
 				print("setting")
 				voxel_instance.set_voxel(pos, mat)
-				voxel_instance.remesh()
