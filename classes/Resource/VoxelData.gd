@@ -22,23 +22,25 @@ signal voxel_data_changed
 		
 		size = nv
 		
+		data_mutex.lock()
 		data.resize(get_voxel_count())
+		data_mutex.unlock()
 	
 		clear()
 
 
-# Voxel data, cannot be directly modified, use duplicate buffers and replace whole data as whole or use set_voxel()
+# Voxel data, get is unsafe for threading without ensuring single access by user
 @export var data : PackedInt64Array = PackedInt64Array():
 	set(nv):
-		_data_mutex.lock()
+		data_mutex.lock()
 		data = nv
-		_data_mutex.unlock()
+		data_mutex.unlock()
 		
-		_notify_data_changed()
+		notify_data_changed()
 	get:
-		return data.duplicate()
+		return data # PackedInt64Array(data) # Should make a copy for editing here, but duplication is not working (Might be a Resource related issue)
 
-var _data_mutex = Mutex.new()
+var data_mutex = Mutex.new()
 
 func _to_string():
 	return "[VoxelData:%s]" % get_instance_id()
@@ -58,13 +60,13 @@ func index_to_vector3i(i:int) -> Vector3i: # HOX! Untested!
 
 # Clears all voxel data to zero
 func clear():
-	_data_mutex.lock()
+	data_mutex.lock()
 	data.fill(0)
-	_data_mutex.unlock()
-	_notify_data_changed()
+	data_mutex.unlock()
+	notify_data_changed()
 
 
-func _notify_data_changed():
-	#print("%s: notify_data_changed" % [self])
+func notify_data_changed():
+	print("%s: _notify_data_changed" % [self])
 	emit_signal("voxel_data_changed")
 	notify_property_list_changed()
