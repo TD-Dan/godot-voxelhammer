@@ -33,7 +33,7 @@ func run_operation():
 				mesh_empty = true
 				#construct_mesh_fast(voxel_instance.voxel_data.data, voxel_instance.vis_buffer, voxel_instance.voxel_data.size)
 			_:
-				push_warning("VoxelOpCreateMesh: mesh mode unimplented -> cancelling")
+				call_deferred("push_warning", "VoxelOpCreateMesh: mesh mode unimplented -> cancelling")
 				mesh_empty = true
 		
 	

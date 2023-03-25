@@ -225,14 +225,14 @@ func push_voxel_operation(vox_op : VoxelOperation):
 	call_deferred("_deferred_push_voxel_op", vox_op)
 
 func _deferred_push_voxel_op(vox_op : VoxelOperation):
-	# Remove all higher state calculations from pending operations, as they are now made invalid
-	if current_operation and current_operation.calculation_level > vox_op.calculation_level:
-		print("removing higher current op: %s" % str(current_operation))
+	# Remove all higher and equal state calculations from pending operations, as they are now made invalid
+	if current_operation and current_operation.calculation_level >= vox_op.calculation_level:
+		print("removing higher or equal current op: %s" % str(current_operation))
 		current_operation.cancel = true
 		current_operation = null
 	for op in pending_operations:
-		if op.calculation_level > vox_op.calculation_level:
-			print("removing higher op: %s" % str(op))
+		if op.calculation_level >= vox_op.calculation_level:
+			print("removing higher or equal op: %s" % str(op))
 			op.cancel = true
 			pending_operations.erase(op)
 	

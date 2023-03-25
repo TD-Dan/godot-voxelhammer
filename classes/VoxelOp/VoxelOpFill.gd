@@ -23,7 +23,7 @@ func run_operation():
 		voxel_instance.voxel_data.data_mutex.unlock()
 		voxel_instance.voxel_data.call_deferred("notify_data_changed")
 	else:
-		push_warning("VoxelOpFill: Can't get lock on voxel data!")
+		call_deferred("push_warning", "VoxelOpFill: Can't get lock on voxel data!")
 
 # This code is potentially executed in another thread!
 func fill(data : PackedInt64Array, size : Vector3i, value : int, start = null, end = null):

@@ -29,7 +29,7 @@ func _init(name:String, calculation_level:CALCULATION_LEVEL):
 
 # Virtual
 func run_operation():
-	push_error("'run_operation()' not implemented!")
+	call_deferred("push_error", "'run_operation()' not implemented!")
 
 func _to_string():
 	return "[%s:%s]" % [name,get_instance_id()]
