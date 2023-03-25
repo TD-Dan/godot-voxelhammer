@@ -34,9 +34,9 @@ signal mesh_ready
 		
 		# TODO: force redraw of mesh
 
-@export var voxel_data : Resource = VoxelData.new(): # : VoxelData
+@export var voxel_data : Resource = VoxelData.new(1): # : VoxelData
 	set(nv):
-		#print("_set_voxel_data")
+		print("%s: _set_voxel_data" % self)
 		
 		# Disconnect from previous voxel_data
 		if voxel_data:
@@ -111,7 +111,7 @@ var current_operation : VoxelOperation = null
 var ready_operations = []
 
 func _ready():
-	#print("VoxelNode: _ready")
+	#print("VoxelInstance3D: _ready")
 	mesh_child = get_node_or_null("VoxelMeshInstance3D")
 	if not mesh_child:
 		mesh_child = MeshInstance3D.new()
@@ -145,7 +145,7 @@ func _ready():
 	# Calculate Visibility (which updates mesh and collision sibling) 
 	remesh()
 	
-	#print("VoxelNode: _ready is done")
+	#print("VoxelInstance3D: _ready is done")
 
 func _enter_tree():
 	_update_collision_sibling() # !important! needs to be updated incase we are inside editor
