@@ -16,7 +16,7 @@ mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
 
-[sub_resource type="Resource" id="Resource_meum3"]
+[sub_resource type="Resource" id="Resource_2e20c"]
 resource_local_to_scene = true
 script = ExtResource("4_01wob")
 size = Vector3i(32, 32, 32)
@@ -28,5 +28,5 @@ data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 
 [node name="VoxelInstance3D" parent="StaticBody3D" instance=ExtResource("1_rg60v")]
 configuration = SubResource("Resource_fm60e")
-voxel_data = SubResource("Resource_meum3")
+voxel_data = SubResource("Resource_2e20c")
 generate_collision_sibling = 1

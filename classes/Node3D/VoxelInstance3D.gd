@@ -112,14 +112,15 @@ var ready_operations = []
 
 func _ready():
 	#print("VoxelNode: _ready")
-	mesh_child = get_node_or_null("MeshInstance3D")
+	mesh_child = get_node_or_null("VoxelMeshInstance3D")
 	if not mesh_child:
 		mesh_child = MeshInstance3D.new()
-		mesh_child.name = "MeshInstance3D"
+		mesh_child.name = "VoxelMeshInstance3D"
 		add_child(mesh_child)
-		# if in editor update owner to view it scenetree and enable selection of this object
-		if Engine.is_editor_hint():
-			mesh_child.owner = get_tree().edited_scene_root
+	
+	# if in editor update owner to view it scenetree and enable selection of this object
+	if Engine.is_editor_hint():
+		mesh_child.owner = get_tree().edited_scene_root
 	
 	current_thread = null
 	
