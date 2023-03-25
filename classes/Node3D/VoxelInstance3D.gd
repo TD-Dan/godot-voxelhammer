@@ -151,7 +151,7 @@ func _enter_tree():
 	_update_collision_sibling() # !important! needs to be updated incase we are inside editor
 
 func _exit_tree():
-	print("VoxelInstance3D %s: _exit_tree" % self)
+	#print("VoxelInstance3D %s: _exit_tree" % self)
 	
 	if current_operation:
 		current_operation.cancel = true
@@ -190,7 +190,8 @@ func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal:
 		print("Got from %s: %s @ %s towards %s in %s" % [camera,event,position,normal,shape_idx])
 
 func _to_string():
-	return "[VoxelInstance3D:%s]" % get_instance_id()
+	var idstr : String = str(get_instance_id())
+	return "[VoxelInstance3D..%s]" % idstr.substr(idstr.length()-4)
 
 # Set single voxel. Thread safe. Index safe. return true on succces
 func set_voxel(pos : Vector3i, value : int) -> bool:
@@ -256,9 +257,9 @@ func _advance_operation_stack():
 					#print("%s: running operation (blocking main thread)..." % self)
 					var run_start_us = Time.get_ticks_usec()
 					current_operation.run_operation()
-					current_operation = null
 					var delta_time_us = Time.get_ticks_usec() - run_start_us
-					print("%s: finished \t\t%s in \t\t%s seconds" % [self, current_operation, delta_time_us/1000000.0])
+					print("%s: finished \t%s in \t%s seconds" % [self, current_operation, delta_time_us/1000000.0])
+					current_operation = null
 				VoxelConfiguration.THREAD_MODE.SIMPLE:
 					current_thread = Thread.new()
 					current_thread.start(_run_op_thread.bind(current_operation))
@@ -276,10 +277,13 @@ func _run_op_thread(op : VoxelOperation):
 	op.run_operation()
 	
 	var delta_time_us = Time.get_ticks_usec() - run_start_us
+	
+	var idstr = str(OS.get_thread_caller_id())
+	idstr = idstr.substr(idstr.length()-4)
 	if op.cancel:
-		print("[Thread:%s]: CANCELLED \t\t%s in \t\t%s seconds" % [OS.get_thread_caller_id(), op, delta_time_us/1000000.0])
-	else:
-		print("[Thread:%s]: finished \t\t%s in \t\t%s seconds" % [OS.get_thread_caller_id(), op, delta_time_us/1000000.0])
+		print("[Thread..%s]: CANCELLED %s in %s seconds" % [idstr, op, delta_time_us/1000000.0])
+	else:		
+		print("[Thread..%s]: finished %s in %s seconds" % [idstr, op, delta_time_us/1000000.0])
 	current_operation = null
 
 func on_work_is_ready(work_item):
@@ -403,7 +407,7 @@ func _on_show_debug_gizmos_changed(value):
 	_update_collision_sibling() # ! important ! updates editor as owner of _col_sibling
 
 func _on_voxel_configuration_changed(what):
-	print("VoxelNode: _on_voxel_configuration_changed %s" % what)
+	#print("VoxelNode: _on_voxel_configuration_changed %s" % what)
 
 	# Force recalculation of mesh
 	_on_voxels_changed()

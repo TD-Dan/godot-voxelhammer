@@ -10,7 +10,7 @@ var blend_buffer : PackedFloat32Array = PackedFloat32Array()
 var smooth_buffer : PackedByteArray = PackedByteArray()
 
 func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
-	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+10)
+	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
 	self.paint_stack = paint_stack
 	self.position_offset = position_offset
 

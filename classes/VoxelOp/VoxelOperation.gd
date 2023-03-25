@@ -32,4 +32,7 @@ func run_operation():
 	call_deferred("push_error", "'run_operation()' not implemented!")
 
 func _to_string():
-	return "[%s:%s]" % [name,get_instance_id()]
+	var id : String = str(get_instance_id())
+	return "[%s..%s]" % [name,id.substr(id.length()-4)]
+	
+	

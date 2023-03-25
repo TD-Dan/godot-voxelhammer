@@ -12,4 +12,4 @@ materials = Array[Material]([ExtResource("1_cgsr6"), ExtResource("2_6dbqp"), Ext
 voxel_base_size = 1.0
 mesh_mode = 2
 accel_mode = 0
-thread_mode = 1
+thread_mode = 0

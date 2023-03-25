@@ -19,7 +19,7 @@ signal voxel_data_changed
 
 @export var size : Vector3i = Vector3i(8,8,8):
 	set(nv):
-		print("VoxelData set size: %s" % nv)
+		#print("VoxelData set size: %s" % nv)
 		if nv.x <= 0 or nv.y <= 0 or nv.z <= 0:
 			push_error("VoxelData size cannot be zero or negative: %s. -> Ignored" % nv)
 			return
@@ -50,8 +50,8 @@ var data_mutex = Mutex.new()
 
 
 func _init(fill_with = null):
-	print("%s: _init(%s)" % [self,fill_with])
-	print("%s: data size: %s" % [self,data.size()])
+	#print("%s: _init(%s)" % [self,fill_with])
+	#print("%s: data size: %s" % [self,data.size()])
 	if fill_with:
 		clear(fill_with)
 
@@ -87,6 +87,6 @@ func clear(value=0):
 
 
 func notify_data_changed():
-	print("%s: _notify_data_changed" % [self])
+	#print("%s: _notify_data_changed" % [self])
 	emit_signal("voxel_data_changed")
 	notify_property_list_changed()
