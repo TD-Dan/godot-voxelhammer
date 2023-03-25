@@ -32,11 +32,26 @@ signal mesh_ready
 				configuration.connect("voxel_configuration_changed", _on_voxel_configuration_changed)
 				#print("%s: connect %s" % [self,configuration])
 		
-		# TODO: force redraw of mesh
+		_on_voxel_configuration_changed()
+
+func _on_voxel_configuration_changed(what="all"):
+	#print("VoxelNode: _on_voxel_configuration_changed %s" % what)
+	if what == "all" or what == "thread_mode":
+		match configuration.thread_mode:
+			VoxelConfiguration.THREAD_MODE.NONE:
+				worker_thread = null
+			VoxelConfiguration.THREAD_MODE.SIMPLE:
+				if not worker_thread:
+					worker_thread = Thread.new()
+			VoxelConfiguration.THREAD_MODE.TASKSERVER:
+				worker_thread = null
+				# TODO use TaskServer if available
+	# Force recalculation of mesh
+	_on_voxels_changed()
 
 @export var voxel_data : Resource = VoxelData.new(1): # : VoxelData
 	set(nv):
-		print("%s: _set_voxel_data" % self)
+		#print("%s: _set_voxel_data" % self)
 		
 		# Disconnect from previous voxel_data
 		if voxel_data:
@@ -50,6 +65,23 @@ signal mesh_ready
 			if not voxel_data.is_connected("voxel_data_changed", _on_voxels_changed):
 				voxel_data.connect("voxel_data_changed", _on_voxels_changed)
 				#print("%s: connect %s" % [self,voxel_data])
+
+func _on_voxels_changed():
+	print("VoxelInstance3D: _on_voxels_changed")
+	if not my_self_bug_check_hack:
+		# TODO: check if this Godot bug in signal emitting has been fixed
+		print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
+		return
+	
+	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
+	
+	_debug_mesh_color = Color(0.5,0,0)
+
+	emit_signal("data_changed", "voxels")
+
+	# recalculate mesh
+	remesh()
+
 
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
@@ -104,11 +136,11 @@ var _debug_mesh_color : Color = Color(0,0,0):
 			_update_debug_mesh()
 
 
-var current_thread : Thread = null
+var worker_thread : Thread = null
 
 var pending_operations = []
+var PENDING_OPERATIONS_LIMIT = 16
 var current_operation : VoxelOperation = null
-var ready_operations = []
 
 func _ready():
 	#print("VoxelInstance3D: _ready")
@@ -121,8 +153,7 @@ func _ready():
 	# if in editor update owner to view it scenetree and enable selection of this object
 	if Engine.is_editor_hint():
 		mesh_child.owner = get_tree().edited_scene_root
-	
-	current_thread = null
+
 	
 	# Connect to VoxelHammer autoload
 	var vh = get_node_or_null("/root/VoxelHammer")
@@ -142,8 +173,11 @@ func _ready():
 			push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
 			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
+	# Force load configuration
+	_on_voxel_configuration_changed()
+	
 	# Calculate Visibility (which updates mesh and collision sibling) 
-	remesh()
+	#remesh()
 	
 	#print("VoxelInstance3D: _ready is done")
 
@@ -155,10 +189,11 @@ func _exit_tree():
 	
 	if current_operation:
 		current_operation.cancel = true
-	for op in ready_operations:
-		op.cancel = true
 	for op in pending_operations:
 		op.cancel = true
+	
+	if worker_thread and worker_thread.is_started():
+		worker_thread.wait_to_finish()
 	
 	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor
 
@@ -222,21 +257,25 @@ func remesh():
 
 var my_self_bug_check_hack
 func push_voxel_operation(vox_op : VoxelOperation):
-	#print("%s: push_voxel_operation %s" % [self,vox_op])
+	#print("%s: push_voxel_operation %s, pending operations: %s" % [self,vox_op, pending_operations.size()])
 	my_self_bug_check_hack = self
-	call_deferred("_deferred_push_voxel_op", vox_op)
+	if pending_operations.size() < PENDING_OPERATIONS_LIMIT:
+		call_deferred("_deferred_push_voxel_op", vox_op)
+	else:
+		push_error("%s: Too many pending operations (PENDING_OPERATIONS_LIMIT=%s)." % [self,PENDING_OPERATIONS_LIMIT])
 
 func _deferred_push_voxel_op(vox_op : VoxelOperation):
+	# This is problematic: we will never update the whole mesh when cpu limited if we do this
 	# Remove all higher and equal state calculations from pending operations, as they are now made invalid
-	if current_operation and current_operation.calculation_level >= vox_op.calculation_level:
-		print("removing higher or equal current op: %s" % str(current_operation))
-		current_operation.cancel = true
-		current_operation = null
-	for op in pending_operations:
-		if op.calculation_level >= vox_op.calculation_level:
-			print("removing higher or equal op: %s" % str(op))
-			op.cancel = true
-			pending_operations.erase(op)
+#	if current_operation and current_operation.calculation_level >= vox_op.calculation_level:
+#		print("removing higher or equal current op: %s in favor of %s" % [current_operation, vox_op])
+#		current_operation.cancel = true
+#		current_operation = null
+#	for op in pending_operations:
+#		if op.calculation_level >= vox_op.calculation_level:
+#			print("removing higher or equal pending op: %s in favor of %s" % [op, vox_op])
+#			op.cancel = true
+#			pending_operations.erase(op)
 	
 	vox_op.voxel_instance = self
 	
@@ -258,11 +297,13 @@ func _advance_operation_stack():
 					var run_start_us = Time.get_ticks_usec()
 					current_operation.run_operation()
 					var delta_time_us = Time.get_ticks_usec() - run_start_us
-					print("%s: finished \t%s in \t%s seconds" % [self, current_operation, delta_time_us/1000000.0])
+					print("%s: finished %s in %s seconds" % [self, current_operation, delta_time_us/1000000.0])
 					current_operation = null
 				VoxelConfiguration.THREAD_MODE.SIMPLE:
-					current_thread = Thread.new()
-					current_thread.start(_run_op_thread.bind(current_operation))
+					#var run_start_us = Time.get_ticks_usec()
+					worker_thread.start(_run_op_thread.bind(current_operation))
+					#var delta_time_us = Time.get_ticks_usec() - run_start_us
+					#print("%s: thread start took %s seconds" % [self, delta_time_us/1000000.0])
 				VoxelConfiguration.THREAD_MODE.TASKSERVER:
 					pass
 					# TODO use TaskServer if available
@@ -284,17 +325,43 @@ func _run_op_thread(op : VoxelOperation):
 		print("[Thread..%s]: CANCELLED %s in %s seconds" % [idstr, op, delta_time_us/1000000.0])
 	else:		
 		print("[Thread..%s]: finished %s in %s seconds" % [idstr, op, delta_time_us/1000000.0])
+	
+	call_deferred("join_worker_thread")
+
+func join_worker_thread():
+	#print("joining")
+	worker_thread.wait_to_finish()
 	current_operation = null
 
-func on_work_is_ready(work_item):
-	print("!!! VoxelNode got work item %s back!" % work_item.ticket)
+func notify_visibility_calculated():
+	visibility_count = vis_buffer.count(1)
+		
+	#print("%s: visibility calculated: %s visible voxels" % [self,str(visibility_count)])
 	
-	pending_operations.erase(work_item)
-	ready_operations.push_back(work_item)
+	_debug_mesh_color = Color(1,0.5,0)
 	
-	if current_thread:
-		current_thread.wait_to_finish()
-		current_thread = null
+	emit_signal("data_changed", "vis_buffer")
+	
+	# Calculate Mesh
+	call_deferred("push_voxel_operation",VoxelOpCreateMesh.new())
+
+
+func notify_mesh_calculated():
+	
+	_debug_mesh_color = Color(0,0.5,0)
+	
+	mesh_surfaces_count = 0
+	mesh_faces_count = 0
+	if mesh_child.mesh:
+		mesh_surfaces_count = mesh_child.mesh.get_surface_count()
+		mesh_faces_count = mesh_child.mesh.get_faces().size()
+	
+	_debug_mesh_color = Color(0,1.0,0)
+	#print("%s: mesh calculated: %s surfaces, %s faces" % [self, str(mesh_surfaces_count), str(mesh_faces_count)])
+	
+	_update_collision_sibling()
+	
+	emit_signal("data_changed", "mesh")
 
 
 func _update_debug_mesh():
@@ -399,63 +466,10 @@ func _update_collision_sibling():
 		if _col_sibling.shape:
 			print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
 			_debug_mesh_color = Color(0.5,1.0,0.5)
-	
+
+
 func _on_show_debug_gizmos_changed(value):
 	#print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
 	_debug_mesh_visible = value
 	
 	_update_collision_sibling() # ! important ! updates editor as owner of _col_sibling
-
-func _on_voxel_configuration_changed(what):
-	#print("VoxelNode: _on_voxel_configuration_changed %s" % what)
-
-	# Force recalculation of mesh
-	_on_voxels_changed()
-
-func _on_voxels_changed():
-	print("VoxelInstance3D: _on_voxels_changed")
-	if not my_self_bug_check_hack:
-		# TODO: check if this Godot bug in signal emitting has been fixed
-		print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
-		return
-	
-	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
-	
-	_debug_mesh_color = Color(0.5,0,0)
-
-	emit_signal("data_changed", "voxels")
-
-	# recalculate Visibility if no other vox operations pending
-	if not current_operation and pending_operations.is_empty():
-		remesh()
-
-func notify_visibility_calculated():
-	visibility_count = vis_buffer.count(1)
-		
-	print("%s: visibility calculated: %s visible voxels" % [self,str(visibility_count)])
-	
-	_debug_mesh_color = Color(1,0.5,0)
-	
-	emit_signal("data_changed", "vis_buffer")
-	
-	# Calculate Mesh if no other operations pending
-	if not current_operation and pending_operations.is_empty():
-		call_deferred("push_voxel_operation",VoxelOpCreateMesh.new())
-
-
-func notify_mesh_calculated():
-	
-	_debug_mesh_color = Color(0,0.5,0)
-	
-	mesh_surfaces_count = 0
-	mesh_faces_count = 0
-	if mesh_child.mesh:
-		mesh_surfaces_count = mesh_child.mesh.get_surface_count()
-		mesh_faces_count = mesh_child.mesh.get_faces().size()
-	
-	_debug_mesh_color = Color(0,1.0,0)
-	print("%s: mesh calculated: %s surfaces, %s faces" % [self, str(mesh_surfaces_count), str(mesh_faces_count)])
-	
-	_update_collision_sibling()
-	
-	emit_signal("data_changed", "mesh")

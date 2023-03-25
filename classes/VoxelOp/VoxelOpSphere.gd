@@ -25,14 +25,14 @@ func _init(fill_value:int, center : Vector3, radius : float, clear=false, start=
 func run_operation():
 	#print("%s: run_operation on %s" % [self,voxel_instance])
 	if voxel_instance.voxel_data.data_mutex.try_lock():
-		fillsphere(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, new_value, start, end)
+		fillsphere(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, new_value, center, radius, start, end)
 		voxel_instance.voxel_data.data_mutex.unlock()
 		voxel_instance.voxel_data.call_deferred("notify_data_changed")
 	else:
 		call_deferred("push_warning", "VoxelOpFill: Can't get lock on voxel data!")
 
 # This code is potentially executed in another thread!
-func fillsphere(data : PackedInt64Array, size : Vector3i, value : int, start = null, end = null):
+func fillsphere(data : PackedInt64Array, size : Vector3i, value : int, center : Vector3, radius : float, start = null, end = null):
 	#print("Filling with %s ..." % value)
 	
 	var sx :int = size.x
