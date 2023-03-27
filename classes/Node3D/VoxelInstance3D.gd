@@ -106,14 +106,15 @@ enum COLLISION_MODE{
 		_update_collision_sibling()
 
 
+var data_buffer : PackedInt64Array = PackedInt64Array()
+var data_buffer_dimensions : Vector3i = Vector3i()
+var data_buffer_mutex = Mutex.new()
 
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null
 
-var smooth_buffer : PackedByteArray = PackedByteArray()
 
 var mesh_child : MeshInstance3D
-
 var mesh_surfaces_count = null
 var mesh_faces_count = null
 
@@ -181,6 +182,7 @@ func _ready():
 	
 	#print("VoxelInstance3D: _ready is done")
 
+
 func _enter_tree():
 	_update_collision_sibling() # !important! needs to be updated incase we are inside editor
 
@@ -196,6 +198,7 @@ func _exit_tree():
 		worker_thread.wait_to_finish()
 	
 	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor
+
 
 func _notification(what):
 	match what:
@@ -253,18 +256,19 @@ func set_mesh(new_mesh:Mesh):
 
 # Force redraw of mesh
 func remesh():
-	push_voxel_operation(VoxelOpVisibility.new())
+	push_voxel_operation(VoxelOpVisibility.new(), true)
+
 
 var my_self_bug_check_hack
-func push_voxel_operation(vox_op : VoxelOperation):
+func push_voxel_operation(vox_op : VoxelOperation, in_front = false):
 	#print("%s: push_voxel_operation %s, pending operations: %s" % [self,vox_op, pending_operations.size()])
 	my_self_bug_check_hack = self
 	if pending_operations.size() < PENDING_OPERATIONS_LIMIT:
-		call_deferred("_deferred_push_voxel_op", vox_op)
+		call_deferred("_deferred_push_voxel_op", vox_op, in_front)
 	else:
 		push_error("%s: Too many pending operations (PENDING_OPERATIONS_LIMIT=%s)." % [self,PENDING_OPERATIONS_LIMIT])
 
-func _deferred_push_voxel_op(vox_op : VoxelOperation):
+func _deferred_push_voxel_op(vox_op : VoxelOperation, in_front):
 	# This is problematic: we will never update the whole mesh when cpu limited if we do this
 	# Remove all higher and equal state calculations from pending operations, as they are now made invalid
 #	if current_operation and current_operation.calculation_level >= vox_op.calculation_level:
@@ -279,7 +283,10 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation):
 	
 	vox_op.voxel_instance = self
 	
-	pending_operations.push_back(vox_op)
+	if in_front:
+		pending_operations.push_front(vox_op)
+	else:
+		pending_operations.push_back(vox_op)
 	
 	_advance_operation_stack()
 
@@ -314,8 +321,8 @@ func _advance_operation_stack():
 func _run_op_thread(op : VoxelOperation):
 	#print("[Thread:%s]: running operation ..." % OS.get_thread_caller_id())
 	var run_start_us = Time.get_ticks_usec()
-	
-	op.run_operation()
+	if not op.cancel:
+		op.run_operation()
 	
 	var delta_time_us = Time.get_ticks_usec() - run_start_us
 	
@@ -343,7 +350,7 @@ func notify_visibility_calculated():
 	emit_signal("data_changed", "vis_buffer")
 	
 	# Calculate Mesh
-	call_deferred("push_voxel_operation",VoxelOpCreateMesh.new())
+	call_deferred("push_voxel_operation",VoxelOpCreateMesh.new(), true)
 
 
 func notify_mesh_calculated():

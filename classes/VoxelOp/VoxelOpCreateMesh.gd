@@ -1,3 +1,5 @@
+@tool
+
 extends VoxelOperation
 
 
@@ -12,33 +14,42 @@ func _init():
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func run_operation():
-	if cancel: return
-	
+func run_operation():	
 	#print("%s: run_operation on %s" % [self,voxel_instance])
 	#print("!!! VoxelOpCreateMesh executing!")
 	var mesh_empty = false
 	
+	var local_data_buffer
+	var local_vis_buffer
+	var local_buffer_dimensions
+	
 	if voxel_instance.visibility_count == 0:
 		mesh_empty = true
 	else:
+		if voxel_instance.configuration.mesh_mode != VoxelConfiguration.MESH_MODE.NONE:
+			voxel_instance.data_buffer_mutex.lock()
+			local_data_buffer = voxel_instance.data_buffer.duplicate()
+			local_vis_buffer = voxel_instance.vis_buffer.duplicate()
+			local_buffer_dimensions = voxel_instance.voxel_data.size
+			voxel_instance.data_buffer_mutex.unlock()
+		
 		match voxel_instance.configuration.mesh_mode:
 			VoxelConfiguration.MESH_MODE.NONE:
 				mesh_empty = true
 			VoxelConfiguration.MESH_MODE.CUBES:
-				construct_mesh_cubes(voxel_instance.voxel_data.data, voxel_instance.vis_buffer, voxel_instance.voxel_data.size)
+				construct_mesh_cubes(local_data_buffer, local_vis_buffer, local_buffer_dimensions)
 			VoxelConfiguration.MESH_MODE.FACES:
-				construct_mesh_faces(voxel_instance.voxel_data.data, voxel_instance.vis_buffer, voxel_instance.voxel_data.size)
+				construct_mesh_faces(local_data_buffer, local_vis_buffer, local_buffer_dimensions)
 			VoxelConfiguration.MESH_MODE.FAST:
 				mesh_empty = true
-				#construct_mesh_fast(voxel_instance.voxel_data.data, voxel_instance.vis_buffer, voxel_instance.voxel_data.size)
+				#construct_mesh_fast(local_data_buffer, local_vis_buffer, local_buffer_dimensions)
 			_:
 				call_deferred("push_warning", "VoxelOpCreateMesh: mesh mode unimplented -> cancelling")
 				mesh_empty = true
 		
 	
 	if cancel: return
-		
+	
 	if mesh_empty:
 		voxel_instance.call_deferred("set_mesh", null)
 	else:

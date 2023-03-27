@@ -5,39 +5,31 @@ extends VoxelOperation
 class_name VoxelOpFill
 
 var new_value
-var start
-var end
 
 
-func _init(fill_value:int, start=null, end=null):
+func _init(fill_value:int):
 	super("VoxelOpFill", VoxelOperation.CALCULATION_LEVEL.VOXEL)
 	new_value = fill_value
-	start = start
-	end = end
 
 # This code is potentially executed in another thread!
 func run_operation():
 	#print("%s: run_operation on %s" % [self,voxel_instance])
-	if voxel_instance.voxel_data.data_mutex.try_lock():
-		fill(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, new_value, start, end)
-		voxel_instance.voxel_data.data_mutex.unlock()
-		voxel_instance.voxel_data.call_deferred("notify_data_changed")
-	else:
-		call_deferred("push_warning", "VoxelOpFill: Can't get lock on voxel data!")
+	var new_data = PackedInt64Array()
+	new_data.resize(voxel_instance.voxel_data.get_voxel_count())
+	
+	if cancel: return
+	
+	fill(new_data, new_value)
+	
+	if cancel: return
+	
+	voxel_instance.voxel_data.data_mutex.lock()
+	voxel_instance.voxel_data.data = new_data
+	voxel_instance.voxel_data.data_mutex.unlock()
+	voxel_instance.voxel_data.call_deferred("notify_data_changed")
 
 # This code is potentially executed in another thread!
-func fill(data : PackedInt64Array, size : Vector3i, value : int, start = null, end = null):
+func fill(data : PackedInt64Array, value : int):
 	#print("Filling with %s ..." % value)
 	
-	var sx :int = size.x
-	var sy :int = size.y
-	var sz :int = size.z
-	
-	if start != null and end != null:
-		for z in range(sz):
-			for y in range(sy):
-				for x in range(sx):
-					if x >= start.x and x < end.x and y >= start.y and y < end.y and z >= start.z and z < end.z:
-						data[x + y*sx + z*sx*sy] = value
-	else:
-		data.fill(value)
+	data.fill(value)

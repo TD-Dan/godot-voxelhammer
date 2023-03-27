@@ -77,12 +77,18 @@ func index_to_vector3i(i:int) -> Vector3i: # HOX! Untested!
 
 # Clears all voxel data to value
 func clear(value=0):
+	#var run_start_us = Time.get_ticks_usec()
+	
 	data_mutex.lock()
 	var count = get_voxel_count()
 	if data.size() != count:
 		data.resize(count)
 	data.fill(value)
 	data_mutex.unlock()
+	
+	#var delta_time_us = Time.get_ticks_usec() - run_start_us
+	#print("%s: clear took %s seconds" % [self, delta_time_us/1000000.0])
+	
 	notify_data_changed()
 
 
