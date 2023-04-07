@@ -93,10 +93,6 @@ func set_item_data(item, paint_op, index):
 		VoxelPaintStack.PAINT_MODE.NONE:
 			mode = "-"
 	
-	var smooth = "n"
-	if paint_op.smooth:
-		smooth = "y"
-	
 	var opname = "unimplemented"
 	var spec_info = ""
 	if paint_op is PaintOpPlane:
@@ -112,7 +108,7 @@ func set_item_data(item, paint_op, index):
 		opname = "Noise"
 		spec_info = " "
 	
-	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, smooth, spec_info])
+	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, spec_info])
 	
 	
 	item.add_button(1, edit_icon)
@@ -141,13 +137,13 @@ func _on_add_popup_selection(index):
 	
 	match index:
 		0: # Plane
-			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 1)
+			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 1)
 		1: # Gradient
-			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 10)
 		2: # GradientVector
-			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 10)
 		3: # Simplex noise
-			paint_op = PaintOpNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
+			paint_op = PaintOpNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1)
 	
 	if paint_op:
 		paint_stack.add_paint_operation(paint_op)

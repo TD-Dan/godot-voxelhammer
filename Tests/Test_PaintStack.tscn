@@ -19,7 +19,7 @@ mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
 
-[sub_resource type="Resource" id="Resource_ycv38"]
+[sub_resource type="Resource" id="Resource_uo475"]
 resource_local_to_scene = true
 script = ExtResource("7_m6vfb")
 size = Vector3i(16, 16, 16)
@@ -34,7 +34,6 @@ paint_mode = 0
 blend_mode = 0
 blend_amount = 1.0
 material = 2
-smooth = true
 active = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_piumm"]
@@ -48,7 +47,6 @@ paint_mode = 0
 blend_mode = 0
 blend_amount = 0.75
 material = 2
-smooth = true
 active = true
 
 [sub_resource type="Resource" id="Resource_ew5xw"]
@@ -59,5 +57,5 @@ operation_stack = [SubResource("Resource_2j4km"), SubResource("Resource_rvrir")]
 
 [node name="VoxelInstance3D" parent="." instance=ExtResource("1_wc05w")]
 configuration = SubResource("Resource_fm60e")
-voxel_data = SubResource("Resource_ycv38")
+voxel_data = SubResource("Resource_uo475")
 paint_stack = SubResource("Resource_ew5xw")
