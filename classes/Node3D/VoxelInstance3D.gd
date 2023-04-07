@@ -69,10 +69,10 @@ func _on_voxel_configuration_changed(what="all"):
 
 func _on_voxels_changed():
 	#print("VoxelInstance3D: _on_voxels_changed")
-	if not my_self_bug_check_hack:
+	#if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
-		print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
-		return
+	#	print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
+	#	return
 	
 	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
 	
@@ -200,30 +200,39 @@ func _exit_tree():
 
 func _notification(what):
 	match what:
-		NOTIFICATION_PARENTED:
-			var parent = get_parent()
-			if parent.has_signal("input_event"):
-				#print("%s: parented to %s: connecting to input_event" % [self,parent])
-				parent.connect("input_event", _on_input_event)
-		NOTIFICATION_UNPARENTED:
-			var parent = get_parent()
-			if parent.has_signal("input_event"):
-				#print("%s: unparented from %s: disconnecting from input_event" % [self,parent])
-				parent.disconnect("input_event", _on_input_event)
+#		NOTIFICATION_PARENTED:
+#			var parent = get_parent()
+#			if parent.has_signal("input_event"):
+#				#print("%s: parented to %s: connecting to input_event" % [self,parent])
+#				parent.connect("input_event", _on_input_event)
+#		NOTIFICATION_UNPARENTED:
+#			var parent = get_parent()
+#			if parent.has_signal("input_event"):
+#				#print("%s: unparented from %s: disconnecting from input_event" % [self,parent])
+#				parent.disconnect("input_event", _on_input_event)
 		NOTIFICATION_EDITOR_PRE_SAVE:
 			#print("%s: PRE_SAVE")
 			#Exclude children from save file
-			if _col_sibling and _col_sibling.owner:
+			if mesh_child:
+				mesh_child.owner = null
+				#mesh_child.queue_free()
+				#remove_child(mesh_child)
+				#mesh_child = null
+			if _col_sibling:
 				_col_sibling.owner = null
+				#_col_sibling.queue_free()
+				#remove_child(_col_sibling)
+				#_col_sibling = null
 		NOTIFICATION_EDITOR_POST_SAVE:
 			#print("%s: POST_SAVE")
 			# Restore editor view of children
-			if _col_sibling:
-				_update_collision_sibling()
+			remesh()
+			#if _col_sibling:
+			#	_update_collision_sibling()
 
-func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int):
-	if event.get_class() != "InputEventMouseMotion":
-		print("Got from %s: %s @ %s towards %s in %s" % [camera,event,position,normal,shape_idx])
+#func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int):
+#	if event.get_class() != "InputEventMouseMotion":
+#		print("Got from %s: %s @ %s towards %s in %s" % [camera,event,position,normal,shape_idx])
 
 func _to_string():
 	var idstr : String = str(get_instance_id())
@@ -430,12 +439,6 @@ func _update_collision_sibling():
 				print("%s: Adding Collision sibling %s" % [self, _col_sibling])
 				get_parent().call_deferred("add_child",_col_sibling)
 		
-		# if in editor update owner to view in scenetree
-		if Engine.is_editor_hint():
-			if _debug_mesh_visible:
-				_col_sibling.owner = get_tree().edited_scene_root
-			else:
-				_col_sibling.owner = null
 		
 		# generate the collision shape
 		var start_time = Time.get_ticks_usec()
@@ -460,6 +463,10 @@ func _update_collision_sibling():
 			_:
 				push_warning("%s: Unsupported collision mode: %s!" % generate_collision_sibling)
 				
+		# if in editor update owner to view in scenetree
+		if Engine.is_editor_hint():
+			_col_sibling.owner = get_tree().edited_scene_root
+		
 		var delta_time = Time.get_ticks_usec() - start_time
 		if _col_sibling.shape:
 			print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])

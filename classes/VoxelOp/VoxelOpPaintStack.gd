@@ -7,7 +7,6 @@ var position_offset
 
 
 var blend_buffer : PackedFloat32Array = PackedFloat32Array()
-var smooth_buffer : PackedByteArray = PackedByteArray()
 
 func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
 	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
@@ -22,8 +21,6 @@ func run_operation():
 		do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, paint_stack, position_offset)
 		
 		voxel_instance.voxel_data.data_mutex.unlock()
-		# voxel_instance.smooth_buffer = smooth_buffer # No need to save as nobody else uses this buffer
-		voxel_instance.smooth_buffer = smooth_buffer
 		voxel_instance.voxel_data.call_deferred("notify_data_changed")
 	else:
 		push_warning("VoxelOpFill: Can't get lock on voxel data!")
@@ -38,7 +35,6 @@ func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : Voxe
 	var sz :int = size.z
 	
 	blend_buffer.resize(data.size())
-	smooth_buffer.resize(data.size())
 	
 	for op in paint_stack.operation_stack:
 		if op.active:
@@ -141,15 +137,12 @@ func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : Voxe
 								match op.paint_mode:
 									VoxelPaintStack.PAINT_MODE.NORMAL:
 										data[x + y*sx + z*sx*sy] = op.material
-										smooth_buffer[x + y*sx + z*sx*sy] = int(op.smooth)
 									VoxelPaintStack.PAINT_MODE.REPLACE: # draw only if voxel already exists
 										if data[x + y*sx + z*sx*sy]:
 											data[x + y*sx + z*sx*sy] = op.material
-											smooth_buffer[x + y*sx + z*sx*sy] = int(op.smooth)
 									VoxelPaintStack.PAINT_MODE.ADD: # draw only if voxel is empty
 										if not data[x + y*sx + z*sx*sy]:
 											data[x + y*sx + z*sx*sy] = op.material
-											smooth_buffer[x + y*sx + z*sx*sy] = int(op.smooth)
 									VoxelPaintStack.PAINT_MODE.ERASE:
 										if data[x + y*sx + z*sx*sy]:
 											data[x + y*sx + z*sx*sy] = 0

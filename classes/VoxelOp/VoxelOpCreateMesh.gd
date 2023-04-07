@@ -127,6 +127,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						#print("added surface tool %s" % material_at_index)
 						surface_tools[material_at_index] = SurfaceTool.new()
 						surface_tools[material_at_index].begin(Mesh.PRIMITIVE_TRIANGLES)
+						surface_tools[material_at_index].set_smooth_group(-1)
 					var st : SurfaceTool = surface_tools[material_at_index]
 					
 					# TODO: implement as check from configuration materials
@@ -217,6 +218,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 					if not material_at_index in surface_tools:
 						surface_tools[material_at_index] = SurfaceTool.new()
 						surface_tools[material_at_index].begin(Mesh.PRIMITIVE_TRIANGLES)
+						surface_tools[material_at_index].set_smooth_group(-1)
 					var st = surface_tools[material_at_index]
 					
 					# TODO: implement as material level check for smooth group

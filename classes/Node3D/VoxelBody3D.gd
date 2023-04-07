@@ -22,9 +22,9 @@ func _process(delta):
 func _on_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.is_pressed():
 		if paint_mode:
-			print("Got "+str(event)+ " " + str(position) + " " + str(normal))
+			print("%s: got %s %s %s" % [self, str(event), str(position), str(normal)])
 			var pos : Vector3 = to_local(position)
-			var norm = (transform * normal).normalize()
+			var norm = (transform * normal).normalized()
 			var mat = -1
 			
 			if event.button_index == 1:

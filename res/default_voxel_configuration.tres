@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="VoxelConfiguration" load_steps=6 format=3 uid="uid://bvhuwmnl8rsp7"]
+[gd_resource type="Resource" script_class="VoxelConfiguration" load_steps=7 format=3 uid="uid://bvhuwmnl8rsp7"]
 
 [ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/TallDwarf/VoxelHammer/res/mat_error.tres" id="1_cgsr6"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelConfiguration.gd" id="1_xtxim"]
@@ -6,9 +6,19 @@
 [ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres" id="3_ing4u"]
 [ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/TallDwarf/VoxelHammer/res/mat_white.tres" id="4_c0uap"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1o7ye"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0, 0.870588, 0.654902, 0.407843)
+metallic = 1.0
+roughness = 0.0
+refraction_scale = 0.02
+uv1_triplanar = true
+uv2_triplanar = true
+
 [resource]
 script = ExtResource("1_xtxim")
-materials = Array[Material]([ExtResource("1_cgsr6"), ExtResource("2_6dbqp"), ExtResource("3_ing4u"), ExtResource("4_c0uap")])
+materials = Array[Material]([ExtResource("1_cgsr6"), ExtResource("2_6dbqp"), ExtResource("3_ing4u"), ExtResource("4_c0uap"), SubResource("StandardMaterial3D_1o7ye")])
 voxel_base_size = 1.0
 mesh_mode = 2
 accel_mode = 0
