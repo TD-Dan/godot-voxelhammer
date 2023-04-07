@@ -115,7 +115,9 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 			
 			for x in range(sx):
 				
-				if cancel: return
+				if cancel:
+					VoxelHammer.surface_tool_guard_mutex.unlock()
+					return
 		
 				var ci : int = x + y*sx + z*sx*sy
 				material_at_index = data[ci]
@@ -203,7 +205,9 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	
 			for z in range(sz):
 				
-				if cancel: return
+				if cancel: 
+					VoxelHammer.surface_tool_guard_mutex.unlock()
+					return
 				
 				var ci : int = x + y*sx + z*sx*sy
 				var material_at_index = data[ci]
