@@ -9,10 +9,18 @@ extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	for item in VoxelConfiguration.MESH_MODE.keys():
+		%OptionButtonMesh.add_item(item)
+	
+	for item in VoxelConfiguration.THREAD_MODE.keys():
+		%OptionButtonThread.add_item(item)
+	
+	%OptionButtonMesh.selected = VoxelHammer.default_configuration.mesh_mode
+	%OptionButtonThread.selected = VoxelHammer.default_configuration.thread_mode
+
 
 var elapsed = 0.0
-var frame_limit = 1/60
+var frame_limit = 1/120
 var frame_limit_counter = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -32,3 +40,11 @@ func _process(delta):
 		n4.push_voxel_operation(VoxelOpSphere.new(2,Vector3(n4.voxel_data.size)/2.0+Vector3(0.1,0.2,0.3), n4.voxel_data.size.x/2*phase, true))
 		
 		n5.push_voxel_operation(VoxelOpSphere.new(2,Vector3(n5.voxel_data.size)/2.0+Vector3(0.1,0.2,0.3), n5.voxel_data.size.x/2*phase, true))
+
+
+func _on_option_button_mesh_item_selected(index):
+	VoxelHammer.default_configuration.mesh_mode = index
+
+
+func _on_option_button_thread_item_selected(index):
+	VoxelHammer.default_configuration.thread_mode = index
