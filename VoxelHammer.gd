@@ -16,6 +16,8 @@ signal show_debug_gizmos_changed(value)
 var native_rust_worker_script = null
 var native_worker = null
 
+# Guard agains GODOT 4.0 bug on threaded access, see comment on VoxelOpCreateMesh.gd
+var surface_tool_guard_mutex = Mutex.new()
 
 func _enter_tree():
 	pass

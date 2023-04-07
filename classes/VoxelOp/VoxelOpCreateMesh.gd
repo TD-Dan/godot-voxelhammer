@@ -5,6 +5,8 @@ extends VoxelOperation
 
 class_name VoxelOpCreateMesh 
 
+# !!! GODOT 4.0 bugs prevent threaded access to meshes or SurfaceTool in paraller: #73035 #56524 #70325
+
 var mesh_buffer
 var material_table
 
@@ -147,6 +149,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						st.add_vertex(Vector3(cube_vertices[i][0]+x,cube_vertices[i][1]+y,cube_vertices[i][2]+z))
 	
 	# Add all surfaces to mesh
+	
 	var i = 0
 	material_table = {}
 	for key in surface_tools.keys():
@@ -171,6 +174,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	#print("Constructing FACES mesh...")
 	# Creates face mesh from voxel data
 	
+	
 	# Create one SurfaceTool per material
 	var surface_tools = {}
 	
@@ -183,9 +187,15 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	var smooth_group_active = false
 	mesh_buffer = ArrayMesh.new()
 	
+	
+
+	
 	# Loop trough all indices
 	for x in range(sx):
 		for y in range(sy):
+			# Guard this block against paraller access, see GODOT bugs on top of file
+			VoxelHammer.surface_tool_guard_mutex.lock()
+	
 			for z in range(sz):
 				
 				if cancel: return
@@ -211,7 +221,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 					
 					# Reminder to not test:
 					# NO UV:s! Mesh generation is faster without and triplanar texturing makes things so much more easier 
-					# No add_triangle_fan(...): no way to alter vertex oordinates
+					# No add_triangle_fan(...): no way to alter vertex coordinates
 					
 					if x == 0 or not data[ci-1]:
 						for vert in cube_face_front:
@@ -231,6 +241,8 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 					if z == sz-1 or not data[ci+sx*sy]:
 						for vert in cube_face_right:
 							st.add_vertex(Vector3(vert[0]+x,vert[1]+y,vert[2]+z))
+	
+			VoxelHammer.surface_tool_guard_mutex.unlock()
 	
 	# Add all surfaces to mesh
 	var i = 0
