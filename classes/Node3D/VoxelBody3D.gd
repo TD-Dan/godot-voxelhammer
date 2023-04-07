@@ -11,7 +11,7 @@ class_name VoxelBody3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	connect("input_event", _on_input_event)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -39,3 +39,4 @@ func _on_input_event(camera, event, position, normal, shape_idx):
 			if mat >= 0:
 				print("setting")
 				voxel_instance.set_voxel(pos, mat)
+
