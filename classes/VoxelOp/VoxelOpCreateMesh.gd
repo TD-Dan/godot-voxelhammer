@@ -110,6 +110,9 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	# Loop trough all indices (once only)
 	for z in range(sz):
 		for y in range(sy):
+			# Guard SurfaceTool against paraller access, see GODOT bugs on top of file
+			VoxelHammer.surface_tool_guard_mutex.lock()
+			
 			for x in range(sx):
 				
 				if cancel: return
@@ -147,6 +150,8 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						
 						#st.set_normal(Vector3(cube_normals[i][0],cube_normals[i][1],cube_normals[i][2]))
 						st.add_vertex(Vector3(cube_vertices[i][0]+x,cube_vertices[i][1]+y,cube_vertices[i][2]+z))
+			
+			VoxelHammer.surface_tool_guard_mutex.unlock()
 	
 	# Add all surfaces to mesh
 	
@@ -193,7 +198,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	# Loop trough all indices
 	for x in range(sx):
 		for y in range(sy):
-			# Guard this block against paraller access, see GODOT bugs on top of file
+			# Guard SurfaceTool against paraller access, see GODOT bugs on top of file
 			VoxelHammer.surface_tool_guard_mutex.lock()
 	
 			for z in range(sz):
