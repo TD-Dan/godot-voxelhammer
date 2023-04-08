@@ -110,5 +110,17 @@ layout_mode = 2
 toggle_mode = false
 flat = true
 
+[node name="PerformanceLabel" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+text = "calculating performance..."
+autowrap_mode = 3
+
+[node name="PerformanceTimer" type="Timer" parent="HBoxContainer/PerformanceLabel"]
+autostart = true
+
 [connection signal="item_selected" from="HBoxContainer/HFlowContainer/OptionButtonMesh" to="." method="_on_option_button_mesh_item_selected"]
 [connection signal="item_selected" from="HBoxContainer/HFlowContainer/OptionButtonThread" to="." method="_on_option_button_thread_item_selected"]
+[connection signal="timeout" from="HBoxContainer/PerformanceLabel/PerformanceTimer" to="." method="_on_performance_timer_timeout"]
