@@ -146,10 +146,10 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						
 						# TODO: control smooth group from material configuration, note: 0 is not no group (godot bug?), maybe set normal manually when no smoothing for now..
 						#if config_mat[n].smooth = true:
-						if material_at_index == 1:
-							st.set_smooth_group(material_at_index)
-						else:
-							st.set_normal(Vector3(cube_normals[i][0],cube_normals[i][1],cube_normals[i][2]))
+						#if material_at_index == 1:
+						#	st.set_smooth_group(material_at_index)
+						#else:
+						#	st.set_normal(Vector3(cube_normals[i][0],cube_normals[i][1],cube_normals[i][2]))
 						
 						#st.set_normal(Vector3(cube_normals[i][0],cube_normals[i][1],cube_normals[i][2]))
 						st.add_vertex(Vector3(cube_vertices[i][0]+x,cube_vertices[i][1]+y,cube_vertices[i][2]+z))
@@ -195,8 +195,6 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	var smooth_group_active = false
 	mesh_buffer = ArrayMesh.new()
 	
-	
-
 	
 	# Loop trough all indices
 	for x in range(sx):
