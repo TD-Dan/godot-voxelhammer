@@ -104,7 +104,6 @@ enum COLLISION_MODE{
 @export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
 	set(nv):
 		generate_collision_sibling = nv
-		_update_collision_sibling()
 
 
 var data_buffer : PackedInt64Array = PackedInt64Array()
@@ -146,16 +145,7 @@ var current_operation : VoxelOperation = null
 
 func _ready():
 	#print("VoxelInstance3D: _ready")
-	mesh_child = get_node_or_null("VoxelMeshInstance3D")
-	if not mesh_child:
-		mesh_child = MeshInstance3D.new()
-		mesh_child.name = "VoxelMeshInstance3D"
-		add_child(mesh_child)
-	
-	# if in editor update owner to view it scenetree and enable selection of this object
-	if Engine.is_editor_hint():
-		mesh_child.owner = get_tree().edited_scene_root
-
+	_establish_mesh_child()
 	
 	# Connect to VoxelHammer autoload
 	var vh = get_node_or_null("/root/VoxelHammer")
@@ -181,8 +171,21 @@ func _ready():
 	#print("VoxelInstance3D: _ready is done")
 
 
+## Create new or find existing mesh_child object
+func _establish_mesh_child():
+	mesh_child = get_node_or_null("VoxelMeshInstance3D")
+	if not mesh_child:
+		mesh_child = MeshInstance3D.new()
+		mesh_child.name = "VoxelMeshInstance3D"
+		call_deferred("add_child", mesh_child)
+	
+	# if in editor update owner to view it scenetree and enable selection of this object
+	if Engine.is_editor_hint():
+		call_deferred("_set_editor_as_owner", mesh_child)
+
+
 func _enter_tree():
-	_update_collision_sibling() # !important! needs to be updated incase we are inside editor
+	pass#_update_collision_sibling() # !important! needs to be updated incase we are inside editor
 
 func _exit_tree():
 	#print("VoxelInstance3D %s: _exit_tree" % self)
@@ -200,39 +203,22 @@ func _exit_tree():
 
 func _notification(what):
 	match what:
-#		NOTIFICATION_PARENTED:
-#			var parent = get_parent()
-#			if parent.has_signal("input_event"):
-#				#print("%s: parented to %s: connecting to input_event" % [self,parent])
-#				parent.connect("input_event", _on_input_event)
-#		NOTIFICATION_UNPARENTED:
-#			var parent = get_parent()
-#			if parent.has_signal("input_event"):
-#				#print("%s: unparented from %s: disconnecting from input_event" % [self,parent])
-#				parent.disconnect("input_event", _on_input_event)
 		NOTIFICATION_EDITOR_PRE_SAVE:
 			#print("%s: PRE_SAVE")
 			#Exclude children from save file
 			if mesh_child:
 				mesh_child.owner = null
-				#mesh_child.queue_free()
-				#remove_child(mesh_child)
-				#mesh_child = null
+				mesh_child.queue_free()
+				mesh_child = null
 			if _col_sibling:
 				_col_sibling.owner = null
-				#_col_sibling.queue_free()
-				#remove_child(_col_sibling)
-				#_col_sibling = null
+				_col_sibling.queue_free()
+				_col_sibling = null
 		NOTIFICATION_EDITOR_POST_SAVE:
 			#print("%s: POST_SAVE")
-			# Restore editor view of children
+			# Restore editor view of children by recreating them
 			remesh()
-			#if _col_sibling:
-			#	_update_collision_sibling()
 
-#func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int):
-#	if event.get_class() != "InputEventMouseMotion":
-#		print("Got from %s: %s @ %s towards %s in %s" % [camera,event,position,normal,shape_idx])
 
 func _to_string():
 	var idstr : String = str(get_instance_id())
@@ -256,14 +242,13 @@ func set_voxel(pos : Vector3i, value : int) -> bool:
 	voxel_data.data_mutex.unlock()
 	return ret
 
+
 # used by VoxelOpCreateMesh to call_deferred
 func set_mesh(new_mesh:Mesh):
+	_establish_mesh_child()
 	mesh_child.mesh = new_mesh
-	
-	if Engine.is_editor_hint():
-		mesh_child.owner = get_tree().edited_scene_root
-	
 	emit_signal("mesh_ready")
+
 
 # Force redraw of mesh
 func remesh():
@@ -419,29 +404,33 @@ func _update_debug_mesh():
 
 
 func _update_collision_sibling():
+	# Clear previous collision sibling
+	if _col_sibling:
+		_col_sibling.queue_free()
+		_col_sibling = null
+	
+	# Keep tree clean of any leftover nodes
+	#var old_sibling = get_parent().get_node_or_null("VoxelShape3D")
+	#if old_sibling:
+	#	print("Removing previous collision sibling from parent")
+	#	old_sibling.queue_free()
+	
 	if not is_inside_tree():
 		#print("Not inside tree: do nothing.")
 		return
-	if not generate_collision_sibling:
-		if _col_sibling:
-			_col_sibling.queue_free() # removes from parent so no need to call get_parent().remove_child(_col_sibling)
-			_col_sibling = null
-	else: # generate_collision_sibling
-		if not _col_sibling:
-			if Engine.is_editor_hint():
-				if get_parent() == get_tree().edited_scene_root:
-					push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node. Set to NONE.")
-					generate_collision_sibling = COLLISION_MODE.NONE
-					return
-			_col_sibling = get_parent().get_node_or_null("VoxelShape3D")
-			if _col_sibling:
-				print("Found collision sibling from parent")
-				_col_sibling = get_parent().get_node("VoxelShape3D")
-			else:
-				_col_sibling = CollisionShape3D.new()
-				_col_sibling.name = "VoxelShape3D"
-				print("%s: Adding Collision sibling %s" % [self, _col_sibling])
-				get_parent().call_deferred("add_child",_col_sibling)
+	
+	if generate_collision_sibling:
+		if Engine.is_editor_hint():
+			if get_parent() == get_tree().edited_scene_root:
+				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node. Set to NONE.")
+				generate_collision_sibling = COLLISION_MODE.NONE
+				return
+			
+			
+		_col_sibling = CollisionShape3D.new()
+		_col_sibling.name = "VoxelShape3D"
+		print("%s: Adding Collision sibling %s" % [self, _col_sibling])
+		get_parent().call_deferred("add_child",_col_sibling)
 		
 		
 		# generate the collision shape
@@ -469,12 +458,15 @@ func _update_collision_sibling():
 				
 		# if in editor update owner to view in scenetree
 		if Engine.is_editor_hint():
-			_col_sibling.owner = get_tree().edited_scene_root
+			call_deferred("_set_editor_as_owner", _col_sibling)
 		
 		var delta_time = Time.get_ticks_usec() - start_time
 		if _col_sibling.shape:
 			#print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
 			_debug_mesh_color = Color(0.5,1.0,0.5)
+
+func _set_editor_as_owner(node):
+	node.owner = get_tree().edited_scene_root
 
 
 func _on_show_debug_gizmos_changed(value):
