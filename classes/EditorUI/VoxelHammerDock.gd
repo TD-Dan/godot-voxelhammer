@@ -84,8 +84,6 @@ func _ready():
 	selected_container.visible = false
 	paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
 	paint_stack_editor.editor_interface = editor_interface
-	
-	paint_marker = paint_marker_scene.instantiate()
 
 
 func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
@@ -129,9 +127,10 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 						else:
 							pos = (pos + norm/2).floor()
 						
-						print(pos)
-						
-						paint_marker.global_position = selection.to_global(pos)
+						if paint_marker:
+							paint_marker.global_position = selection.to_global(pos)
+						else:
+							push_error("Can't find paint_marker node. Has somebody deleted it?")
 						
 						selection.set_voxel(pos, mat)
 						selection.remesh()
@@ -178,10 +177,13 @@ func _on_button_paint_toggled(button_pressed):
 	
 	var scene_root = editor_interface.get_edited_scene_root()
 	if mousemode_paint:
+		paint_marker = paint_marker_scene.instantiate()
 		scene_root.add_child(paint_marker)
 		#paint_marker.owner = scene_root
 	else:
 		scene_root.remove_child(paint_marker)
+		paint_marker.queue_free()
+		paint_marker = null
 		#paint_marker.owner = null
 
 
