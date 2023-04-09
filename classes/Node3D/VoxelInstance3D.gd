@@ -429,7 +429,7 @@ func _update_collision_sibling():
 			
 		_col_sibling = CollisionShape3D.new()
 		_col_sibling.name = "VoxelShape3D"
-		print("%s: Adding Collision sibling %s" % [self, _col_sibling])
+		#print("%s: Adding Collision sibling %s" % [self, _col_sibling])
 		get_parent().call_deferred("add_child",_col_sibling)
 		
 		
