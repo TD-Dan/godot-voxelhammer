@@ -49,6 +49,8 @@ func _handles(object: Object) -> bool:
 		return true
 	if object is VoxelBody3D:
 		return true
+	if object is VoxelTerrain3D:
+		return true
 	return false
 
 func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):

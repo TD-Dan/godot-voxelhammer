@@ -60,10 +60,12 @@ enum THREAD_MODE {
 		emit_signal("voxel_configuration_changed", "thread_mode")
 
 @export_group("Helper tools")
+
 ## Select which material index in the materials array to edit
 @export var material_to_edit = 0:
 	set(nv):		
 		material_to_edit = clamp(nv,0,materials.size())
+
 ## Doubles the material size by dividing its Triplanar UV1 and UV2 size by two. This is helpfull to circumvent Godot Editors automatic rounding to nearest 0.001 decimals.
 @export var double_material_size : bool = false:
 	set(nv):
@@ -72,6 +74,7 @@ enum THREAD_MODE {
 			double_material_size = false
 			materials[material_to_edit].uv1_scale /= 2
 			materials[material_to_edit].uv2_scale /= 2
+
 ## Halves the material size by doubling its Triplanar UV1 and UV2 size. This is helpfull to circumvent Godot Editors automatic rounding to nearest 0.001 decimals.
 @export var half_material_size : bool = false:
 	set(nv):
@@ -80,6 +83,8 @@ enum THREAD_MODE {
 			half_material_size = false
 			materials[material_to_edit].uv1_scale *= 2
 			materials[material_to_edit].uv2_scale *= 2
+
+
 func _init():
 	pass
 	# TODO: test if fixed
@@ -90,6 +95,7 @@ func _init():
 	materials[1] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres") as Material
 	materials[2] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres") as Material
 	materials[3] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_white.tres") as Material
+
 
 func _to_string():
 	return "[VoxelConfiguration:%s]" % get_instance_id()
