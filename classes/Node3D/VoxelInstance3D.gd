@@ -259,6 +259,10 @@ func set_voxel(pos : Vector3i, value : int) -> bool:
 # used by VoxelOpCreateMesh to call_deferred
 func set_mesh(new_mesh:Mesh):
 	mesh_child.mesh = new_mesh
+	
+	if Engine.is_editor_hint():
+		mesh_child.owner = get_tree().edited_scene_root
+	
 	emit_signal("mesh_ready")
 
 # Force redraw of mesh
@@ -469,7 +473,7 @@ func _update_collision_sibling():
 		
 		var delta_time = Time.get_ticks_usec() - start_time
 		if _col_sibling.shape:
-			print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
+			#print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
 			_debug_mesh_color = Color(0.5,1.0,0.5)
 
 
