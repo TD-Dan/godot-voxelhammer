@@ -30,6 +30,11 @@ var selection = null:
 		
 		button_paint.button_pressed = false
 		
+		if nv is VoxelBody3D:
+			var child = nv.get_node_or_null("VoxelInstance3D")
+			if child:
+				nv = child
+			
 		if nv is VoxelInstance3D:
 			selection = nv
 			

@@ -47,6 +47,8 @@ func _handles(object: Object) -> bool:
 	#print("_handles? : %s" % str(object))
 	if object is VoxelInstance3D:
 		return true
+	if object is VoxelBody3D:
+		return true
 	return false
 
 func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
