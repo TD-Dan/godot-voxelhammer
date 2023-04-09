@@ -63,7 +63,7 @@ mesh = SubResource("BoxMesh_ukcjb")
 shape = SubResource("BoxShape3D_u72ij")
 
 [node name="TargetMarker" parent="." instance=ExtResource("2_bgtqf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, -3)
 
 [node name="VoxelBody3D" type="StaticBody3D" parent="."]
 script = ExtResource("3_2x7vi")

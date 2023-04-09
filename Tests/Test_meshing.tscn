@@ -1,27 +1,19 @@
-[gd_scene load_steps=11 format=3 uid="uid://cipsi5u20ocsr"]
+[gd_scene load_steps=8 format=3 uid="uid://d12ma7qrq2c2n"]
 
-[ext_resource type="Material" uid="uid://cy3iyc1vgtogu" path="res://materials/Default_world.tres" id="1_8nx6q"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelBody3D.gd" id="1_eg5wj"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.gd" id="2_loswh"]
 [ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/TallDwarf/VoxelHammer/res/default_voxel_configuration.tres" id="3_0hxvj"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelData.gd" id="4_io6ot"]
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_tie6s"]
-material = ExtResource("1_8nx6q")
-size = Vector2(16, 8)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_01omt"]
-size = Vector3(16, 0.01, 8)
-
 [sub_resource type="Resource" id="Resource_gbtcp"]
 script = ExtResource("4_io6ot")
 size = Vector3i(4, 4, 4)
-data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 0, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2)
+data = PackedInt64Array(4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 4, 3, 3, 3, 4, 4, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 4, 4, 4, 4, 4)
 
 [sub_resource type="Resource" id="Resource_iowfv"]
 script = ExtResource("4_io6ot")
-size = Vector3i(4, 4, 4)
-data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2)
+size = Vector3i(5, 5, 5)
+data = PackedInt64Array(3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3)
 
 [sub_resource type="Resource" id="Resource_334av"]
 script = ExtResource("4_io6ot")
@@ -30,20 +22,8 @@ data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 
 [node name="Test_voxel_scale" type="Node3D"]
 
-[node name="Plane" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
-metadata/_edit_group_ = true
-
-[node name="PlaneMesh" type="MeshInstance3D" parent="Plane"]
-mesh = SubResource("PlaneMesh_tie6s")
-
-[node name="PlaneShape" type="CollisionShape3D" parent="Plane"]
-shape = SubResource("BoxShape3D_01omt")
-
 [node name="VoxelBody3D" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -6)
 script = ExtResource("1_eg5wj")
-metadata/_edit_group_ = true
 
 [node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D"]
 script = ExtResource("2_loswh")
@@ -52,11 +32,10 @@ voxel_data = SubResource("Resource_gbtcp")
 generate_collision_sibling = 3
 
 [node name="VoxelBody3D3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -6)
 script = ExtResource("1_eg5wj")
-metadata/_edit_group_ = true
 
 [node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0065918, 0, 8.04378)
 script = ExtResource("2_loswh")
 configuration = ExtResource("3_0hxvj")
 voxel_data = SubResource("Resource_iowfv")
@@ -65,7 +44,6 @@ generate_collision_sibling = 3
 [node name="VoxelBody3D2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
 script = ExtResource("1_eg5wj")
-metadata/_edit_group_ = true
 
 [node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D2"]
 script = ExtResource("2_loswh")

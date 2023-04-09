@@ -10,7 +10,10 @@
 [resource]
 script = ExtResource("1_xtxim")
 materials = Array[Material]([ExtResource("1_cgsr6"), ExtResource("2_6dbqp"), ExtResource("3_ing4u"), ExtResource("4_c0uap"), ExtResource("5_cj00f")])
-voxel_base_size = 1.0
+voxel_reference_size = 1.0
 mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
+material_to_edit = 1
+double_material_size = false
+half_material_size = false
