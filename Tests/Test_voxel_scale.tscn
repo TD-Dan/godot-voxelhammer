@@ -82,6 +82,7 @@ mesh_scale = 8.0
 [node name="VoxelBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
 script = ExtResource("1_eg5wj")
+paint_mode = true
 metadata/_edit_group_ = true
 
 [node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D"]
