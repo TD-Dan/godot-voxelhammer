@@ -488,7 +488,8 @@ func _update_collision_sibling():
 			_debug_mesh_color = Color(0.5,1.0,0.5)
 
 func _set_editor_as_owner(node):
-	node.owner = get_tree().edited_scene_root
+	if get_tree():
+		node.owner = get_tree().edited_scene_root
 
 
 func _on_show_debug_gizmos_changed(value):
