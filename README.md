@@ -22,6 +22,10 @@ Chunky voxels for minecraft style generating and rendering of 3d geometry
 - [ ] PaintStacks: Geometry generation with photoshop like layers
 - [x] Supported paint operations: noise, gradients, planes. Upcoming: spheres and rectangles
 
+## Performance
+
+Generating and meshing around 1 Million voxels/second on AMD FX-8320
+
 
 ## Related repositories (NOT UP TO DATE!):
 
