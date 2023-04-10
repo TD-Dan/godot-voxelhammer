@@ -425,10 +425,10 @@ func _update_collision_sibling():
 		_col_sibling = null
 	
 	# Keep tree clean of any leftover nodes
-	#var old_sibling = get_parent().get_node_or_null("VoxelShape3D")
-	#if old_sibling:
-	#	print("Removing previous collision sibling from parent")
-	#	old_sibling.queue_free()
+	var old_sibling = get_parent().get_node_or_null("VoxelShape3D")
+	if old_sibling:
+		#print("Removing previous collision sibling from parent")
+		old_sibling.queue_free()
 	
 	if not is_inside_tree():
 		#print("Not inside tree: do nothing.")
