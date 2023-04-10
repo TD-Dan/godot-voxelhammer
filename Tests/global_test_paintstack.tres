@@ -33,7 +33,7 @@ active = true
 [sub_resource type="Resource" id="Resource_64unf"]
 script = ExtResource("3_l1o0h")
 low = 0
-high = 1
+high = 0
 plane = 1
 paint_mode = 2
 blend_mode = 0
