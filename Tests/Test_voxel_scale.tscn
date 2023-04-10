@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://cipsi5u20ocsr"]
+[gd_scene load_steps=13 format=3 uid="uid://cipsi5u20ocsr"]
 
 [ext_resource type="Material" uid="uid://cy3iyc1vgtogu" path="res://materials/Default_world.tres" id="1_8nx6q"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelBody3D.gd" id="1_eg5wj"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.gd" id="2_loswh"]
 [ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/TallDwarf/VoxelHammer/res/default_voxel_configuration.tres" id="3_0hxvj"]
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelData.gd" id="4_io6ot"]
+[ext_resource type="Material" uid="uid://bfpv45gqj8nvl" path="res://materials/Default_object.tres" id="6_adn0y"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_tie6s"]
 material = ExtResource("1_8nx6q")
@@ -18,10 +19,19 @@ script = ExtResource("4_io6ot")
 size = Vector3i(4, 4, 4)
 data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0)
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_sggsp"]
+friction = 0.14
+bounce = 0.8
+
+[sub_resource type="SphereMesh" id="SphereMesh_yivs5"]
+material = ExtResource("6_adn0y")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_dyyyn"]
+
 [node name="Test_voxel_scale" type="Node3D"]
 
 [node name="Plane" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0, -0.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.8, 0, -0.1)
 metadata/_edit_group_ = true
 
 [node name="PlaneMesh" type="MeshInstance3D" parent="Plane"]
@@ -126,3 +136,15 @@ configuration = ExtResource("3_0hxvj")
 voxel_data = SubResource("Resource_iowfv")
 generate_collision_sibling = 1
 mesh_scale = 0.7
+
+[node name="TargetSphere" type="RigidBody3D" parent="." groups=["LookAtTarget"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.728, 2.38425, 6)
+physics_material_override = SubResource("PhysicsMaterial_sggsp")
+metadata/_edit_group_ = true
+
+[node name="SphereMesh" type="MeshInstance3D" parent="TargetSphere"]
+gi_mode = 2
+mesh = SubResource("SphereMesh_yivs5")
+
+[node name="SphereShape" type="CollisionShape3D" parent="TargetSphere"]
+shape = SubResource("SphereShape3D_dyyyn")
