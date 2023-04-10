@@ -224,11 +224,26 @@ func _on_add_vox_instance_pressed():
 		new_parent = sel[0]
 	
 	if new_parent:
-		var new_vox = VoxelInstance3D.new()
+		var new_vox = load("res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.tscn").instantiate()
 		new_vox.name = "VoxelInstance3D"
-		new_parent.add_child(new_vox)
+		new_parent.add_child(new_vox,true)
 		new_vox.owner = new_owner
 
 
 func _on_add_vox_body_pressed():
-	pass # Replace with function body.
+	button_paint.button_pressed = false
+	# TODO: Add UndoRedo
+	# Get current selection
+	var scene_root = editor_interface.get_edited_scene_root()
+	var new_owner =  editor_interface.get_edited_scene_root()
+	
+	var new_parent = scene_root
+	var sel = editor_interface.get_selection().get_selected_nodes()
+	if not sel.is_empty():
+		new_parent = sel[0]
+	
+	if new_parent:
+		var new_vox = load("res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelBody3D.tscn").instantiate()
+		new_vox.name = "VoxelBody3D"
+		new_parent.add_child(new_vox,true)
+		new_vox.owner = new_owner
