@@ -101,9 +101,22 @@ enum COLLISION_MODE{
 	CONVEX_MESH,
 	CONCAVE_MESH
 }
+
+var _generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE
 @export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
 	set(nv):
-		generate_collision_sibling = nv
+		_generate_collision_sibling = nv
+		_update_collision_sibling()
+	get:
+		return _generate_collision_sibling
+
+## Mesh scale. When other than 1.0, mesh type collision siblings are not available, as Godot does not support scaled collision shapes
+@export_range(0.1, 10.0, 0.1) var mesh_scale : float = 1.0:
+	set(nv):
+		mesh_scale = nv
+		if mesh_child:
+			mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
+		_update_collision_sibling()
 
 
 var data_buffer : PackedInt64Array = PackedInt64Array()
@@ -177,6 +190,7 @@ func _establish_mesh_child():
 	if not mesh_child:
 		mesh_child = MeshInstance3D.new()
 		mesh_child.name = "VoxelMeshInstance3D"
+		mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
 		call_deferred("add_child", mesh_child)
 	
 	# if in editor update owner to view it scenetree and enable selection of this object
@@ -406,6 +420,7 @@ func _update_debug_mesh():
 func _update_collision_sibling():
 	# Clear previous collision sibling
 	if _col_sibling:
+		get_parent().remove_child(_col_sibling)
 		_col_sibling.queue_free()
 		_col_sibling = null
 	
@@ -419,11 +434,16 @@ func _update_collision_sibling():
 		#print("Not inside tree: do nothing.")
 		return
 	
-	if generate_collision_sibling:
+	if mesh_scale != 1.0:
+		if _generate_collision_sibling > COLLISION_MODE.CUBE:
+			push_warning("Mesh collision is not supported for scaled meshes. This is a Godot limitation. Falling back to Cube collision. Set 'Mesh Scale' to 1.0 to enable mesh collisions.")
+			_generate_collision_sibling = COLLISION_MODE.CUBE
+				
+	if _generate_collision_sibling:
 		if Engine.is_editor_hint():
 			if get_parent() == get_tree().edited_scene_root:
-				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node. Set to NONE.")
-				generate_collision_sibling = COLLISION_MODE.NONE
+				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node to generate a collision sibling. Set to NONE.")
+				_generate_collision_sibling = COLLISION_MODE.NONE
 				return
 			
 			
@@ -440,13 +460,13 @@ func _update_collision_sibling():
 		_col_sibling.transform = self.transform
 		_col_sibling.shape = null
 		
-		match generate_collision_sibling:
+		match _generate_collision_sibling:
 			COLLISION_MODE.NONE:
 				push_warning("%s: Something wrong with logic, this should not happen!")
 			COLLISION_MODE.CUBE:
 				_col_sibling.shape = BoxShape3D.new()
-				_col_sibling.shape.size = voxel_data.size
-				_col_sibling.translate_object_local(Vector3(voxel_data.size)/2.0)
+				_col_sibling.shape.size = voxel_data.size * mesh_scale
+				_col_sibling.translate_object_local(Vector3(voxel_data.size * mesh_scale)/2.0)
 			COLLISION_MODE.CONVEX_MESH:
 				if mesh_child and mesh_child.mesh:
 					_col_sibling.shape = mesh_child.mesh.create_convex_shape(true, false)
@@ -454,7 +474,7 @@ func _update_collision_sibling():
 				if mesh_child and mesh_child.mesh:
 					_col_sibling.shape = mesh_child.mesh.create_trimesh_shape()
 			_:
-				push_warning("%s: Unsupported collision mode: %s!" % generate_collision_sibling)
+				push_warning("%s: Unsupported collision mode: %s!" % _generate_collision_sibling)
 				
 		# if in editor update owner to view in scenetree
 		if Engine.is_editor_hint():

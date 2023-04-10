@@ -18,19 +18,20 @@ script = ExtResource("4_io6ot")
 size = Vector3i(4, 4, 4)
 data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 2, 2, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 
-[sub_resource type="Resource" id="Resource_iowfv"]
-script = ExtResource("4_io6ot")
-size = Vector3i(4, 4, 4)
-data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0)
-
 [sub_resource type="Resource" id="Resource_334av"]
 script = ExtResource("4_io6ot")
 size = Vector3i(4, 4, 4)
 data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 2)
 
+[sub_resource type="Resource" id="Resource_iowfv"]
+script = ExtResource("4_io6ot")
+size = Vector3i(4, 4, 4)
+data = PackedInt64Array(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0)
+
 [node name="Test_voxel_scale" type="Node3D"]
 
 [node name="Plane" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0, -0.1)
 metadata/_edit_group_ = true
 
 [node name="PlaneMesh" type="MeshInstance3D" parent="Plane"]
@@ -49,18 +50,8 @@ metadata/_edit_group_ = true
 script = ExtResource("2_loswh")
 configuration = ExtResource("3_0hxvj")
 voxel_data = SubResource("Resource_gbtcp")
-generate_collision_sibling = 3
-
-[node name="VoxelBody3D3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -6)
-script = ExtResource("1_eg5wj")
-metadata/_edit_group_ = true
-
-[node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D3"]
-script = ExtResource("2_loswh")
-configuration = ExtResource("3_0hxvj")
-voxel_data = SubResource("Resource_iowfv")
-generate_collision_sibling = 3
+generate_collision_sibling = 1
+mesh_scale = 0.5
 
 [node name="VoxelBody3D2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
@@ -72,3 +63,26 @@ script = ExtResource("2_loswh")
 configuration = ExtResource("3_0hxvj")
 voxel_data = SubResource("Resource_334av")
 generate_collision_sibling = 3
+
+[node name="VoxelBody3D3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, -6)
+script = ExtResource("1_eg5wj")
+metadata/_edit_group_ = true
+
+[node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D3"]
+script = ExtResource("2_loswh")
+configuration = ExtResource("3_0hxvj")
+voxel_data = SubResource("Resource_iowfv")
+generate_collision_sibling = 1
+mesh_scale = 2.0
+
+[node name="VoxelBody3D4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, -6)
+script = ExtResource("1_eg5wj")
+metadata/_edit_group_ = true
+
+[node name="VoxelInstance3D" type="Node3D" parent="VoxelBody3D4"]
+script = ExtResource("2_loswh")
+configuration = ExtResource("3_0hxvj")
+voxel_data = SubResource("Resource_iowfv")
+generate_collision_sibling = 1

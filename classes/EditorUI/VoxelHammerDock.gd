@@ -181,15 +181,30 @@ func _on_button_paint_toggled(button_pressed):
 	mousemode_paint = button_pressed
 	
 	var scene_root = editor_interface.get_edited_scene_root()
+	if paint_marker:
+			scene_root.remove_child(paint_marker)
+			paint_marker.queue_free()
+			paint_marker = null
+			#paint_marker.owner = null
+	
+	var failed_to_enter_mode = false
+	if mousemode_paint:
+		if selection.mesh_scale != 1.0:
+			push_warning("Paint mode not supported for scaled meshes. This is a Godot limitation. Use 'Mesh Scale' 1.0 to enable live paint.")
+			failed_to_enter_mode = true
+		elif selection.generate_collision_sibling != VoxelInstance3D.COLLISION_MODE.CONCAVE_MESH:
+			push_warning("Paint mode supported only when a concave mesh is present. Set 'Generate Collision Sibling' to 'Concave Mesh' to enable live paint.")
+			failed_to_enter_mode = true
+		
+	if failed_to_enter_mode:
+		mousemode_paint = false
+		button_paint.button_pressed = false
+		return
+	
 	if mousemode_paint:
 		paint_marker = paint_marker_scene.instantiate()
 		scene_root.add_child(paint_marker)
 		#paint_marker.owner = scene_root
-	else:
-		scene_root.remove_child(paint_marker)
-		paint_marker.queue_free()
-		paint_marker = null
-		#paint_marker.owner = null
 
 
 func _on_button_mesh_pressed():
