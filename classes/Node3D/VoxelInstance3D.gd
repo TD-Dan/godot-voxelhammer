@@ -421,7 +421,7 @@ func _update_collision_sibling():
 	# Clear previous collision sibling
 	if _col_sibling and _col_sibling != null:
 		if get_parent():
-				get_parent().remove_child(_col_sibling)
+				get_parent().remove_child.call_deferred(_col_sibling)
 		_col_sibling.queue_free()
 		_col_sibling = null
 	
@@ -443,7 +443,7 @@ func _update_collision_sibling():
 				
 	if _generate_collision_sibling:
 		if Engine.is_editor_hint():
-			if get_parent() == get_tree().edited_scene_root:
+			if self == get_tree().edited_scene_root:
 				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node to generate a collision sibling. Set to NONE.")
 				_generate_collision_sibling = COLLISION_MODE.NONE
 				return

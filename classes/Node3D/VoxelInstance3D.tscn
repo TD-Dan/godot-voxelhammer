@@ -1,16 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://b5fa6m6t14mp"]
+[gd_scene load_steps=4 format=3 uid="uid://b5fa6m6t14mp"]
 
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.gd" id="1_vkiea"]
 [ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/TallDwarf/VoxelHammer/res/default_voxel_configuration.tres" id="2_r47df"]
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelData.gd" id="3_rnv0e"]
-
-[sub_resource type="Resource" id="Resource_b1dch"]
-resource_local_to_scene = true
-script = ExtResource("3_rnv0e")
-size = Vector3i(4, 2, 4)
-data = PackedInt64Array(2, 2, 2, 2, 0, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 0)
+[ext_resource type="Resource" uid="uid://bch6ind1ucak7" path="res://addons/TallDwarf/VoxelHammer/res/vox_Letter_M_on_block.tres" id="3_u6vte"]
 
 [node name="VoxelInstance3D" type="Node3D"]
 script = ExtResource("1_vkiea")
 configuration = ExtResource("2_r47df")
-voxel_data = SubResource("Resource_b1dch")
+voxel_data = ExtResource("3_u6vte")

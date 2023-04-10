@@ -229,3 +229,6 @@ func _on_add_vox_instance_pressed():
 		new_parent.add_child(new_vox)
 		new_vox.owner = new_owner
 
+
+func _on_add_vox_body_pressed():
+	pass # Replace with function body.
