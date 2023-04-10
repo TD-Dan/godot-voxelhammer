@@ -53,6 +53,7 @@ func _ready():
 	tree.set_column_custom_minimum_width(5,7)
 	
 	tree_root = tree.create_item()
+	tree.connect("button_clicked", _on_Tree_button_pressed)
 	
 	var add_popup = add_button.get_popup()
 	add_popup.connect("index_pressed", _on_add_popup_selection)
@@ -92,10 +93,6 @@ func set_item_data(item, paint_op, index):
 		VoxelPaintStack.PAINT_MODE.NONE:
 			mode = "-"
 	
-	var smooth = "n"
-	if paint_op.smooth:
-		smooth = "y"
-	
 	var opname = "unimplemented"
 	var spec_info = ""
 	if paint_op is PaintOpPlane:
@@ -107,11 +104,11 @@ func set_item_data(item, paint_op, index):
 	if paint_op is PaintOpGradientVector:
 		opname = "GradientVector"
 		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
-	if paint_op is PaintOpSimplexNoise:
-		opname = "Simplex Noise"
-		spec_info = "%s, %s, %s, %s " % [paint_op.lucanarity, paint_op.octaves, paint_op.period, paint_op.persistence]
+	if paint_op is PaintOpNoise:
+		opname = "Noise"
+		spec_info = " "
 	
-	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, smooth, spec_info])
+	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, spec_info])
 	
 	
 	item.add_button(1, edit_icon)
@@ -140,13 +137,13 @@ func _on_add_popup_selection(index):
 	
 	match index:
 		0: # Plane
-			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 1)
+			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 1)
 		1: # Gradient
-			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 10)
 		2: # GradientVector
-			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true, 0, 10)
+			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 10)
 		3: # Simplex noise
-			paint_op = PaintOpSimplexNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, true)
+			paint_op = PaintOpNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1)
 	
 	if paint_op:
 		paint_stack.add_paint_operation(paint_op)
@@ -155,8 +152,8 @@ func _on_add_popup_selection(index):
 	commit_tree()
 
 
-func _on_Tree_button_pressed(item, column, id):
-	#print("Tree: button pressed")
+func _on_Tree_button_pressed(item, column, id, mouse_button_index):
+	print("Tree: button pressed")
 	var paint_op : PaintOperation = item.get_metadata(0)
 	var index = item.get_metadata(1)
 	if column == 1 and Engine.is_editor_hint() and editor_interface: # edit in inspector

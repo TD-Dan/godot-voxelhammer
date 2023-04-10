@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://ch0hyf2y1fc45"]
+
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelTerrain3D.gd" id="1_fg8wr"]
+
+[node name="Test_VoxelTerrain" type="Node3D"]
+
+[node name="VoxelTerrain3D" type="Node3D" parent="."]
+script = ExtResource("1_fg8wr")
+chunk_size = 64
+smallest_voxel = 0.25
+largest_voxel = 32
+cascade_biggest_size = 2048
+cascade_smallest_size = 16
+total_chunks = 64

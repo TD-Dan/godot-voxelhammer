@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3 uid="uid://dlxih8x6o2edk"]
+
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.gd" id="1_le5cq"]
+[ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/TallDwarf/VoxelHammer/res/default_voxel_configuration.tres" id="2_uvv4s"]
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelData.gd" id="3_yduuk"]
+
+[sub_resource type="Resource" id="Resource_jmtwu"]
+script = ExtResource("3_yduuk")
+size = Vector3i(3, 2, 2)
+data = PackedInt64Array(0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MasterInstance" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.599999, 0, -2.7)
+script = ExtResource("1_le5cq")
+configuration = ExtResource("2_uvv4s")
+voxel_data = SubResource("Resource_jmtwu")
+metadata/_edit_group_ = true
+
+[node name="Duplicate1" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -7.8)
+script = ExtResource("1_le5cq")
+configuration = ExtResource("2_uvv4s")
+voxel_data = SubResource("Resource_jmtwu")
+metadata/_edit_group_ = true
+
+[node name="Label" type="Label" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -505.5
+offset_right = 505.5
+offset_bottom = 104.0
+grow_horizontal = 2
+size_flags_horizontal = 10
+text = "Purpose of test:
+Duplicated VoxelInstances should have only one instance of VoxelData and VoxelMeshInstance3D shared among themselves
+Test:
+Spawn 1000 copies and modify master instance. All copies should reflect the change without additional mesh calculation overhead."

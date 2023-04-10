@@ -10,7 +10,7 @@ class_name PaintOpGradient
 @export var reverse = false
 @export var plane : VoxelPaintStack.AXIS_PLANE = VoxelPaintStack.AXIS_PLANE.Y
 
-func _init(blend_mode = VoxelPaintStack.BLEND_MODE.NORMAL, material = 1, smooth = false, offset = 0, distance = 10):
-	super(blend_mode,material,smooth)
+func _init(blend_mode = VoxelPaintStack.BLEND_MODE.NORMAL, material = 1, offset = 0, distance = 10):
+	super(blend_mode,material)
 	self.offset = offset
 	self.distance = distance

@@ -5,140 +5,102 @@
 [ext_resource type="Texture2D" uid="uid://bnla6ylerkkog" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/Edit.svg" id="3_32rcu"]
 
 [node name="VoxelHammer" type="Control"]
+layout_mode = 3
 anchor_right = 0.177
 anchor_bottom = 0.597
 script = ExtResource("1_guxvn")
 
 [node name="Panel" type="Panel" parent="."]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="HFlowContainer" type="HFlowContainer" parent="Panel/VBoxContainer"]
-offset_right = 339.0
-offset_bottom = 31.0
+layout_mode = 2
 
 [node name="EditGlobalsButton" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
-offset_right = 157.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "Edit Global settings"
 
 [node name="AddVoxInstance" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
-offset_left = 161.0
-offset_right = 333.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "Add VoxelInstance3D"
 
 [node name="HSeparator3" type="HSeparator" parent="Panel/VBoxContainer"]
-offset_top = 35.0
-offset_right = 339.0
-offset_bottom = 39.0
+layout_mode = 2
 
 [node name="SelectedInfo" type="Label" parent="Panel/VBoxContainer"]
-offset_top = 43.0
-offset_right = 339.0
-offset_bottom = 69.0
+layout_mode = 2
 text = "Selection:none"
 
 [node name="SelectedMoreInfo" type="Label" parent="Panel/VBoxContainer"]
-offset_top = 73.0
-offset_right = 339.0
-offset_bottom = 99.0
+layout_mode = 2
 text = "Info on node"
 
 [node name="HSeparator" type="HSeparator" parent="Panel/VBoxContainer"]
-offset_top = 103.0
-offset_right = 339.0
-offset_bottom = 107.0
+layout_mode = 2
 
 [node name="VoxelEditTools" type="HFlowContainer" parent="Panel/VBoxContainer"]
-offset_top = 111.0
-offset_right = 339.0
-offset_bottom = 177.0
+layout_mode = 2
 
 [node name="ButtonClear" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_right = 49.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "Clear"
 
 [node name="ButtonFill" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 53.0
-offset_right = 83.0
-offset_bottom = 31.0
+layout_mode = 2
 text = "Fill"
 
 [node name="ButtonPaint" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 87.0
-offset_right = 154.0
-offset_bottom = 31.0
+layout_mode = 2
 toggle_mode = true
 text = "Paint"
 icon = ExtResource("3_32rcu")
 
 [node name="Label" type="Label" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 158.0
-offset_top = 2.0
-offset_right = 228.0
-offset_bottom = 28.0
+layout_mode = 2
 size_flags_horizontal = 8
 text = "material:"
 
 [node name="SpinBoxMaterial" type="SpinBox" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_left = 231.938
-offset_right = 315.0
-offset_bottom = 31.0
+layout_mode = 2
 size_flags_horizontal = 8
 
 [node name="ButtonMesh" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
-offset_top = 35.0
-offset_right = 76.0
-offset_bottom = 66.0
+layout_mode = 2
 text = "Re-mesh"
 
 [node name="HSeparator2" type="HSeparator" parent="Panel/VBoxContainer"]
-offset_top = 181.0
-offset_right = 339.0
-offset_bottom = 185.0
+layout_mode = 2
 
 [node name="SelectedScrollContainer" type="ScrollContainer" parent="Panel/VBoxContainer"]
-visible = false
-offset_top = 154.0
-offset_right = 339.0
-offset_bottom = 644.0
+layout_mode = 2
 size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/VBoxContainer/SelectedScrollContainer"]
-offset_right = 339.0
-offset_bottom = 490.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer"]
-offset_right = 339.0
-offset_bottom = 31.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer"]
-offset_top = 2.0
-offset_right = 201.0
-offset_bottom = 28.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Paint Stack:"
 
 [node name="RepaintButton" type="Button" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer"]
-offset_left = 205.0
-offset_right = 339.0
-offset_bottom = 31.0
-text = "Edit in inspector"
+layout_mode = 2
+text = "Repaint"
 
 [node name="PaintStackEditor" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer" instance=ExtResource("2_4p7xf")]
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_top = 35.0
-offset_right = 339.0
-offset_bottom = 490.0
+layout_mode = 2
 
 [connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/EditGlobalsButton" to="." method="_on_EditGlobalsButton_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/AddVoxInstance" to="." method="_on_add_vox_instance_pressed"]

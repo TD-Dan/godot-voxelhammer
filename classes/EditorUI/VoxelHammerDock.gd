@@ -14,6 +14,12 @@ var editor_interface : EditorInterface
 @onready var voxel_edit_material = $Panel/VBoxContainer/VoxelEditTools/SpinBoxMaterial
 @onready var paint_stack_editor = $Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/PaintStackEditor
 
+@onready var button_paint = $Panel/VBoxContainer/VoxelEditTools/ButtonPaint
+var mousemode_paint = false
+
+@onready var paint_marker_scene = preload("res://addons/TallDwarf/VoxelHammer/res/paint_marker.tscn")
+var paint_marker : Node3D
+
 var selection = null:
 	set(nv):
 		#print("VoxelHammerDock: setting selection")
@@ -22,6 +28,13 @@ var selection = null:
 		
 		#TODO enable / make smarter
 		
+		button_paint.button_pressed = false
+		
+		if nv is VoxelBody3D:
+			var child = nv.get_node_or_null("VoxelInstance3D")
+			if child:
+				nv = child
+			
 		if nv is VoxelInstance3D:
 			selection = nv
 			
@@ -61,10 +74,10 @@ func _update_selected_info_text():
 		if selection.voxel_data:
 			vox_count = selection.voxel_data.get_voxel_count()
 		selected_info_more.text = "Voxel count: %s" % vox_count
-		if selection.visibility_count != null:
+		if "visibility_count" in selection:
 			selected_info_more.text += ", Visible: %s" % selection.visibility_count
-			
-		if selection.mesh_surfaces_count != null:
+		
+		if "mesh_surfaces_count" in selection:
 			selected_info_more.text += ", Surfaces-Faces: %s-%s" % [selection.mesh_surfaces_count, selection.mesh_faces_count]
 	
 	else:
@@ -74,9 +87,60 @@ func _update_selected_info_text():
 
 func _ready():
 	selected_container.visible = false
-	# TODO: enable
-	#paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
+	paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
 	paint_stack_editor.editor_interface = editor_interface
+
+
+func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
+	#if event.get_class() != "InputEventMouseMotion":
+		#print("got input %s" % event.get_class())
+	
+	if mousemode_paint:
+		match event.get_class():
+			"InputEventKey":
+				if Input.is_action_pressed("ui_cancel"):
+					button_paint.button_pressed = false
+					return true
+			"InputEventMouseButton":
+				var event_mb : InputEventMouseButton = event
+
+				# Need to manually pick in tool mode and VoxelInstance picking logic not running
+
+				if selection and event_mb.button_index == 1 and event_mb.is_pressed():
+					#print("%s: got input %s" % [self,str(event)])
+					var mouse_pos = event.position
+					var camera = viewport_camera
+					
+					var ray_length = 100.0
+					var from = camera.project_ray_origin(mouse_pos)
+					var to = from + camera.project_ray_normal(mouse_pos) * ray_length
+					var space_state = selection.get_viewport().find_world_3d().get_direct_space_state()
+					var params = PhysicsRayQueryParameters3D.new()
+					params.from = from
+					params.to = to
+					var results =  space_state.intersect_ray(params)
+					print(results)
+					if results.size() > 0:
+						var pos : Vector3 = selection.to_local(results["position"])
+						var norm = results["normal"]
+						#print(norm)
+						#print(pos.floor())
+						var mat = voxel_edit_material.value
+						
+						if mat == 0:
+							pos = (pos - norm/2).floor()
+						else:
+							pos = (pos + norm/2).floor()
+						
+						if paint_marker:
+							paint_marker.global_position = selection.to_global(pos)
+						else:
+							push_error("Can't find paint_marker node. Has somebody deleted it?")
+						
+						selection.set_voxel(pos, mat)
+						selection.remesh()
+					return true
+	return false
 
 
 func _on_paint_stack_changed():
@@ -114,14 +178,41 @@ func _on_button_fill_pressed():
 
 
 func _on_button_paint_toggled(button_pressed):
-	pass # Replace with function body.
+	mousemode_paint = button_pressed
+	
+	var scene_root = editor_interface.get_edited_scene_root()
+	if paint_marker:
+			scene_root.remove_child(paint_marker)
+			paint_marker.queue_free()
+			paint_marker = null
+			#paint_marker.owner = null
+	
+	var failed_to_enter_mode = false
+	if mousemode_paint:
+		if selection.mesh_scale != 1.0:
+			push_warning("Paint mode not supported for scaled meshes. This is a Godot limitation. Use 'Mesh Scale' 1.0 to enable live paint.")
+			failed_to_enter_mode = true
+		elif selection.generate_collision_sibling != VoxelInstance3D.COLLISION_MODE.CONCAVE_MESH:
+			push_warning("Paint mode supported only when a concave mesh is present. Set 'Generate Collision Sibling' to 'Concave Mesh' to enable live paint.")
+			failed_to_enter_mode = true
+		
+	if failed_to_enter_mode:
+		mousemode_paint = false
+		button_paint.button_pressed = false
+		return
+	
+	if mousemode_paint:
+		paint_marker = paint_marker_scene.instantiate()
+		scene_root.add_child(paint_marker)
+		#paint_marker.owner = scene_root
 
 
 func _on_button_mesh_pressed():
-	selection.push_voxel_operation(VoxelOpVisibility.new())
+	selection.remesh()
 
 
 func _on_add_vox_instance_pressed():
+	button_paint.button_pressed = false
 	# TODO: Add UndoRedo
 	# Get current selection
 	var scene_root = editor_interface.get_edited_scene_root()
@@ -133,7 +224,8 @@ func _on_add_vox_instance_pressed():
 		new_parent = sel[0]
 	
 	if new_parent:
-		var new_vox = load("res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.tscn").instantiate()
+		var new_vox = VoxelInstance3D.new()
+		new_vox.name = "VoxelInstance3D"
 		new_parent.add_child(new_vox)
 		new_vox.owner = new_owner
 

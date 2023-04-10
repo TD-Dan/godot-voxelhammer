@@ -2,49 +2,39 @@ extends VoxelOperation
 
 class_name VoxelOpPaintStack
 
-var mat_buffer
-var smooth_buffer
-var blend_buffer
 var paint_stack
 var position_offset
 
-func _init(voxel_data, voxel_configuration, paint_stack, position_offset=Vector3(0,0,0)):
-	super(VoxelData.CALC_STATE.VOXEL, voxel_data, voxel_configuration)
-	self.name = "VoxelOpPaintStack"
-	self.paint_stack = paint_stack.duplicate()
+
+var blend_buffer : PackedFloat32Array = PackedFloat32Array()
+
+func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
+	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
+	self.paint_stack = paint_stack
 	self.position_offset = position_offset
 
 
-
-# Runs in main node to prepare data
-func prepare():
-	mat_buffer = voxel_data.material.duplicate()
-	smooth_buffer = voxel_data.smooth.duplicate()
-	blend_buffer = voxel_data.blend_buffer.duplicate()
-
-
-# This code is executed in another thread so it can not access voxel_node variable!
-func execute(thread_cache : Dictionary):
-	#print("!!! VoxelOpVisibility executing!")
-	do_paint_stack()
-
-
-# This code will be executed in the main thread so access to voxel_node is ok
-func finalize():
-	if !mat_buffer or !smooth_buffer:
-		push_error("mat_buffer or smooth_buffer missing!")
-	voxel_data.material = mat_buffer
-	voxel_data.smooth = smooth_buffer
-	voxel_data.blend_buffer = blend_buffer
+# This code is potentially executed in another thread!
+func run_operation():
+	#print("!!! VoxelOpPaintStack executing!")
+	if voxel_instance.voxel_data.data_mutex.try_lock():
+		do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, paint_stack, position_offset)
+		
+		voxel_instance.voxel_data.data_mutex.unlock()
+		voxel_instance.voxel_data.call_deferred("notify_data_changed")
+	else:
+		push_warning("VoxelOpFill: Can't get lock on voxel data!")
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func do_paint_stack():
-	#print("Applying Voxel Paint stack...")
+func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3):
+	print("Applying Voxel Paint stack...")
 	
-	var sx :int = voxel_data.voxel_count.x
-	var sy :int = voxel_data.voxel_count.y
-	var sz :int = voxel_data.voxel_count.z
+	var sx :int = size.x
+	var sy :int = size.y
+	var sz :int = size.z
+	
+	blend_buffer.resize(data.size())
 	
 	for op in paint_stack.operation_stack:
 		if op.active:
@@ -114,7 +104,7 @@ func do_paint_stack():
 							dot = 1 - dot
 							blend_change = dot
 						
-						if op is PaintOpSimplexNoise:
+						if op is PaintOpNoise:
 							cull_test = true
 							blend_change = (op.noise.get_noise_3d(x+position_offset.x, y+position_offset.y, z+position_offset.z) + 1.0)
 						
@@ -146,19 +136,16 @@ func do_paint_stack():
 							if blend_buffer[x + y*sx + z*sx*sy] and blend_buffer[x + y*sx + z*sx*sy] >= 1:
 								match op.paint_mode:
 									VoxelPaintStack.PAINT_MODE.NORMAL:
-										mat_buffer[x + y*sx + z*sx*sy] = op.material
-										smooth_buffer[x + y*sx + z*sx*sy] = op.smooth
-									VoxelPaintStack.PAINT_MODE.REPLACE:
-										if mat_buffer[x + y*sx + z*sx*sy]:
-											mat_buffer[x + y*sx + z*sx*sy] = op.material
-											smooth_buffer[x + y*sx + z*sx*sy] = op.smooth
-									VoxelPaintStack.PAINT_MODE.ADD:
-										if not mat_buffer[x + y*sx + z*sx*sy]:
-											mat_buffer[x + y*sx + z*sx*sy] = op.material
-											smooth_buffer[x + y*sx + z*sx*sy] = op.smooth
+										data[x + y*sx + z*sx*sy] = op.material
+									VoxelPaintStack.PAINT_MODE.REPLACE: # draw only if voxel already exists
+										if data[x + y*sx + z*sx*sy]:
+											data[x + y*sx + z*sx*sy] = op.material
+									VoxelPaintStack.PAINT_MODE.ADD: # draw only if voxel is empty
+										if not data[x + y*sx + z*sx*sy]:
+											data[x + y*sx + z*sx*sy] = op.material
 									VoxelPaintStack.PAINT_MODE.ERASE:
-										if mat_buffer[x + y*sx + z*sx*sy]:
-											mat_buffer[x + y*sx + z*sx*sy] = 0
+										if data[x + y*sx + z*sx*sy]:
+											data[x + y*sx + z*sx*sy] = 0
 									VoxelPaintStack.PAINT_MODE.NONE:
 										pass
 
