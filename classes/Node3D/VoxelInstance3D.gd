@@ -90,7 +90,7 @@ func _on_voxels_changed():
 		if paint_stack:
 			if voxel_data:
 				voxel_data.clear()
-				push_voxel_operation(VoxelOpPaintStack.new(paint_stack, global_position))
+				push_voxel_operation(VoxelOpPaintStack.new(paint_stack, true))
 
 
 var _col_sibling # only one editing this value is _update_collision_sibling!

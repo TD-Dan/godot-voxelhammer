@@ -3,36 +3,45 @@ extends VoxelOperation
 class_name VoxelOpPaintStack
 
 var paint_stack
-var position_offset
+var use_global_position
 
 
 var blend_buffer : PackedFloat32Array = PackedFloat32Array()
 
-func _init(paint_stack : VoxelPaintStack, position_offset=Vector3(0,0,0)):
+func _init(paint_stack : VoxelPaintStack, use_global_position=false):
 	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
 	self.paint_stack = paint_stack
-	self.position_offset = position_offset
+	self.use_global_position = use_global_position
 
 
 # This code is potentially executed in another thread!
 func run_operation():
 	#print("!!! VoxelOpPaintStack executing!")
-	if voxel_instance.voxel_data.data_mutex.try_lock():
-		do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, paint_stack, position_offset)
 		
-		voxel_instance.voxel_data.data_mutex.unlock()
-		voxel_instance.voxel_data.call_deferred("notify_data_changed")
-	else:
-		push_warning("VoxelOpFill: Can't get lock on voxel data!")
+	voxel_instance.data_buffer_mutex.lock()
+	var local_position_offset = Vector3(0,0,0)
+	var local_scale = 1.0
+	
+	if use_global_position:
+		local_position_offset = voxel_instance.global_position
+		local_scale = voxel_instance.mesh_scale
+	
+	voxel_instance.data_buffer_mutex.unlock()
+	
+	do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, paint_stack, local_position_offset, local_scale)
+		
+	voxel_instance.voxel_data.call_deferred("notify_data_changed")
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3):
+func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3 = Vector3(0,0,0), scale = 1.0):
 	print("Applying Voxel Paint stack...")
 	
 	var sx :int = size.x
 	var sy :int = size.y
 	var sz :int = size.z
+	
+	var point : Vector3
 	
 	blend_buffer.resize(data.size())
 	
@@ -45,36 +54,38 @@ func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : Voxe
 						if cancel:
 							return
 						
-						var cull_test = false
-						var blend_change = 0.0
+						point = Vector3(x,y,z)
+						if use_global_position:
+							point *= scale
+							point += position_offset
+						
+						var draw_at_point = false
+						var blend_value_at_point = 0.0
 						
 						if op is PaintOpPlane:
-							var plane = x
-							var offset = position_offset.x
+							var plane_point = point.x
 							match op.plane:
 								VoxelPaintStack.AXIS_PLANE.Y:
-									plane = y
-									offset = position_offset.y
+									plane_point = point.y
 								VoxelPaintStack.AXIS_PLANE.Z:
-									plane = z
-									offset = position_offset.z
+									plane_point = point.z
 									
-							if plane >= op.low - offset and plane <= op.high - offset:
-								cull_test = true
-								blend_change = 1.0
+							if plane_point >= op.low - 0.5 and plane_point <= op.high - 0.5:
+								draw_at_point = true
+								blend_value_at_point = 1.0
 						
 						if op is PaintOpGradient:
 							
-							cull_test = true
+							draw_at_point = true
 							
-							var point = x + position_offset.x
+							var plane_point = point.x
 							match op.plane:
 								VoxelPaintStack.AXIS_PLANE.Y:
-									point = y + position_offset.y
+									plane_point = point.y
 								VoxelPaintStack.AXIS_PLANE.Z:
-									point = z + position_offset.z
+									plane_point = point.z
 							
-							var blend_amount = (op.offset - point) / op.distance
+							var blend_amount = (op.offset - plane_point) / op.distance
 							
 							if op.mirror:
 								blend_amount = 1 - clamp(abs(blend_amount), 0, 1.0)
@@ -84,14 +95,14 @@ func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : Voxe
 							if op.reverse:
 								blend_amount = 1 - blend_amount
 								
-							blend_change = blend_amount
+							blend_value_at_point = blend_amount
 							
 						if op is PaintOpGradientVector:
-							cull_test=true
+							draw_at_point=true
 							
 							var plane = op.plane
-							var point = (Vector3(x,y,z) + position_offset) / op.distance
-							var dot = plane.dot(point)
+							var plane_point = point / op.distance
+							var dot = plane.dot(plane_point)
 							
 							if dot > 1.0:
 								dot = 1.0
@@ -102,37 +113,38 @@ func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : Voxe
 									dot = 0
 							
 							dot = 1 - dot
-							blend_change = dot
+							blend_value_at_point = dot
 						
 						if op is PaintOpNoise:
-							cull_test = true
-							blend_change = (op.noise.get_noise_3d(x+position_offset.x, y+position_offset.y, z+position_offset.z) + 1.0)
+							draw_at_point = true
+							blend_value_at_point = (op.noise.get_noise_3d(point.x, point.y, point.z) + 1.0)
 						
 						
-						if cull_test:
-							blend_change *= op.blend_amount
+						# Write blend buffer
+						blend_value_at_point *= op.blend_amount
+						match op.blend_mode:
+							VoxelPaintStack.BLEND_MODE.NORMAL:
+								blend_buffer[x + y*sx + z*sx*sy] = blend_value_at_point
+							VoxelPaintStack.BLEND_MODE.ADD:
+								if not blend_buffer[x + y*sx + z*sx*sy]:
+									blend_buffer[x + y*sx + z*sx*sy] = blend_value_at_point
+								else:
+									blend_buffer[x + y*sx + z*sx*sy] += blend_value_at_point
+							VoxelPaintStack.BLEND_MODE.MINUS:
+								if not blend_buffer[x + y*sx + z*sx*sy]:
+									blend_buffer[x + y*sx + z*sx*sy] = -blend_value_at_point
+								else:
+									blend_buffer[x + y*sx + z*sx*sy] -= blend_value_at_point
+							VoxelPaintStack.BLEND_MODE.ONE_MINUS:
+								blend_buffer[x + y*sx + z*sx*sy] = 1 - blend_value_at_point
+							VoxelPaintStack.BLEND_MODE.MULTIPLY:
+								if blend_buffer[x + y*sx + z*sx*sy]:
+									blend_buffer[x + y*sx + z*sx*sy] *= blend_value_at_point
+							VoxelPaintStack.BLEND_MODE.NONE:
+								pass
 							
-							match op.blend_mode:
-								VoxelPaintStack.BLEND_MODE.NORMAL:
-									blend_buffer[x + y*sx + z*sx*sy] = blend_change
-								VoxelPaintStack.BLEND_MODE.ADD:
-									if not blend_buffer[x + y*sx + z*sx*sy]:
-										blend_buffer[x + y*sx + z*sx*sy] = blend_change
-									else:
-										blend_buffer[x + y*sx + z*sx*sy] += blend_change
-								VoxelPaintStack.BLEND_MODE.MINUS:
-									if not blend_buffer[x + y*sx + z*sx*sy]:
-										blend_buffer[x + y*sx + z*sx*sy] = -blend_change
-									else:
-										blend_buffer[x + y*sx + z*sx*sy] -= blend_change
-								VoxelPaintStack.BLEND_MODE.ONE_MINUS:
-									blend_buffer[x + y*sx + z*sx*sy] = 1 - blend_change
-								VoxelPaintStack.BLEND_MODE.MULTIPLY:
-									if blend_buffer[x + y*sx + z*sx*sy]:
-										blend_buffer[x + y*sx + z*sx*sy] *= blend_change
-								VoxelPaintStack.BLEND_MODE.NONE:
-									pass
-								
+						#Write voxel data if blend at point is > 1.0
+						if draw_at_point:
 							if blend_buffer[x + y*sx + z*sx*sy] and blend_buffer[x + y*sx + z*sx*sy] >= 1:
 								match op.paint_mode:
 									VoxelPaintStack.PAINT_MODE.NORMAL:

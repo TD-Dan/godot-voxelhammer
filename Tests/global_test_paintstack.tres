@@ -6,34 +6,35 @@
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/PaintOp/VoxelPaintStack.gd" id="4_g5y32"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_5nj68"]
-seed = 69
+seed = 74
+fractal_octaves = 3
 
 [sub_resource type="Resource" id="Resource_yabuf"]
 script = ExtResource("1_iutm8")
 noise = SubResource("FastNoiseLite_5nj68")
 paint_mode = 4
 blend_mode = 0
-blend_amount = 1.0
+blend_amount = 0.9
 material = 2
 active = true
 
 [sub_resource type="Resource" id="Resource_i8w08"]
 script = ExtResource("2_tlvmf")
-offset = 32
-distance = 16
+offset = 42
+distance = 42
 mirror = false
 reverse = false
 plane = 1
 paint_mode = 0
 blend_mode = 4
-blend_amount = 1.0
+blend_amount = 2.0
 material = 2
 active = true
 
 [sub_resource type="Resource" id="Resource_64unf"]
 script = ExtResource("3_l1o0h")
 low = 0
-high = 0
+high = 16
 plane = 1
 paint_mode = 2
 blend_mode = 0
