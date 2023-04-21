@@ -380,7 +380,7 @@ func _update_debug_mesh():
 		_debug_mesh_child = MeshInstance3D.new()
 		add_child(_debug_mesh_child)
 	
-	var size = voxel_data.size * configuration.voxel_base_size
+	var size = voxel_data.size * mesh_scale
 	
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_LINES)

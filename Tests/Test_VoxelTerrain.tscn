@@ -1,14 +1,27 @@
-[gd_scene load_steps=2 format=3 uid="uid://ch0hyf2y1fc45"]
+[gd_scene load_steps=4 format=3 uid="uid://ch0hyf2y1fc45"]
 
 [ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelTerrain3D.gd" id="1_fg8wr"]
+[ext_resource type="Resource" uid="uid://b1soikmlwutjf" path="res://addons/TallDwarf/VoxelHammer/Tests/global_test_paintstack.tres" id="2_4ytpm"]
+[ext_resource type="Material" uid="uid://im647kkshlch" path="res://addons/TallDwarf/VoxelHammer/res/mat_transparent.tres" id="2_pbqb4"]
 
 [node name="Test_VoxelTerrain" type="Node3D"]
 
 [node name="VoxelTerrain3D" type="Node3D" parent="."]
 script = ExtResource("1_fg8wr")
-chunk_size = 64
-smallest_voxel = 0.25
-largest_voxel = 32
-cascade_biggest_size = 2048
+paint_stack = ExtResource("2_4ytpm")
+tracking_target = NodePath("../TestTarget")
+chunk_size = 16
+largest_voxel = 2
+cascade_biggest_size = 32
 cascade_smallest_size = 16
-total_chunks = 64
+chunk_cascades = 2
+total_chunks = 16
+
+[node name="TestTarget" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 7, 10)
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="TestTarget"]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 1, 0)
+sides = 12
+cone = true
+material = ExtResource("2_pbqb4")
