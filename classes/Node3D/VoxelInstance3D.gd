@@ -68,7 +68,7 @@ func _on_voxel_configuration_changed(what="all"):
 				#print("%s: connect %s" % [self,voxel_data])
 
 func _on_voxels_changed():
-	#print("VoxelInstance3D: _on_voxels_changed")
+	print("VoxelInstance3D: _on_voxels_changed")
 	#if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
 	#	print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
@@ -261,6 +261,7 @@ func set_voxel(pos : Vector3i, value : int) -> bool:
 func set_mesh(new_mesh:Mesh):
 	_establish_mesh_child()
 	mesh_child.mesh = new_mesh
+	#print("MESH READY")
 	emit_signal("mesh_ready")
 
 
@@ -293,6 +294,9 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation, in_front):
 
 
 func _advance_operation_stack():
+	#if not is_inside_tree():
+	#	return true
+		
 	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
 	if not current_operation:
 		#print("popping from stack %s" % str(current_operation))

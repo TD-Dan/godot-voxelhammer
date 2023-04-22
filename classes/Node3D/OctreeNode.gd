@@ -5,7 +5,12 @@ extends Node3D
 class_name OctreeNode
 
 var size : int = 1
+var leaf_size : int = 1
 var sub_nodes : Array[OctreeNode] = []
+
+var configuration : VoxelConfiguration
+var paint_stack : VoxelPaintStack
+
 var leaf_mesh : Node3D
 
 var type = OCTREE_TYPE.TRUNK
@@ -40,56 +45,74 @@ func _ready():
 func _process(delta):
 	pass
 
-func refresh_position(target_pos : Vector3):
+
+var iterator = -2
+
+# return value indicates whether all children have been processed
+func refresh_position(target_pos : Vector3) -> bool:
 	if not is_inside_tree():
-		return
+		return true
 	
-	_debug_mesh.size = Vector3(size,size,size)
-	
-	_debug_mesh.mesh_color.g = 0
-	if size == 1:
-		type = OCTREE_TYPE.LEAF
-		_debug_mesh.mesh_color.g = 1
-		return
-	
-	var gpos = global_position
-	
-	
-	match type:
-		OCTREE_TYPE.ROOT: _debug_mesh.mesh_color.r = 1
-		OCTREE_TYPE.TRUNK: _debug_mesh.mesh_color.r = 0.75
-		OCTREE_TYPE.BRANCH:
-			_debug_mesh.mesh_color.r = 0.25
-			_debug_mesh.mesh_color.g = 0.5
-		OCTREE_TYPE.LEAF:
-			_debug_mesh.mesh_color.r = 0
-	
-	_debug_mesh.mesh_color.b = 0
-	
-	var is_inside = false
-	
-	if target_pos.x - size/2 < gpos.x + size and target_pos.x + size/2 > gpos.x - size and \
-		target_pos.y - size/2 < gpos.y + size and target_pos.y + size/2 > gpos.y - size and \
-		target_pos.z - size/2 < gpos.z + size and target_pos.z + size/2 > gpos.z - size:
-			is_inside = true
-	
-	if is_inside:
-		_debug_mesh.mesh_color.b = 1
+	# Run self refresh
+	if iterator == -2:
+		_debug_mesh.size = Vector3(size,size,size)
 		
-		if size > 1:
-			if sub_nodes.is_empty():
+		# if already at smallest size, update it
+		if size == leaf_size and not leaf_mesh:
+			type = OCTREE_TYPE.LEAF
+			_debug_mesh.mesh_color = Color(0.25,1,0.25)
+			leaf_mesh = VoxelInstance3D.new()
+			leaf_mesh.voxel_data.size = Vector3i(size,size,size)
+			#leaf_mesh.position = position
+			leaf_mesh.configuration = configuration
+			leaf_mesh.paint_stack = paint_stack
+			add_child.call_deferred(leaf_mesh)
+			return true
+		
+		# Test if we need more detailed sub trees
+		var is_inside = false
+		var gpos = global_position
+		if target_pos.x - size/2 < gpos.x + size and target_pos.x + size/2 > gpos.x - size and \
+			target_pos.y - size/2 < gpos.y + size and target_pos.y + size/2 > gpos.y - size and \
+			target_pos.z - size/2 < gpos.z + size and target_pos.z + size/2 > gpos.z - size:
+				is_inside = true
+		
+		if is_inside:
+			type = OCTREE_TYPE.TRUNK
+			_debug_mesh.mesh_color.b = 1
+		
+			if size > leaf_size and sub_nodes.is_empty():
 				for i in range(8):
 					var new_sub_node = OctreeNode.new()
 					new_sub_node.type = OCTREE_TYPE.TRUNK
 					new_sub_node.size = size / 2
+					new_sub_node.leaf_size = leaf_size
 					new_sub_node.position = octree_initial_positions[i] * size / 2
+					new_sub_node.configuration = configuration
+					new_sub_node.paint_stack = paint_stack
 					sub_nodes.append(new_sub_node)
 					add_child.call_deferred(new_sub_node)
-			
+		else:
+			type = OCTREE_TYPE.BRANCH
 			for sub in sub_nodes:
-				sub.refresh_position(target_pos)
-	else:
-		type = OCTREE_TYPE.BRANCH
-		for sub in sub_nodes:
-			sub.queue_free()
-		sub_nodes = []
+				sub.queue_free()
+			sub_nodes = []
+		
+		iterator = -1
+	
+	if iterator == -1: iterator = sub_nodes.size()-1
+	
+	if iterator > -1:
+		var sub = sub_nodes[iterator]
+		if sub.refresh_position(target_pos):
+			iterator -= 1
+		if iterator > -1:
+			# still processing children, message parent to keep halt iteration
+			return false
+		
+		# All children have been processed, refresh self
+		iterator = -2
+		return true
+	
+	iterator = -2
+	return true
