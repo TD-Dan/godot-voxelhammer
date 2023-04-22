@@ -1,9 +1,6 @@
-
-<img src="https://github.com/kupoli/godot_voxelhammer-examples/blob/main/screenshots/screencap%20220109.jpg">
-
 # VoxelHammer
 
-<img src="https://badgen.net/badge/Godot/v%204.0.2/blue?icon=https://godotengine.org/themes/godotengine/assets/press/icon_monochrome_dark.svg"> <img src="https://badgen.net/badge/license/MIT/blue">
+<img src="https://badgen.net/badge/Godot/v%204.0.2/blue?icon=https://godotengine.org/themes/godotengine/assets/press/icon_monochrome_dark.svg"> <img src="https://badgen.net/badge/license/MIT/blue"> <img src="https://badgen.net/badge/version/v%200.1.0/cyan">
 
 ! BARELY USABLE: MULTIPLE COMMITS INCOMING !
 
