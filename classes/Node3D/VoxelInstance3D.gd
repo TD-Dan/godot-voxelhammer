@@ -68,7 +68,7 @@ func _on_voxel_configuration_changed(what="all"):
 				#print("%s: connect %s" % [self,voxel_data])
 
 func _on_voxels_changed():
-	#print("VoxelInstance3D: _on_voxels_changed")
+	print("VoxelInstance3D: _on_voxels_changed")
 	#if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
 	#	print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
@@ -90,7 +90,7 @@ func _on_voxels_changed():
 		if paint_stack:
 			if voxel_data:
 				voxel_data.clear()
-				push_voxel_operation(VoxelOpPaintStack.new(paint_stack, global_position))
+				push_voxel_operation(VoxelOpPaintStack.new(paint_stack, true))
 
 
 var _col_sibling # only one editing this value is _update_collision_sibling!
@@ -261,6 +261,7 @@ func set_voxel(pos : Vector3i, value : int) -> bool:
 func set_mesh(new_mesh:Mesh):
 	_establish_mesh_child()
 	mesh_child.mesh = new_mesh
+	#print("MESH READY")
 	emit_signal("mesh_ready")
 
 
@@ -293,6 +294,9 @@ func _deferred_push_voxel_op(vox_op : VoxelOperation, in_front):
 
 
 func _advance_operation_stack():
+	#if not is_inside_tree():
+	#	return true
+		
 	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
 	if not current_operation:
 		#print("popping from stack %s" % str(current_operation))
@@ -380,7 +384,7 @@ func _update_debug_mesh():
 		_debug_mesh_child = MeshInstance3D.new()
 		add_child(_debug_mesh_child)
 	
-	var size = voxel_data.size * configuration.voxel_base_size
+	var size = voxel_data.size * mesh_scale
 	
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_LINES)
@@ -421,7 +425,7 @@ func _update_collision_sibling():
 	# Clear previous collision sibling
 	if _col_sibling and _col_sibling != null:
 		if get_parent():
-				get_parent().remove_child(_col_sibling)
+				get_parent().remove_child.call_deferred(_col_sibling)
 		_col_sibling.queue_free()
 		_col_sibling = null
 	
@@ -443,7 +447,7 @@ func _update_collision_sibling():
 				
 	if _generate_collision_sibling:
 		if Engine.is_editor_hint():
-			if get_parent() == get_tree().edited_scene_root:
+			if self == get_tree().edited_scene_root:
 				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node to generate a collision sibling. Set to NONE.")
 				_generate_collision_sibling = COLLISION_MODE.NONE
 				return
@@ -488,7 +492,8 @@ func _update_collision_sibling():
 			_debug_mesh_color = Color(0.5,1.0,0.5)
 
 func _set_editor_as_owner(node):
-	node.owner = get_tree().edited_scene_root
+	if get_tree():
+		node.owner = get_tree().edited_scene_root
 
 
 func _on_show_debug_gizmos_changed(value):

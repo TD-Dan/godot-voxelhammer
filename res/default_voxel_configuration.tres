@@ -14,6 +14,6 @@ voxel_reference_size = 1.0
 mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
-material_to_edit = 1
+material_to_edit = 2
 double_material_size = false
 half_material_size = false
