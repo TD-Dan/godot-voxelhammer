@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csailxdrfty2w"
-path="res://.godot/imported/Eraser.svg-9d46f3973339ff9841659027b1bf3e75.ctex"
+path="res://.godot/imported/Eraser.svg-d77b0b275d0dae66a0bc97bc36ee22a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/godot_voxelhammer/classes/EditorUI/icons/Eraser.svg"
-dest_files=["res://.godot/imported/Eraser.svg-9d46f3973339ff9841659027b1bf3e75.ctex"]
+source_file="res://addons/godot-voxelhammer/classes/EditorUI/icons/Eraser.svg"
+dest_files=["res://.godot/imported/Eraser.svg-d77b0b275d0dae66a0bc97bc36ee22a3.ctex"]
 
 [params]
 

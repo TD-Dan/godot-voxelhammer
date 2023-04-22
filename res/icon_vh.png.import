@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dnpesvmv0c2ag"
-path="res://.godot/imported/icon_vh.png-5717b83a25ab8754b7087673f035b0ae.ctex"
+path="res://.godot/imported/icon_vh.png-2139bfe2dadcd82eb560b636d9810c96.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/godot_voxelhammer/res/icon_vh.png"
-dest_files=["res://.godot/imported/icon_vh.png-5717b83a25ab8754b7087673f035b0ae.ctex"]
+source_file="res://addons/godot-voxelhammer/res/icon_vh.png"
+dest_files=["res://.godot/imported/icon_vh.png-2139bfe2dadcd82eb560b636d9810c96.ctex"]
 
 [params]
 

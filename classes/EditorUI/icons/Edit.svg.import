@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bnla6ylerkkog"
-path="res://.godot/imported/Edit.svg-342609ca214a26bcba84b878754a738e.ctex"
+path="res://.godot/imported/Edit.svg-137e7f1dbbe3cb500890d04e42b73246.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/godot_voxelhammer/classes/EditorUI/icons/Edit.svg"
-dest_files=["res://.godot/imported/Edit.svg-342609ca214a26bcba84b878754a738e.ctex"]
+source_file="res://addons/godot-voxelhammer/classes/EditorUI/icons/Edit.svg"
+dest_files=["res://.godot/imported/Edit.svg-137e7f1dbbe3cb500890d04e42b73246.ctex"]
 
 [params]
 

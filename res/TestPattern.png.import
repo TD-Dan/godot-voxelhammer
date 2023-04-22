@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://drdje8uqd8y50"
-path.s3tc="res://.godot/imported/TestPattern.png-31a833ac22aa6038a843d56594405219.s3tc.ctex"
+path.s3tc="res://.godot/imported/TestPattern.png-9738477a803f5e23824f3403ccdb9a20.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/godot_voxelhammer/res/TestPattern.png"
-dest_files=["res://.godot/imported/TestPattern.png-31a833ac22aa6038a843d56594405219.s3tc.ctex"]
+source_file="res://addons/godot-voxelhammer/res/TestPattern.png"
+dest_files=["res://.godot/imported/TestPattern.png-9738477a803f5e23824f3403ccdb9a20.s3tc.ctex"]
 
 [params]
 

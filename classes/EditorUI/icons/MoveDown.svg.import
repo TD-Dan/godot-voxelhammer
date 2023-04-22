@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dverw0t3u6n87"
-path="res://.godot/imported/MoveDown.svg-f261333caedfcd4e877019ae48554d8d.ctex"
+path="res://.godot/imported/MoveDown.svg-3283020a026f016c0a3b4bb2cb3cee45.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/godot_voxelhammer/classes/EditorUI/icons/MoveDown.svg"
-dest_files=["res://.godot/imported/MoveDown.svg-f261333caedfcd4e877019ae48554d8d.ctex"]
+source_file="res://addons/godot-voxelhammer/classes/EditorUI/icons/MoveDown.svg"
+dest_files=["res://.godot/imported/MoveDown.svg-3283020a026f016c0a3b4bb2cb3cee45.ctex"]
 
 [params]
 
