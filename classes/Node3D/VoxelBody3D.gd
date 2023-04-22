@@ -7,11 +7,23 @@ class_name VoxelBody3D
 @export var paint_mode : bool = false
 @export var paint_mat : int = 2
 
-@onready var voxel_instance : VoxelInstance3D = $VoxelInstance3D
+var voxel_instance : VoxelInstance3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	connect("input_event", _on_input_event)
+	
+	call_deferred("_post_ready_deferred")
+
+
+func _post_ready_deferred():
+	voxel_instance = get_node_or_null("VoxelInstance3D")
+	if not voxel_instance:
+		voxel_instance = VoxelInstance3D.new()
+		add_child(voxel_instance)
+	
+	if Engine.is_editor_hint():
+		voxel_instance.owner = get_tree().edited_scene_root
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

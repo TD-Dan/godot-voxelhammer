@@ -137,7 +137,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 #						surface_tools[material_at_index].set_smooth_group(0)
 					
 					# Reminder to not test:
-					# NO UV:s! Mesh generation is faster without and triplanar texturing makes things so much more easier
+					# NO UV:s! Mesh generation and rendering is faster without and triplanar texturing makes things so much more easier
 					# Triplanar causes flickering when material sampling is 'nearest'
 					# NO append_from(): Its ~20-100x slower than add_vertex
 					

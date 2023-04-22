@@ -1,14 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://dpo4hewo6er6c"]
+[gd_scene load_steps=7 format=3 uid="uid://dpo4hewo6er6c"]
 
-[ext_resource type="Script" path="res://addons/godot_voxelhammer/classes/EditorUI/VoxelHammerDock.gd" id="1_ffqko"]
-[ext_resource type="PackedScene" uid="uid://crnxvjidwoar5" path="res://addons/godot_voxelhammer/classes/EditorUI/PaintStackEditor.tscn" id="2_4p7xf"]
-[ext_resource type="Texture2D" uid="uid://bnla6ylerkkog" path="res://addons/godot_voxelhammer/classes/EditorUI/icons/Edit.svg" id="3_32rcu"]
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/VoxelHammerDock.gd" id="1_guxvn"]
+[ext_resource type="PackedScene" uid="uid://crnxvjidwoar5" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/PaintStackEditor.tscn" id="2_4p7xf"]
+[ext_resource type="Texture2D" uid="uid://ceuiqffp3p82c" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/Tools.svg" id="2_nv7lk"]
+[ext_resource type="Texture2D" uid="uid://bnla6ylerkkog" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/Edit.svg" id="3_32rcu"]
+[ext_resource type="Texture2D" uid="uid://dnpesvmv0c2ag" path="res://addons/TallDwarf/VoxelHammer/res/icon_vh.png" id="3_njf8o"]
+[ext_resource type="Texture2D" uid="uid://7bvueq8nrfet" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/RotateRight.svg" id="5_embum"]
 
 [node name="VoxelHammer" type="Control"]
 layout_mode = 3
 anchor_right = 0.177
 anchor_bottom = 0.597
-script = ExtResource("1_ffqko")
+script = ExtResource("1_guxvn")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 0
@@ -26,10 +29,17 @@ layout_mode = 2
 [node name="EditGlobalsButton" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
 layout_mode = 2
 text = "Edit Global settings"
+icon = ExtResource("2_nv7lk")
+
+[node name="AddVoxBody" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
+layout_mode = 2
+text = "Add VoxelBody3D"
+icon = ExtResource("3_njf8o")
 
 [node name="AddVoxInstance" type="Button" parent="Panel/VBoxContainer/HFlowContainer"]
 layout_mode = 2
 text = "Add VoxelInstance3D"
+icon = ExtResource("3_njf8o")
 
 [node name="HSeparator3" type="HSeparator" parent="Panel/VBoxContainer"]
 layout_mode = 2
@@ -37,10 +47,12 @@ layout_mode = 2
 [node name="SelectedInfo" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 text = "Selection:none"
+autowrap_mode = 2
 
 [node name="SelectedMoreInfo" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 text = "Info on node"
+autowrap_mode = 2
 
 [node name="HSeparator" type="HSeparator" parent="Panel/VBoxContainer"]
 layout_mode = 2
@@ -74,11 +86,13 @@ size_flags_horizontal = 8
 [node name="ButtonMesh" type="Button" parent="Panel/VBoxContainer/VoxelEditTools"]
 layout_mode = 2
 text = "Re-mesh"
+icon = ExtResource("5_embum")
 
 [node name="HSeparator2" type="HSeparator" parent="Panel/VBoxContainer"]
 layout_mode = 2
 
 [node name="SelectedScrollContainer" type="ScrollContainer" parent="Panel/VBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -98,11 +112,13 @@ text = "Paint Stack:"
 [node name="RepaintButton" type="Button" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Repaint"
+icon = ExtResource("5_embum")
 
 [node name="PaintStackEditor" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer" instance=ExtResource("2_4p7xf")]
 layout_mode = 2
 
 [connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/EditGlobalsButton" to="." method="_on_EditGlobalsButton_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/AddVoxBody" to="." method="_on_add_vox_body_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/AddVoxInstance" to="." method="_on_add_vox_instance_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonClear" to="." method="_on_button_clear_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonFill" to="." method="_on_button_fill_pressed"]

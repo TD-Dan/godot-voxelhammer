@@ -108,7 +108,7 @@ func set_item_data(item, paint_op, index):
 		opname = "Noise"
 		spec_info = " "
 	
-	item.set_text(0, "%s (%s, %s, %s ) (%s)" % [opname, mode, paint_op.material, spec_info])
+	item.set_text(0, "%s (%s, %s ) (%s)" % [opname, mode, paint_op.material, spec_info])
 	
 	
 	item.add_button(1, edit_icon)

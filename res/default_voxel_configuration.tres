@@ -1,19 +1,19 @@
 [gd_resource type="Resource" script_class="VoxelConfiguration" load_steps=7 format=3 uid="uid://bvhuwmnl8rsp7"]
 
-[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/godot_voxelhammer/res/mat_error.tres" id="1_cgsr6"]
-[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/godot_voxelhammer/res/mat_uvtest.tres" id="2_6dbqp"]
-[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/godot_voxelhammer/res/mat_benchmark.tres" id="3_ing4u"]
-[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/godot_voxelhammer/res/mat_white.tres" id="4_c0uap"]
-[ext_resource type="Script" path="res://addons/godot_voxelhammer/classes/Resource/VoxelConfiguration.gd" id="5_bxvro"]
-[ext_resource type="Material" uid="uid://im647kkshlch" path="res://addons/godot_voxelhammer/res/mat_transparent.tres" id="5_cj00f"]
+[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/TallDwarf/VoxelHammer/res/mat_error.tres" id="1_cgsr6"]
+[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelConfiguration.gd" id="1_xtxim"]
+[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres" id="2_6dbqp"]
+[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres" id="3_ing4u"]
+[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/TallDwarf/VoxelHammer/res/mat_white.tres" id="4_c0uap"]
+[ext_resource type="Material" uid="uid://im647kkshlch" path="res://addons/TallDwarf/VoxelHammer/res/mat_transparent.tres" id="5_cj00f"]
 
 [resource]
-script = ExtResource("5_bxvro")
+script = ExtResource("1_xtxim")
 materials = Array[Material]([ExtResource("1_cgsr6"), ExtResource("2_6dbqp"), ExtResource("3_ing4u"), ExtResource("4_c0uap"), ExtResource("5_cj00f")])
 voxel_reference_size = 1.0
-mesh_mode = 3
+mesh_mode = 2
 accel_mode = 0
 thread_mode = 1
-material_to_edit = 0
+material_to_edit = 2
 double_material_size = false
 half_material_size = false
