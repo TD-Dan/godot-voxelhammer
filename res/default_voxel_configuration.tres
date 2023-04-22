@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="VoxelConfiguration" load_steps=6 format=3 uid="uid://bvhuwmnl8rsp7"]
 
-[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/godot_voxelhammer/res/mat_error.tres" id="1_mnjje"]
-[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/godot_voxelhammer/res/mat_uvtest.tres" id="2_ohm63"]
-[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/godot_voxelhammer/res/mat_benchmark.tres" id="3_nj17m"]
-[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/godot_voxelhammer/res/mat_white.tres" id="4_sywr3"]
-[ext_resource type="Script" path="res://addons/godot_voxelhammer/classes/Resource/VoxelConfiguration.gd" id="5_h1phy"]
+[ext_resource type="Material" uid="uid://0gykgi4mmdo6" path="res://addons/godot-voxelhammer/res/mat_error.tres" id="1_mnjje"]
+[ext_resource type="Material" uid="uid://qdfs2qt8trs" path="res://addons/godot-voxelhammer/res/mat_uvtest.tres" id="2_ohm63"]
+[ext_resource type="Material" uid="uid://diivkrqknfga3" path="res://addons/godot-voxelhammer/res/mat_benchmark.tres" id="3_nj17m"]
+[ext_resource type="Material" uid="uid://jfdghx0ou4ar" path="res://addons/godot-voxelhammer/res/mat_white.tres" id="4_sywr3"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/Resource/VoxelConfiguration.gd" id="5_h1phy"]
 
 [resource]
 script = ExtResource("5_h1phy")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://crnxvjidwoar5"]
 
-[ext_resource type="Script" path="res://addons/godot_voxelhammer/classes/EditorUI/PaintStackEditor.gd" id="1_lf3ix"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/EditorUI/PaintStackEditor.gd" id="1_lf3ix"]
 
 [node name="PaintStackEditor" type="Control"]
 layout_mode = 3

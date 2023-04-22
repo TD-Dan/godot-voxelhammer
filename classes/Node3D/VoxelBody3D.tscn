@@ -1,9 +1,9 @@
 [gd_scene load_steps=6 format=3 uid="uid://btvioqlwt3ny8"]
 
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelBody3D.gd" id="1_onbsj"]
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Node3D/VoxelInstance3D.gd" id="2_e44dm"]
-[ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/TallDwarf/VoxelHammer/res/default_voxel_configuration.tres" id="3_112mm"]
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/Resource/VoxelData.gd" id="4_sw38j"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/Node3D/VoxelBody3D.gd" id="1_onbsj"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/Node3D/VoxelInstance3D.gd" id="2_e44dm"]
+[ext_resource type="Resource" uid="uid://bvhuwmnl8rsp7" path="res://addons/godot-voxelhammer/res/default_voxel_configuration.tres" id="3_112mm"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/Resource/VoxelData.gd" id="4_sw38j"]
 
 [sub_resource type="Resource" id="Resource_vmocd"]
 script = ExtResource("4_sw38j")
