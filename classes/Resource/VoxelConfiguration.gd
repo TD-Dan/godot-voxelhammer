@@ -91,10 +91,10 @@ func _init():
 	#Hack to circumvent resource loading bug
 	materials.clear()
 	materials.resize(4)
-	materials[0] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_error.tres") as Material
-	materials[1] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_uvtest.tres") as Material
-	materials[2] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_benchmark.tres") as Material
-	materials[3] = preload("res://addons/TallDwarf/VoxelHammer/res/mat_white.tres") as Material
+	materials[0] = preload("../../res/mat_error.tres") as Material
+	materials[1] = preload("../../res/mat_uvtest.tres") as Material
+	materials[2] = preload("../../res/mat_benchmark.tres") as Material
+	materials[3] = preload("../../res/mat_white.tres") as Material
 
 
 func _to_string():

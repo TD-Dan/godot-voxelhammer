@@ -1,14 +1,14 @@
 [gd_scene load_steps=4 format=3 uid="uid://dpo4hewo6er6c"]
 
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/VoxelHammerDock.gd" id="1_guxvn"]
-[ext_resource type="PackedScene" uid="uid://crnxvjidwoar5" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/PaintStackEditor.tscn" id="2_4p7xf"]
-[ext_resource type="Texture2D" uid="uid://bnla6ylerkkog" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/icons/Edit.svg" id="3_32rcu"]
+[ext_resource type="Script" path="res://addons/godot_voxelhammer/classes/EditorUI/VoxelHammerDock.gd" id="1_ffqko"]
+[ext_resource type="PackedScene" uid="uid://crnxvjidwoar5" path="res://addons/godot_voxelhammer/classes/EditorUI/PaintStackEditor.tscn" id="2_4p7xf"]
+[ext_resource type="Texture2D" uid="uid://bnla6ylerkkog" path="res://addons/godot_voxelhammer/classes/EditorUI/icons/Edit.svg" id="3_32rcu"]
 
 [node name="VoxelHammer" type="Control"]
 layout_mode = 3
 anchor_right = 0.177
 anchor_bottom = 0.597
-script = ExtResource("1_guxvn")
+script = ExtResource("1_ffqko")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 0

@@ -17,7 +17,7 @@ var editor_interface : EditorInterface
 @onready var button_paint = $Panel/VBoxContainer/VoxelEditTools/ButtonPaint
 var mousemode_paint = false
 
-@onready var paint_marker_scene = preload("res://addons/TallDwarf/VoxelHammer/res/paint_marker.tscn")
+@onready var paint_marker_scene = preload("../../res/paint_marker.tscn")
 var paint_marker : Node3D
 
 var selection = null:

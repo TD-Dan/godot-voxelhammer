@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://crnxvjidwoar5"]
 
-[ext_resource type="Script" path="res://addons/TallDwarf/VoxelHammer/classes/EditorUI/PaintStackEditor.gd" id="1_or4ri"]
+[ext_resource type="Script" path="res://addons/godot_voxelhammer/classes/EditorUI/PaintStackEditor.gd" id="1_lf3ix"]
 
 [node name="PaintStackEditor" type="Control"]
 layout_mode = 3
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("1_or4ri")
+script = ExtResource("1_lf3ix")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 0

@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lluaqxc2l767"
-path.s3tc="res://.godot/imported/TestPatternHeightMap.png-8cc39b1c8248f3adfb811c776b9b1088.s3tc.ctex"
+path.s3tc="res://.godot/imported/TestPatternHeightMap.png-2eb7f4f416510cf232242026e736b8d3.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://addons/TallDwarf/VoxelHammer/res/TestPatternHeightMap.png"
-dest_files=["res://.godot/imported/TestPatternHeightMap.png-8cc39b1c8248f3adfb811c776b9b1088.s3tc.ctex"]
+source_file="res://addons/godot_voxelhammer/res/TestPatternHeightMap.png"
+dest_files=["res://.godot/imported/TestPatternHeightMap.png-2eb7f4f416510cf232242026e736b8d3.s3tc.ctex"]
 
 [params]
 
