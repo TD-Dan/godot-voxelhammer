@@ -1,6 +1,6 @@
 [gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://diivkrqknfga3"]
 
-[ext_resource type="Texture2D" uid="uid://c8qrdmjj81dcr" path="res://addons/TallDwarf/VoxelHammer/res/benchmark.png" id="1_itd8k"]
+[ext_resource type="Texture2D" uid="uid://c8qrdmjj81dcr" path="res://addons/godot_voxelhammer/res/benchmark.png" id="1_itd8k"]
 
 [resource]
 albedo_texture = ExtResource("1_itd8k")
