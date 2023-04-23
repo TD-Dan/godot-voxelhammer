@@ -68,7 +68,7 @@ func _on_voxel_configuration_changed(what="all"):
 				#print("%s: connect %s" % [self,voxel_data])
 
 func _on_voxels_changed():
-	print("VoxelInstance3D: _on_voxels_changed")
+	#print("VoxelInstance3D: _on_voxels_changed")
 	#if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
 	#	print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
