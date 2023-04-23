@@ -24,11 +24,10 @@ signal voxel_configuration_changed(what)
 enum MESH_MODE {
 	NONE,
 	CUBES,
-	FACES,
-	FAST
+	FACES
 }
 ## Mesh generation strategy to use
-@export var mesh_mode : MESH_MODE = MESH_MODE.FAST:
+@export var mesh_mode : MESH_MODE = MESH_MODE.FACES:
 	set(v):
 		mesh_mode = v
 		emit_signal("voxel_configuration_changed", "mesh_mode")

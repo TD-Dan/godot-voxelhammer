@@ -42,9 +42,6 @@ func run_operation():
 				construct_mesh_cubes(local_data_buffer, local_vis_buffer, local_buffer_dimensions)
 			VoxelConfiguration.MESH_MODE.FACES:
 				construct_mesh_faces(local_data_buffer, local_vis_buffer, local_buffer_dimensions)
-			VoxelConfiguration.MESH_MODE.FAST:
-				mesh_empty = true
-				#construct_mesh_fast(local_data_buffer, local_vis_buffer, local_buffer_dimensions)
 			_:
 				call_deferred("push_warning", "VoxelOpCreateMesh: mesh mode unimplented -> cancelling")
 				mesh_empty = true
