@@ -105,8 +105,13 @@ var _octrees : Array[OctreeNode] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Connect to VoxelHammer autoload
+	var vh = get_node_or_null("/root/VoxelHammer")
+	if vh:
+		if not configuration:
+			configuration = vh.default_configuration
+			
 	_tracking_target = get_node_or_null(tracking_target)
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
