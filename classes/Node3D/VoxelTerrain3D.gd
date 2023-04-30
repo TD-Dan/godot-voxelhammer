@@ -72,7 +72,7 @@ var _cascade_smallest_size : int = 32
 		return _cascade_smallest_size
 
 
-var _chunk_cascades : int = 8
+var _chunk_cascades : int = 3
 ## Number of progressively larger chunk sizes to generate
 @export var chunk_cascades : int = 8:
 	set(nv):
