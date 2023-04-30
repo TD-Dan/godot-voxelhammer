@@ -90,7 +90,7 @@ func _on_voxels_changed():
 		if paint_stack:
 			if voxel_data:
 				voxel_data.clear()
-				push_voxel_operation(VoxelOpPaintStack.new(paint_stack, true))
+				push_voxel_operation(VoxelOpPaintStack.new(paint_stack))
 
 
 var _col_sibling # only one editing this value is _update_collision_sibling!
@@ -190,9 +190,11 @@ func _establish_mesh_child():
 	if not mesh_child:
 		mesh_child = MeshInstance3D.new()
 		mesh_child.name = "VoxelMeshInstance3D"
-		mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
 		call_deferred("add_child", mesh_child)
 	
+	mesh_child.position = Vector3.ZERO
+	mesh_child.rotation = Vector3.ZERO
+	mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
 	# if in editor update owner to view it scenetree and enable selection of this object
 	if Engine.is_editor_hint():
 		call_deferred("_set_editor_as_owner", mesh_child)

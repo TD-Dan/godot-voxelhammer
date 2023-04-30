@@ -3,15 +3,13 @@ extends VoxelOperation
 class_name VoxelOpPaintStack
 
 var paint_stack
-var use_global_position
 
 
 var blend_buffer : PackedFloat32Array = PackedFloat32Array()
 
-func _init(paint_stack : VoxelPaintStack, use_global_position=false):
+func _init(paint_stack : VoxelPaintStack):
 	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
 	self.paint_stack = paint_stack
-	self.use_global_position = use_global_position
 
 
 # This code is potentially executed in another thread!
@@ -22,7 +20,7 @@ func run_operation():
 	var local_position_offset = Vector3(0,0,0)
 	var local_scale = 1.0
 	
-	if use_global_position:
+	if paint_stack.use_global_coordinates:
 		local_position_offset = voxel_instance.global_position
 		local_scale = voxel_instance.mesh_scale
 	
@@ -55,7 +53,7 @@ func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : Voxe
 							return
 						
 						point = Vector3(x,y,z)
-						if use_global_position:
+						if paint_stack.use_global_coordinates:
 							point *= scale
 							point += position_offset
 						

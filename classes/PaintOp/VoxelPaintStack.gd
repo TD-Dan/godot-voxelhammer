@@ -13,10 +13,15 @@ class_name VoxelPaintStack
 
 signal operation_stack_changed
 
+@export var use_global_coordinates = true:
+	set(nv):
+		use_global_coordinates = nv
+		emit_signal("operation_stack_changed")
+
 # Array of PaintOperations
 @export var operation_stack : Array = Array():
-	set(v):
-		operation_stack = v
+	set(nv):
+		operation_stack = nv
 		emit_signal("operation_stack_changed")
 
 enum AXIS_PLANE {
