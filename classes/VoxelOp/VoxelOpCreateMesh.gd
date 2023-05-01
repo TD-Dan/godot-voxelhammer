@@ -160,7 +160,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	for key in surface_tools.keys():
 		#surface_tools[key].index()
 		surface_tools[key].generate_normals()
-		surface_tools[key].generate_tangents()
+		#surface_tools[key].generate_tangents()
 		mesh_buffer.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_tools[key].commit_to_arrays())
 		material_table[i] = key
 		i = i+1
@@ -256,7 +256,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	for key in surface_tools.keys():
 		#surface_tools[key].index()
 		surface_tools[key].generate_normals()
-		surface_tools[key].generate_tangents()
+		#surface_tools[key].generate_tangents()
 		mesh_buffer.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_tools[key].commit_to_arrays())
 		material_table[i] = key
 		i = i+1
