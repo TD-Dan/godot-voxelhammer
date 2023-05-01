@@ -33,7 +33,7 @@ func run_operation():
 
 # This code is executed in another thread so it can not access voxel_node variable!
 func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3 = Vector3(0,0,0), scale = 1.0):
-	print("Applying Voxel Paint stack...")
+	#print("Applying Voxel Paint stack...")
 	
 	var sx :int = size.x
 	var sy :int = size.y
