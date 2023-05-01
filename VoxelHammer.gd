@@ -6,6 +6,8 @@ extends Node
 
 signal show_debug_gizmos_changed(value)
 
+@export var plugin_directory = "res://addons/godot-voxelhammer/"
+
 @export var default_configuration : Resource = preload("./res/default_voxel_configuration.tres")
 
 @export var show_debug_gizmos = false:
