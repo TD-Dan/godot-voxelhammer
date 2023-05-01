@@ -87,11 +87,15 @@ func _on_voxels_changed():
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
 		paint_stack = nv
-		if paint_stack:
-			if voxel_data:
-				voxel_data.clear()
-				push_voxel_operation(VoxelOpPaintStack.new(paint_stack))
+		voxel_data.clear()
+		apply_paintstack()
 
+func apply_paintstack(draw_stack : VoxelPaintStack = null):
+	if not draw_stack: draw_stack = paint_stack
+	if draw_stack:
+		if voxel_data:
+			push_voxel_operation(VoxelOpPaintStack.new(draw_stack))
+	
 
 var _col_sibling # only one editing this value is _update_collision_sibling!
 
@@ -269,7 +273,6 @@ func set_mesh(new_mesh:Mesh):
 	mesh_child.mesh = new_mesh
 	#print("MESH READY")
 	emit_signal("mesh_ready")
-
 
 # Force redraw of mesh
 func remesh():

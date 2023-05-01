@@ -25,6 +25,8 @@ func _enter_tree():
 	add_control_to_dock(DOCK_SLOT_RIGHT_BL, dock)
 	
 	add_autoload_singleton("VoxelHammer", "res://addons/godot-voxelhammer/VoxelHammer.gd")
+	
+	print("VoxelHammer plugin load ready")
 
 
 func _exit_tree():
@@ -41,6 +43,8 @@ func _exit_tree():
 		dock.free()
 	
 	remove_autoload_singleton("VoxelHammer")
+	
+	print("VoxelHammer plugin unload ready")
 
 
 func _handles(object: Object) -> bool:

@@ -12,3 +12,4 @@ func _init(blend_mode = VoxelPaintStack.BLEND_MODE.NORMAL, material = 1, low = 0
 	super(blend_mode,material)
 	self.low = low
 	self.high = high
+
