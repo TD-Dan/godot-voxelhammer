@@ -1,7 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://c6xirm7yafwrn"]
-
-[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/Node3D/DebugMesh.gd" id="1_3201j"]
-
-[node name="DebugMesh" type="Node3D"]
-script = ExtResource("1_3201j")
-mesh_color = Color(0.517647, 0.517647, 0.517647, 1)

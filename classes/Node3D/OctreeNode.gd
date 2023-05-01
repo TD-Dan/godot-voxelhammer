@@ -62,6 +62,7 @@ func refresh_position(target_pos : Vector3) -> bool:
 			type = OCTREE_TYPE.LEAF
 			_debug_mesh.mesh_color = Color(0.25,1,0.25)
 			leaf_mesh = VoxelInstance3D.new()
+			leaf_mesh.voxel_data = VoxelData.new()
 			leaf_mesh.voxel_data.size = Vector3i(size,size,size)
 			leaf_mesh.configuration = configuration
 			leaf_mesh.paint_stack = paint_stack
