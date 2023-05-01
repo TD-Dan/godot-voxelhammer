@@ -10,7 +10,7 @@ class_name VoxelBody3D
 var voxel_instance : VoxelInstance3D
 
 # Called when the node enters the scene tree for the first time.
-func _ready():
+func _ready():	
 	connect("input_event", _on_input_event)
 	
 	call_deferred("_post_ready_deferred")
@@ -18,8 +18,13 @@ func _ready():
 
 func _post_ready_deferred():
 	voxel_instance = get_node_or_null("VoxelInstance3D")
+	
 	if not voxel_instance:
+		print("creating new")
 		voxel_instance = VoxelInstance3D.new()
+		voxel_instance.name = "VoxelInstance3D"
+		voxel_instance.voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_B_on_block.tres").duplicate()
+		voxel_instance.generate_collision_sibling = VoxelInstance3D.COLLISION_MODE.CONCAVE_MESH
 		add_child(voxel_instance)
 	
 	if Engine.is_editor_hint():

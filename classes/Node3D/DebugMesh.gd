@@ -68,4 +68,4 @@ func _update_debug_mesh():
 	st.add_vertex(Vector3(0,size.y,size.z))
 	
 	_debug_mesh_child.mesh = st.commit()
-	_debug_mesh_child.mesh.surface_set_material(0, load("res://addons/godot-voxelhammer/res/line.tres"))
+	_debug_mesh_child.mesh.surface_set_material(0, load(VoxelHammer.plugin_directory+"res/line.tres"))

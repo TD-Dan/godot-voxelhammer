@@ -224,7 +224,7 @@ func _on_add_vox_instance_pressed():
 		new_parent = sel[0]
 	
 	if new_parent:
-		var new_vox = load("../Node3D/VoxelInstance3D.tscn").instantiate()
+		var new_vox = load(VoxelHammer.plugin_directory + "classes/Node3D/VoxelInstance3D.tscn").instantiate()
 		new_vox.name = "VoxelInstance3D"
 		new_parent.add_child(new_vox,true)
 		new_vox.owner = new_owner
@@ -243,7 +243,7 @@ func _on_add_vox_body_pressed():
 		new_parent = sel[0]
 	
 	if new_parent:
-		var new_vox = load("../Node3D/VoxelBody3D.tscn").instantiate()
+		var new_vox = load(VoxelHammer.plugin_directory + "classes/Node3D/VoxelBody3D.tscn").instantiate()
 		new_vox.name = "VoxelBody3D"
 		new_parent.add_child(new_vox,true)
 		new_vox.owner = new_owner

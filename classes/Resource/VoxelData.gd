@@ -17,7 +17,7 @@ class_name VoxelData
 signal voxel_data_changed
 
 
-@export var size : Vector3i = Vector3i(8,8,8):
+@export var size : Vector3i = Vector3i(4,4,4):
 	set(nv):
 		#print("VoxelData set size: %s" % nv)
 		if nv.x <= 0 or nv.y <= 0 or nv.z <= 0:

@@ -50,7 +50,7 @@ func _on_voxel_configuration_changed(what="all"):
 	# Force recalculation of mesh
 	_on_voxels_changed()
 
-@export var voxel_data : Resource = VoxelData.new(1): # : VoxelData
+@export var voxel_data : Resource: # VoxelData
 	set(nv):
 		#print("%s: _set_voxel_data" % self)
 		
@@ -158,6 +158,10 @@ var current_operation : VoxelOperation = null
 
 func _ready():
 	#print("VoxelInstance3D: _ready")
+	
+	if not voxel_data:
+		voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_M_on_block.tres").duplicate()
+	
 	_establish_mesh_child()
 	
 	# Connect to VoxelHammer autoload
@@ -201,7 +205,7 @@ func _establish_mesh_child():
 
 
 func _enter_tree():
-	pass#_update_collision_sibling() # !important! needs to be updated incase we are inside editor
+	pass
 
 func _exit_tree():
 	#print("VoxelInstance3D %s: _exit_tree" % self)
@@ -214,7 +218,7 @@ func _exit_tree():
 	if worker_thread and worker_thread.is_started():
 		worker_thread.wait_to_finish()
 	
-	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor
+	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor. This removes the sibling alongside the VoxelInstance3D.
 
 
 func _notification(what):
@@ -420,7 +424,7 @@ func _update_debug_mesh():
 	st.add_vertex(Vector3(0,size.y,size.z))
 	
 	_debug_mesh_child.mesh = st.commit()
-	_debug_mesh_child.mesh.surface_set_material(0, load("res://addons/godot-voxelhammer/res/line.tres"))
+	_debug_mesh_child.mesh.surface_set_material(0, load(VoxelHammer.plugin_directory+"res/line.tres"))
 
 
 func _update_collision_sibling():
