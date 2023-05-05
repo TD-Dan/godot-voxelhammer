@@ -97,13 +97,16 @@ func set_item_data(item, paint_op, index):
 	var spec_info = ""
 	if paint_op is PaintOpPlane:
 		opname = "Plane"
-		spec_info = "%s, %s " % [paint_op.low, paint_op.high]
+		spec_info = "%s to %s " % [paint_op.low, paint_op.high]
 	if paint_op is PaintOpGradient:
 		opname = "Gradient"
 		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
 	if paint_op is PaintOpGradientVector:
 		opname = "GradientVector"
 		spec_info = "%s, %s " % [paint_op.offset, paint_op.distance]
+	if paint_op is PaintOpSphere:
+		opname = "Sphere"
+		spec_info = "@%s r=%s " % [paint_op.center, paint_op.radius]
 	if paint_op is PaintOpNoise:
 		opname = "Noise"
 		spec_info = " "
@@ -136,13 +139,15 @@ func _on_add_popup_selection(index):
 	var paint_op = null
 	
 	match index:
-		0: # Plane
+		0:
 			paint_op = PaintOpPlane.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 1)
-		1: # Gradient
+		1:
 			paint_op = PaintOpGradient.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 10)
-		2: # GradientVector
+		2:
 			paint_op = PaintOpGradientVector.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1, 0, 10)
-		3: # Simplex noise
+		3:
+			paint_op = PaintOpSphere.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1)
+		4:
 			paint_op = PaintOpNoise.new(VoxelPaintStack.PAINT_MODE.NORMAL, 1)
 	
 	if paint_op:

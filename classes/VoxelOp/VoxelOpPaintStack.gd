@@ -116,6 +116,13 @@ func do_paint_stack(data : PackedInt64Array, blend_buffer : PackedFloat32Array, 
 							dot = 1 - dot
 							blend_value_at_point = dot
 						
+						if op is PaintOpSphere:
+							var distance2 = (point.x-op.center.x)*(point.x-op.center.x)+(point.y-op.center.y)*(point.y-op.center.y)+(point.z-op.center.z)*(point.z-op.center.z)
+							var radius2 = op.radius*op.radius
+							if distance2 < radius2:
+								draw_at_point = true
+								blend_value_at_point = remap(distance2, 0, radius2, 1.0, 0.0)
+							
 						if op is PaintOpNoise:
 							draw_at_point = true
 							blend_value_at_point = (op.noise.get_noise_3d(point.x, point.y, point.z) + 1.0)
