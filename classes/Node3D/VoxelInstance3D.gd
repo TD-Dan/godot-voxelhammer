@@ -95,7 +95,7 @@ func apply_paintstack(draw_stack : VoxelPaintStack = null):
 	if draw_stack:
 		if voxel_data:
 			push_voxel_operation(VoxelOpPaintStack.new(draw_stack))
-	
+
 
 var _col_sibling # only one editing this value is _update_collision_sibling!
 
@@ -126,6 +126,8 @@ var _generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE
 var data_buffer : PackedInt64Array = PackedInt64Array()
 var data_buffer_dimensions : Vector3i = Vector3i()
 var data_buffer_mutex = Mutex.new()
+
+var blend_buffer : PackedFloat32Array = PackedFloat32Array()
 
 var vis_buffer : PackedByteArray = PackedByteArray()
 var visibility_count = null

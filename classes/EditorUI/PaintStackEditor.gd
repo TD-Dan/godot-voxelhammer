@@ -153,7 +153,7 @@ func _on_add_popup_selection(index):
 
 
 func _on_Tree_button_pressed(item, column, id, mouse_button_index):
-	print("Tree: button pressed")
+	#print("Tree: button pressed")
 	var paint_op : PaintOperation = item.get_metadata(0)
 	var index = item.get_metadata(1)
 	if column == 1 and Engine.is_editor_hint() and editor_interface: # edit in inspector

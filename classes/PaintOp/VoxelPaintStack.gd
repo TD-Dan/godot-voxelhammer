@@ -13,10 +13,26 @@ class_name VoxelPaintStack
 
 signal operation_stack_changed
 
+## Use global coordinates instead of local ones when calculating PaintOperations
 @export var use_global_coordinates = true:
 	set(nv):
 		use_global_coordinates = nv
 		emit_signal("operation_stack_changed")
+
+
+## Clear voxel_data to 0 before applying PaintStack
+@export var clear_voxel_data = true:
+	set(nv):
+		clear_voxel_data = nv
+		emit_signal("operation_stack_changed")
+
+
+## Clear blend_buffer to 0 before applying PaintStack
+@export var clear_blend_buffer = false:
+	set(nv):
+		clear_blend_buffer = nv
+		emit_signal("operation_stack_changed")
+
 
 # Array of PaintOperations
 @export var operation_stack : Array = Array():

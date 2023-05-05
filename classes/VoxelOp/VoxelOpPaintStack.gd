@@ -5,8 +5,6 @@ class_name VoxelOpPaintStack
 var paint_stack
 
 
-var blend_buffer : PackedFloat32Array = PackedFloat32Array()
-
 func _init(paint_stack : VoxelPaintStack):
 	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
 	self.paint_stack = paint_stack
@@ -26,22 +24,27 @@ func run_operation():
 	
 	voxel_instance.data_buffer_mutex.unlock()
 	
-	do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.voxel_data.size, paint_stack, local_position_offset, local_scale)
+	do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.blend_buffer, voxel_instance.voxel_data.size, paint_stack, local_position_offset, local_scale)
 		
 	voxel_instance.voxel_data.call_deferred("notify_data_changed")
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func do_paint_stack(data : PackedInt64Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3 = Vector3(0,0,0), scale = 1.0):
+func do_paint_stack(data : PackedInt64Array, blend_buffer : PackedFloat32Array, size : Vector3i, paint_stack : VoxelPaintStack, position_offset : Vector3 = Vector3(0,0,0), scale = 1.0):
 	#print("Applying Voxel Paint stack...")
 	
 	var sx :int = size.x
 	var sy :int = size.y
 	var sz :int = size.z
-	
 	var point : Vector3
 	
-	blend_buffer.resize(data.size())
+	if paint_stack.clear_voxel_data:
+		data.fill(0)
+		
+	if blend_buffer.is_empty():
+		blend_buffer.resize(data.size())
+	if paint_stack.clear_blend_buffer:
+		blend_buffer.fill(0.0)
 	
 	for op in paint_stack.operation_stack:
 		if op.active:
