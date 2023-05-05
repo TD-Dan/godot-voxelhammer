@@ -119,7 +119,7 @@ func _forward_3d_gui_input(viewport_camera: Camera3D, event: InputEvent):
 					params.from = from
 					params.to = to
 					var results =  space_state.intersect_ray(params)
-					print(results)
+					#print(results)
 					if results.size() > 0:
 						var pos : Vector3 = selection.to_local(results["position"])
 						var norm = results["normal"]
