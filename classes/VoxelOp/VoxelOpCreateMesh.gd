@@ -120,6 +120,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 				material_at_index = data[ci]
 				
 				if vis_buffer[ci] and material_at_index:
+					if material_at_index < 0: material_at_index = 0
 					if not material_at_index in surface_tools:
 						#print("added surface tool %s" % material_at_index)
 						surface_tools[material_at_index] = SurfaceTool.new()
@@ -210,6 +211,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 				var visible_at_index = vis_buffer[ci]
 				
 				if material_at_index and visible_at_index:
+					if material_at_index < 0: material_at_index = 0
 					if not material_at_index in surface_tools:
 						surface_tools[material_at_index] = SurfaceTool.new()
 						surface_tools[material_at_index].begin(Mesh.PRIMITIVE_TRIANGLES)
