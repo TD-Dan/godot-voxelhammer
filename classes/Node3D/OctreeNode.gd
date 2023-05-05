@@ -11,7 +11,7 @@ var sub_nodes : Array[OctreeNode] = []
 var configuration : VoxelConfiguration
 var paint_stack : VoxelPaintStack
 
-var leaf_mesh : Node3D
+var leaf_mesh : VoxelInstance3D
 
 var type = OCTREE_TYPE.TRUNK
 
@@ -58,15 +58,18 @@ func refresh_position(target_pos : Vector3) -> bool:
 		_debug_mesh.size = Vector3(size,size,size)
 		
 		# if already at smallest size, update it
-		if size == leaf_size and not leaf_mesh:
-			type = OCTREE_TYPE.LEAF
-			_debug_mesh.mesh_color = Color(0.25,1,0.25)
-			leaf_mesh = VoxelInstance3D.new()
-			leaf_mesh.voxel_data = VoxelData.new()
-			leaf_mesh.voxel_data.size = Vector3i(size,size,size)
-			leaf_mesh.configuration = configuration
-			leaf_mesh.paint_stack = paint_stack
-			add_child.call_deferred(leaf_mesh)
+		if size == leaf_size:
+			if not leaf_mesh:
+				type = OCTREE_TYPE.LEAF
+				_debug_mesh.mesh_color = Color(0.25,1,0.25)
+				leaf_mesh = VoxelInstance3D.new()
+				leaf_mesh.voxel_data = VoxelData.new()
+				leaf_mesh.voxel_data.size = Vector3i(size,size,size)
+				leaf_mesh.configuration = configuration
+				leaf_mesh.paint_stack = paint_stack
+				add_child.call_deferred(leaf_mesh)
+			#else:
+			#	leaf_mesh.apply_paintstack()
 			return true
 		
 		# Test if we need more detailed sub trees
