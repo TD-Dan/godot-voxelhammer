@@ -116,8 +116,8 @@ func do_paint_stack(data : PackedInt64Array, blend_buffer : PackedFloat32Array, 
 							dot = 1 - dot
 							blend_value_at_point = dot
 						
-						if op is PaintOpSphere:
-							var distance2 = (point.x-op.center.x)*(point.x-op.center.x)+(point.y-op.center.y)*(point.y-op.center.y)+(point.z-op.center.z)*(point.z-op.center.z)
+						if op is PaintOpSphere: 
+							var distance2 = (point - op.center).length_squared()
 							var radius2 = op.radius*op.radius
 							if distance2 < radius2:
 								draw_at_point = true
