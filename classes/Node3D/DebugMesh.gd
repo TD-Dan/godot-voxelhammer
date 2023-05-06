@@ -11,14 +11,18 @@ class_name DebugMesh
 
 
 
-@export var mesh_color : Color = Color(0,0,0):
+@export var color : Color = Color(0,0,0):
 	set(v):
-		mesh_color = v
+		color = v
 		_update_debug_mesh()
 
 
 # Debug linemesh that shows current mesh calculation status and size
 var _debug_mesh_child : MeshInstance3D = null
+
+
+func _init(color = Color(1,1,1)):
+	self.color = color
 
 
 # Called when the node enters the scene tree for the first time.
@@ -38,7 +42,7 @@ func _update_debug_mesh():
 	
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_LINES)
-	st.set_color(mesh_color)
+	st.set_color(color)
 	
 	st.add_vertex(Vector3(0,0,0))
 	st.add_vertex(Vector3(size.x,0,0))

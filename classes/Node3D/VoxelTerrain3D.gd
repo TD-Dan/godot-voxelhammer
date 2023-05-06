@@ -102,7 +102,7 @@ func _calculate_num_cascades():
 	_chunk_cascades = n
 
 
-var chunks : VoxelChunkServer
+var chunks : ChunkManager
 #var _cascades : CascadeManager
 
 
