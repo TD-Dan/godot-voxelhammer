@@ -27,19 +27,20 @@ signal chunk_deactivated
 signal chunk_unloaded
 
 @export var chunk_size : int = 16
+
+@export_group("Database File")
 @export var database_folder : String = ""
 @export var database_uid : String = ""
 @export var database_name : String = ""
+@export var database_format : String = ""
+@export var create_database : bool = false:
+	set(nv): rebuild_database_folder()
 
+@export_group("Chunk generation")
 @export var max_chunks : int = 50
 @export var max_active : int = 20
 
 @export var thread_mode : VoxelConfiguration.THREAD_MODE = VoxelConfiguration.THREAD_MODE.NONE
-
-class Chunk:
-	var position : Vector3i = Vector3i.ZERO
-	var data : Dictionary = Dictionary()
-	var active = false
 
 
 var chunks : Dictionary = {}
@@ -52,20 +53,36 @@ var hotspots : Dictionary = Dictionary()
 
 func _ready():
 	if database_folder == "":
-		database_folder = "usr://chunkdata/"
+		database_folder = "user://chunkdata"
 	if database_uid == "":
 		var rando = RandomNumberGenerator.new()
 		rando.randomize()
 		database_uid = str(str(rando.randi())+OS.get_unique_id()).sha256_text().left(10)
 	if database_name == "":
 		database_name = "Unnamed"
+	if database_format == "":
+		database_format = "tscn"
+	rebuild_database_folder()
 
 
-var frame = 0
-func _process(delta):
-	if chunks.is_empty(): return
-	if hotspots.is_empty(): return
+func rebuild_database_folder():
+	var global_path = ProjectSettings.globalize_path(database_folder)
+	var full_path = global_path+"/"+database_name+"-"+database_uid+"/"
+	if not DirAccess.dir_exists_absolute(full_path):
+		print("FOLDER %s does not exist at %s" % [database_folder, full_path])
+		var error = DirAccess.make_dir_absolute(full_path)
+		if error:
+			push_error("ChunkManager: CANT CREATE FOLDER %s %s : %s" % [database_folder, full_path, error_string(error)])
+	else:
+		print("FOLDER %s exist at %s" % [database_folder, full_path])
+
+func _exit_tree():
+	for chunk in chunks.values():
+		chunk.save_to_disk("%s/%s-%s/%s.%s" % [database_folder, database_name, database_uid, chunk.get_filename(), database_format])
 	
+	
+var frame = 0
+func _process(delta):	
 	if frame < 1:
 		_round_robin_save_chunks_to_disk()
 	elif frame < 2:
@@ -80,6 +97,8 @@ func _process(delta):
 
 var sctd_iterator = 0
 func _round_robin_save_chunks_to_disk():
+	if chunks.is_empty(): return
+	
 	var chunk = chunks.values()[sctd_iterator]
 	#print(sctd_iterator)
 	
@@ -90,6 +109,8 @@ func _round_robin_save_chunks_to_disk():
 
 var kha_iterator = 0
 func _round_robin_keep_hotspots_active():
+	if hotspots.is_empty(): return
+	
 	var hotspot : Node3D = hotspots.keys()[kha_iterator]
 	var found_chunk = get_chunk_at(hotspot.global_position, false)
 	
@@ -105,6 +126,8 @@ func _round_robin_keep_hotspots_active():
 
 var eh_iterator = 0
 func _round_robin_expand_hotspots():
+	if hotspots.is_empty(): return
+	
 	if chunks.size() > max_chunks: return
 	
 	var hotspot : Node3D = hotspots.keys()[eh_iterator]
