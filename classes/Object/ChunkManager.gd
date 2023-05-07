@@ -78,7 +78,7 @@ func rebuild_database_folder():
 
 func _exit_tree():
 	for chunk in chunks.values():
-		chunk.save_to_disk("%s/%s-%s/%s.%s" % [database_folder, database_name, database_uid, chunk.get_filename(), database_format])
+		chunk.save_to_disk(position_to_globalpath(chunk.position))
 	
 	
 var frame = 0
@@ -113,6 +113,7 @@ func _round_robin_keep_hotspots_active():
 	
 	var hotspot : Node3D = hotspots.keys()[kha_iterator]
 	var found_chunk = get_chunk_at(hotspot.global_position, false)
+	if not found_chunk: return
 	
 	if not found_chunk.active:
 		active_chunks[found_chunk.position] = found_chunk
@@ -162,18 +163,26 @@ func remove_hotspot(hotspot : Node3D):
 func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	#print("ChunkManager: getting chunk at %s" % point)
 	var index_position = point.snapped(Vector3i(chunk_size,chunk_size,chunk_size))
-	var found_chunk = chunks.get(index_position)
-	if found_chunk:
-		return found_chunk
-	else:
-		if not create_missing: return null
+	var loaded_chunk = chunks.get(index_position)
+	if loaded_chunk:
+		return loaded_chunk
 		
-		var new_chunk = Chunk.new()
-		new_chunk.position = index_position
-		chunks[index_position] = new_chunk
-		emit_signal("new_chunk_created", new_chunk)
-		emit_signal("chunk_loaded", new_chunk)
-		return new_chunk
+	if FileAccess.file_exists(position_to_globalpath(index_position)):
+		var disk_chunk = Chunk.load_from_disk(position_to_globalpath(index_position))
+		chunks[index_position] = disk_chunk
+		emit_signal("chunk_loaded", disk_chunk)
+		return disk_chunk
+		
+	if not create_missing: return null
+	
+	var new_chunk = Chunk.new()
+	new_chunk.name = Chunk.get_filename(chunk_size,index_position)
+	new_chunk.position = index_position
+	new_chunk.size = chunk_size
+	chunks[index_position] = new_chunk
+	emit_signal("new_chunk_created", new_chunk)
+	emit_signal("chunk_loaded", new_chunk)
+	return new_chunk
 
 
 func _on_update_timer():
@@ -182,3 +191,7 @@ func _on_update_timer():
 
 func _on_hotspot_deleted(hotspot):
 	print("ChunkManager: Received 'hotspot deleted' for %s" % hotspot)
+
+
+func position_to_globalpath(pos : Vector3i) -> String:
+	return "%s/%s-%s/%s.%s" % [database_folder, database_name, database_uid, Chunk.get_filename(chunk_size, pos), database_format]
