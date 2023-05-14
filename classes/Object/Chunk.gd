@@ -23,7 +23,7 @@ var dist_to_closest_hotspot = 0
 
 ## Save all persistent_data to disk
 func save_to_disk(completefilepath):
-	print("Chunk saving to disk : " + completefilepath)
+	#print("Chunk saving to disk : " + completefilepath)
 	var packet = PackedScene.new()
 	var save_node = self
 	var error = packet.pack(save_node)
@@ -38,7 +38,7 @@ func save_to_disk(completefilepath):
 
 ## Load all persistent_data from disk and return a Chunk containing it
 static func load_from_disk(completefilepath):
-	print("Chunk loading from disk : " + completefilepath)
+	#print("Chunk loading from disk : " + completefilepath)
 	var load_packet : PackedScene = ResourceLoader.load(completefilepath, "", ResourceLoader.CACHE_MODE_IGNORE)
 	return load_packet.instantiate()
 

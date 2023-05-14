@@ -13,24 +13,25 @@ class_name ChunkManager
 
 ## Completely new chunk is being generated
 signal new_chunk_created
-
 ## Existing chunk has been loaded into memory, but not yet active
 signal chunk_loaded
-
 ## Chunk is added to the active world area
 signal chunk_activated
-
 ## Chunk is removed from the active world area, but not unloaded
 signal chunk_deactivated
-
 ## Chunk is completely removed from memory and potentially written to disk
 signal chunk_unloaded
+
+signal hotspot_added
+signal hotspot_removed
+
 
 @export var chunk_size : int = 16:
 	set(nv):
 		chunk_size = nv
 		half_chunk = Vector3i(nv/2,nv/2,nv/2)
 @export var half_chunk : Vector3i
+
 
 @export_group("Database File")
 ## database base folder, usually "user://somefolder"
@@ -49,9 +50,19 @@ signal chunk_unloaded
 
 @export_group("Chunk generation")
 ## How many chunks to keep in memory, even if some of them are not active. This can mitigate unneeded disk trashing
-@export var max_chunks : int = 50
+@export var max_chunks : int = 50:
+	set(nv):
+		max_chunks = nv
+		if max_active > max_chunks: max_active = max_chunks
+		_update_all_hotspots()
+
+
 ## Maximum active chunks. This can be interpreted as chunks that are drawn and receive _process signals f.ex. Proper activvation logic needs to be implemented by listening to chunk_activated / chunk_deactivated signals
-@export var max_active : int = 20
+@export var max_active : int = 20:
+	set(nv):
+		max_active = nv
+		if max_chunks < max_active: max_chunks = max_active
+		_update_all_hotspots()
 
 ## Wether to utilize threading for chunk logic and file read/write
 @export var thread_mode : VoxelConfiguration.THREAD_MODE = VoxelConfiguration.THREAD_MODE.NONE:
@@ -61,12 +72,12 @@ signal chunk_unloaded
 
 ## Dictionary of key:value as Vector3i:Chunk
 var chunks : Dictionary = {}
-## Dictionary of Vector3i:Chunk mappings of active chunks
+## Dictionary of key:value as Vector3i:Chunk
 var active_chunks : Dictionary = {}
 
 
 class HotspotData:
-	var radius : int = 0
+	var radius : float = 0
 
 
 ## Hotspots keep chunks active around them
@@ -133,63 +144,72 @@ func _process(delta):
 	elif frame < 2:
 		_round_robin_keep_hotspots_active()
 	elif frame < 3:
+		_round_robin_calculate_distances()
+	elif frame < 4:
 		_round_robin_deactivate_and_unload()
-	#elif frame < 4:
-	#	_round_robin_expand_hotspots()
 		
 	frame += 1
-	if frame > 4:
+	if frame > 5:
 		frame = 0
 
 
 var sctd_iterator = 0
 func _round_robin_save_chunks_to_disk():
 	if chunks.is_empty(): return
+	sctd_iterator += 1
+	if sctd_iterator >= chunks.size():
+		sctd_iterator = 0
 	
 	var chunk : Chunk = chunks.values()[sctd_iterator]
 	if chunk.data_changed:
 		chunk.save_to_disk(get_globalpath(chunk.position))
-	
-	
-	sctd_iterator += 1
-	if sctd_iterator >= chunks.size():
-		sctd_iterator = 0
 
 
 var kha_iterator = 0
 func _round_robin_keep_hotspots_active():
 	if hotspots.is_empty(): return
-	
-	var hotspot : Node3D = hotspots.keys()[kha_iterator]
-	var found_chunk = get_chunk_at(hotspot.global_position, true)
-	if not found_chunk:
-		push_error("ChunkManager: Cannot get chunk at %s" % hotspot.global_position)
-		return
-	
-	if not found_chunk.active:
-		activate_chunk(found_chunk)
-	
 	kha_iterator += 1
 	if kha_iterator >= hotspots.size():
 		kha_iterator = 0
+	
+	var hotspot_node : Node3D = hotspots.keys()[kha_iterator]
+	var hotspot = hotspots[hotspot_node]
+	
+	var repeats = floori(hotspot.radius)
+	var half_offset = Vector3(hotspot.radius/2.0,hotspot.radius/2.0,hotspot.radius/2.0)*chunk_size
+	var iterables = range(repeats+1)
+	for x in iterables:
+		for y in iterables:
+			for z in iterables:
+				var found_chunk = get_chunk_at(hotspot_node.global_position - half_offset + Vector3(x*chunk_size,y*chunk_size,z*chunk_size), true)
+				if not found_chunk.active:
+					activate_chunk(found_chunk)
 
 
-var deu_iterator = 0
-func _round_robin_deactivate_and_unload():
+var cd_iterator = 0
+func _round_robin_calculate_distances():
 	if chunks.is_empty(): return
+	cd_iterator += 1
+	if cd_iterator >= chunks.size():
+		cd_iterator = 0
 	
 	if not hotspots.is_empty():
-		var chunk : Chunk = chunks.values()[deu_iterator]
+		var chunk : Chunk = chunks.values()[cd_iterator]
 		chunk.dist_to_closest_hotspot = 4611686018427387904 # max 64 bit signed int
 		for hotspot in hotspots.keys():
 			var dist_to_hotspot = Vector3i(chunk.position - half_chunk - (Vector3i(hotspot.global_position)) ).length_squared()
 			if chunk.dist_to_closest_hotspot > dist_to_hotspot:
 				chunk.dist_to_closest_hotspot = dist_to_hotspot
+
+
+
+func _round_robin_deactivate_and_unload():
+	if chunks.is_empty(): return
 	
 	if chunks.size() > max_chunks:
 		var furthest_away = null
-		for candidate in chunks.values():
-			if not furthest_away or candidate.dist_to_closest_hotspot > furthest_away.dist_to_closest_hotspot:
+		for candidate in chunks.values():			
+			if not furthest_away or (candidate.dist_to_closest_hotspot > 0 and candidate.dist_to_closest_hotspot > furthest_away.dist_to_closest_hotspot):
 				furthest_away = candidate
 		
 		unload_chunk(furthest_away)
@@ -200,24 +220,8 @@ func _round_robin_deactivate_and_unload():
 			if not furthest_away or candidate.dist_to_closest_hotspot > furthest_away.dist_to_closest_hotspot:
 				furthest_away = candidate
 		deactivate_chunk(furthest_away)
-	
-	deu_iterator += 1
-	if deu_iterator >= chunks.size():
-		deu_iterator = 0
 
 
-var eh_iterator = 0
-func _round_robin_expand_hotspots():
-	if hotspots.is_empty(): return
-	
-	if chunks.size() > max_chunks: return
-	
-	var hotspot : Node3D = hotspots.keys()[eh_iterator]
-	var found_chunk = get_chunk_at(hotspot.global_position)
-	
-	eh_iterator += 1
-	if eh_iterator >= hotspots.size():
-		eh_iterator = 0
 
 
 func add_hotspot(hotspot : Node3D):
@@ -227,6 +231,9 @@ func add_hotspot(hotspot : Node3D):
 		return
 	hotspots[hotspot] = HotspotData.new()
 	hotspot.connect("tree_exiting", _on_hotspot_deleted.bind(hotspot))
+	
+	emit_signal("hotspot_added", hotspot)
+	_update_all_hotspots()
 
 
 func remove_hotspot(hotspot : Node3D):
@@ -237,6 +244,19 @@ func remove_hotspot(hotspot : Node3D):
 		return
 	hotspots.erase(found_hotspot)
 	hotspot.disconnect("tree_exiting", _on_hotspot_deleted)
+	
+	emit_signal("hotspot_removed", hotspot)
+	_update_all_hotspots()
+
+
+func _update_all_hotspots():
+	if hotspots.is_empty(): return
+	
+	# Allocate all hotspot radiuses from the max_active variable
+	# Calculates a single side lenght of a cube so that the total volume of all hotspots equals max_active volume
+	var radius_portion = pow(float(max_active) / float(hotspots.size()), 1.0/3.0)
+	for hotspot in hotspots.values():
+		hotspot.radius = radius_portion
 
 
 ## Get the chunk that contains the given point
@@ -278,15 +298,11 @@ func deactivate_chunk(chunk : Chunk):
 
 
 func unload_chunk(chunk : Chunk):
-	print("ChunkManager: unloading chunk %s" % chunk)
+	#print("ChunkManager: unloading chunk %s" % chunk)
 	if chunk.active:
 		deactivate_chunk(chunk)
 	chunks.erase(chunk.position)
 	emit_signal("chunk_unloaded", chunk)
-
-
-func _on_update_timer():
-	print("foobar!")
 
 
 func _on_hotspot_deleted(hotspot):
