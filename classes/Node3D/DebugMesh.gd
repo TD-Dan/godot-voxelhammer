@@ -58,6 +58,7 @@ func _update_debug_mesh():
 			add_child(_debug_label_child)
 		_debug_label_child.position.y = size.y
 		_debug_label_child.text = text
+		_debug_label_child.modulate = color
 	
 	
 	var st = SurfaceTool.new()
