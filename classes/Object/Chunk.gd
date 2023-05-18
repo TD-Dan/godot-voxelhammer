@@ -14,12 +14,14 @@ class_name Chunk
 ## Data that is not saved to disk and gets discarded after Chunk has been unloaded
 var transient_data : Dictionary = Dictionary()
 
+var loaded = false
 var active = false
 
 ## Chunk contents has been changed
 var data_changed = false
 
-var dist_to_closest_hotspot = 0
+## shortest axial distance to nearest hotspot in cubic space
+var dist_to_closest_hotspot : float = 0.0
 
 ## Save all persistent_data to disk
 func save_to_disk(completefilepath):
