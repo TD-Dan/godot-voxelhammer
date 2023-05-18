@@ -14,6 +14,7 @@ class_name Chunk
 ## Data that is not saved to disk and gets discarded after Chunk has been unloaded
 var transient_data : Dictionary = Dictionary()
 
+var initialized = false
 var loaded = false
 var active = false
 

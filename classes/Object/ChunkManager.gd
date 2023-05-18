@@ -164,16 +164,16 @@ var frame = 0
 func _process(delta):	
 	if frame < 1:
 		_round_robin_add_potential_chunks()
-	#if frame < 2:
-	#	_round_robin_keep_hotspots_active()
-	elif frame < 3:
-		_round_robin_calculate_distances(3) # 0.05 - 0.1 ms operation. can calculate several iterations per frame
+	elif frame < 2:
+		_round_robin_keep_hotspots_active()
 	elif frame < 4:
-		_round_robin_load_and_activate()
+		_round_robin_calculate_distances(4) # 0.05 - 0.1 ms operation. can calculate several iterations per frame
 	elif frame < 5:
+		_round_robin_load_and_activate()
+	elif frame < 7:
 		_round_robin_deactivate_unload_and_contract()
-	#elif frame < 6:
-	#	_round_robin_save_chunks_to_disk()
+	elif frame < 8:
+		_round_robin_save_chunks_to_disk()
 		
 	frame += 1
 	if frame > 7:
@@ -182,27 +182,33 @@ func _process(delta):
 
 # Add empty unloaded chunks around hotspots to track their distance
 var apc_iterator = 0
-func _round_robin_add_potential_chunks(iterations : int = 1):
+var apc_sub_iterator = 0
+func _round_robin_add_potential_chunks(iterations : int = 8):
 	if hotspots.is_empty(): return
 	
-	for it in range(iterations):
+	if apc_sub_iterator == 0:
 		apc_iterator += 1
 		if apc_iterator >= hotspots.size():
 			apc_iterator = 0
-		
-		var hotspot_node : Node3D = hotspots.keys()[apc_iterator]
-		var hotspot = hotspots[hotspot_node]
-		
-		var half_offset = Vector3(hotspot.radius,hotspot.radius,hotspot.radius)*chunk_size/2.0
-		
-		# get array of iterations needed for one side of cube
-		var side_iterables = range(ceili(hotspot.radius))
-		
-		for x in side_iterables:
-			for y in side_iterables:
-				for z in side_iterables:
-					var probe_position = hotspot_node.global_position + Vector3(x*chunk_size,y*chunk_size,z*chunk_size)
-					var found_chunk = get_chunk_at(probe_position)
+	
+	var hotspot_node : Node3D = hotspots.keys()[apc_iterator]
+	var hotspot = hotspots[hotspot_node]
+	
+	
+	# get array of iterations needed for one side of cube
+	var range = ceili(hotspot.radius*1.5)
+	var side_iterables = range(range)
+	var start_point = hotspot_node.global_position - Vector3(range*chunk_size/2., range*chunk_size/2., range*chunk_size/2.)
+	
+	var x = apc_sub_iterator
+	for y in side_iterables:
+		for z in side_iterables:
+			var probe_position = start_point + Vector3(x*chunk_size,y*chunk_size,z*chunk_size)
+			var found_chunk = get_chunk_at(probe_position)
+	
+	apc_sub_iterator += 1
+	if apc_sub_iterator > range:
+		apc_sub_iterator = 0
 
 
 # Ensure most important chunks are kept in active state
@@ -238,62 +244,76 @@ func _round_robin_calculate_distances(iterations : int = 1):
 			_calculate_distance_to_closest_hotspot_for(chunk)
 
 
+var laa_iterator = 0
 func _round_robin_load_and_activate():
 	if chunks.is_empty(): return
 	
-	if loaded_chunks.size() < max_loaded:
-		var closest_unloaded = null
-		for candidate in chunks.values():
-			if not closest_unloaded or candidate.dist_to_closest_hotspot > closest_unloaded.dist_to_closest_hotspot:
-				if not candidate.loaded:
-					closest_unloaded = candidate
-		
-		if closest_unloaded:
-			load_chunk(closest_unloaded)
+	laa_iterator += 1
+	if laa_iterator == 2:
+		laa_iterator = 0
 	
-	if active_chunks.size() < max_active:
-		var closest_loaded = null
-		for candidate in chunks.values():
-			if not closest_loaded or candidate.dist_to_closest_hotspot > closest_loaded.dist_to_closest_hotspot:
-				if candidate.loaded and not candidate.active:
-					closest_loaded = candidate
-		
-		if closest_loaded:
-			activate_chunk(closest_loaded)
+	match laa_iterator:
+		0:
+			if loaded_chunks.size() < max_loaded:
+				var closest_unloaded = null
+				for candidate in chunks.values():
+					if not closest_unloaded or closest_unloaded.dist_to_closest_hotspot > candidate.dist_to_closest_hotspot:
+						if not candidate.loaded:
+							closest_unloaded = candidate
+				
+				if closest_unloaded:
+					load_chunk(closest_unloaded)
+		1:
+			if active_chunks.size() < max_active:
+				var closest_loaded = null
+				for candidate in chunks.values():
+					if not closest_loaded or closest_loaded.dist_to_closest_hotspot > candidate.dist_to_closest_hotspot:
+						if candidate.loaded and not candidate.active:
+							closest_loaded = candidate
+				
+				if closest_loaded:
+					activate_chunk(closest_loaded)
 
 
+var duac_iterator = 0
 func _round_robin_deactivate_unload_and_contract():
 	if chunks.is_empty(): return
 	
-	if chunks.size() > max_chunks:
-		var furthest_away = null
-		for candidate in chunks.values():
-			if not furthest_away or candidate.dist_to_closest_hotspot > furthest_away.dist_to_closest_hotspot:
-				if not candidate.loaded:
-					furthest_away = candidate
-		
-		if furthest_away:
-			delete_chunk(furthest_away)
-	
-	if loaded_chunks.size() > max_loaded:
-		var furthest_away = null
-		for candidate in loaded_chunks.values():
-			if not furthest_away or candidate.dist_to_closest_hotspot > furthest_away.dist_to_closest_hotspot:
-				if not candidate.active:
-					furthest_away = candidate
-		
-		if furthest_away:
-			unload_chunk(furthest_away)
-	
-	if active_chunks.size() > max_active:
-		var furthest_away = null
-		for candidate in active_chunks.values():
-			if not furthest_away or candidate.dist_to_closest_hotspot > furthest_away.dist_to_closest_hotspot:
-				if candidate.active:
-					furthest_away = candidate
-		
-		if furthest_away:
-			deactivate_chunk(furthest_away)
+	duac_iterator += 1
+	if duac_iterator == 3:
+		duac_iterator = 0
+			
+	match duac_iterator:
+		0:
+			if chunks.size() > max_chunks:
+				var furthest_away = null
+				for candidate in chunks.values():
+					if not furthest_away or furthest_away.dist_to_closest_hotspot < candidate.dist_to_closest_hotspot:
+						if not candidate.loaded:
+							furthest_away = candidate
+				
+				if furthest_away:
+					delete_chunk(furthest_away)
+		1:
+			if loaded_chunks.size() >= max_loaded:
+				var furthest_away = null
+				for candidate in loaded_chunks.values():
+					if not furthest_away or furthest_away.dist_to_closest_hotspot < candidate.dist_to_closest_hotspot:
+						if candidate.loaded and not candidate.active:
+							furthest_away = candidate
+				
+				if furthest_away:
+					unload_chunk(furthest_away)
+		2:
+			if active_chunks.size() >= max_active:
+				var furthest_away = null
+				for candidate in active_chunks.values():
+					if not furthest_away or furthest_away.dist_to_closest_hotspot < candidate.dist_to_closest_hotspot:
+						if candidate.active:
+							furthest_away = candidate
+				
+				if furthest_away:
+					deactivate_chunk(furthest_away)
 
 
 var sctd_iterator = 0
@@ -365,11 +385,12 @@ func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	new_chunk.size = chunk_size
 	chunks[new_chunk.position] = new_chunk
 	_calculate_distance_to_closest_hotspot_for(new_chunk)
-	emit_signal("chunk_initialized", new_chunk)
+	new_chunk.initialized = true
+	emit_signal.call_deferred("chunk_initialized", new_chunk)
 	return new_chunk
 
 
-## Swap a placeholder chunk to real chunk data
+## Load chunk data from disk or generate new chunk data
 func load_chunk(chunk : Chunk):
 	if chunk.loaded:
 		push_error("%s: Trying to load already loaded chunk %s" % [self, chunk])
@@ -377,15 +398,14 @@ func load_chunk(chunk : Chunk):
 	
 	if FileAccess.file_exists(get_globalpath(chunk.position)):
 		var disk_chunk = Chunk.load_from_disk(get_globalpath(chunk.position))
-		chunks[chunk.position] = disk_chunk
-		chunk = disk_chunk
+		chunks[chunk.position].persistent_data = disk_chunk.persistent_data
 	else:
-		emit_signal("new_chunk_created", chunk)
+		emit_signal.call_deferred("new_chunk_created", chunk)
 		
 	loaded_chunks[chunk.position] = chunk
 	chunk.loaded = true
 	_calculate_distance_to_closest_hotspot_for(chunk)
-	emit_signal("chunk_loaded", chunk)
+	emit_signal.call_deferred("chunk_loaded", chunk)
 
 
 func activate_chunk(chunk : Chunk):
@@ -398,7 +418,7 @@ func activate_chunk(chunk : Chunk):
 	
 	active_chunks[chunk.position] = chunk
 	chunk.active = true
-	emit_signal("chunk_activated", chunk)
+	emit_signal.call_deferred("chunk_activated", chunk)
 
 
 func deactivate_chunk(chunk : Chunk):
@@ -408,7 +428,7 @@ func deactivate_chunk(chunk : Chunk):
 	
 	active_chunks.erase(chunk.position)
 	chunk.active = false
-	emit_signal("chunk_deactivated", chunk)
+	emit_signal.call_deferred("chunk_deactivated", chunk)
 
 
 func unload_chunk(chunk : Chunk):
@@ -424,7 +444,6 @@ func unload_chunk(chunk : Chunk):
 	chunk.loaded = false
 	emit_signal("chunk_unloaded", chunk)
 	chunk.persistent_data.clear()
-	chunk.transient_data.clear()
 
 
 func delete_chunk(chunk : Chunk):
@@ -434,6 +453,7 @@ func delete_chunk(chunk : Chunk):
 		push_error("%s: Trying to remove loaded chunk %s\n Please unload first." % [self, chunk])
 	
 	emit_signal("chunk_deleted", chunk)
+	chunk.transient_data.clear()
 	chunks.erase(chunk.position)
 	chunk.queue_free()
 
