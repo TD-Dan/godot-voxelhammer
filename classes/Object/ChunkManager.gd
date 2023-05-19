@@ -91,7 +91,9 @@ signal shortest_distance_updated
 
 
 ## Dictionary of key:value as Vector3i:Chunk
-var chunks : Dictionary = {}
+var chunks_by_position : Dictionary = {}
+## Array of all chunks sorted by their distance to closest hotspot
+var chunks_by_distance : SortedArray = SortedArray.new()
 ## Dictionary of key:value as Vector3i:Chunk
 var loaded_chunks : Dictionary = {}
 ## Dictionary of key:value as Vector3i:Chunk
@@ -176,7 +178,7 @@ func _process(delta):
 		_round_robin_save_chunks_to_disk()
 		
 	frame += 1
-	if frame > 7:
+	if frame > 8:
 		frame = 0
 
 
@@ -233,20 +235,21 @@ func _round_robin_keep_hotspots_active():
 
 var cd_iterator = 0
 func _round_robin_calculate_distances(iterations : int = 1):
-	if chunks.is_empty(): return
-	for it in range(min(iterations, chunks.size())):
+	if chunks_by_position.is_empty(): return
+	for it in range(min(iterations, chunks_by_position.size())):
 		cd_iterator += 1
-		if cd_iterator >= chunks.size():
+		if cd_iterator >= chunks_by_position.size():
 			cd_iterator = 0
 		
 		if not hotspots.is_empty():
-			var chunk : Chunk = chunks.values()[cd_iterator]
+			var chunk : Chunk = chunks_by_position.values()[cd_iterator]
 			_calculate_distance_to_closest_hotspot_for(chunk)
+			chunks_by_distance.update(chunk)
 
 
 var laa_iterator = 0
 func _round_robin_load_and_activate():
-	if chunks.is_empty(): return
+	if chunks_by_position.is_empty(): return
 	
 	laa_iterator += 1
 	if laa_iterator == 2:
@@ -256,7 +259,7 @@ func _round_robin_load_and_activate():
 		0:
 			if loaded_chunks.size() < max_loaded:
 				var closest_unloaded = null
-				for candidate in chunks.values():
+				for candidate in chunks_by_position.values():
 					if not closest_unloaded or closest_unloaded.dist_to_closest_hotspot > candidate.dist_to_closest_hotspot:
 						if not candidate.loaded:
 							closest_unloaded = candidate
@@ -266,7 +269,7 @@ func _round_robin_load_and_activate():
 		1:
 			if active_chunks.size() < max_active:
 				var closest_loaded = null
-				for candidate in chunks.values():
+				for candidate in chunks_by_position.values():
 					if not closest_loaded or closest_loaded.dist_to_closest_hotspot > candidate.dist_to_closest_hotspot:
 						if candidate.loaded and not candidate.active:
 							closest_loaded = candidate
@@ -277,7 +280,7 @@ func _round_robin_load_and_activate():
 
 var duac_iterator = 0
 func _round_robin_deactivate_unload_and_contract():
-	if chunks.is_empty(): return
+	if chunks_by_position.is_empty(): return
 	
 	duac_iterator += 1
 	if duac_iterator == 3:
@@ -285,9 +288,9 @@ func _round_robin_deactivate_unload_and_contract():
 			
 	match duac_iterator:
 		0:
-			if chunks.size() > max_chunks:
+			if chunks_by_position.size() > max_chunks:
 				var furthest_away = null
-				for candidate in chunks.values():
+				for candidate in chunks_by_position.values():
 					if not furthest_away or furthest_away.dist_to_closest_hotspot < candidate.dist_to_closest_hotspot:
 						if not candidate.loaded:
 							furthest_away = candidate
@@ -319,13 +322,13 @@ func _round_robin_deactivate_unload_and_contract():
 var sctd_iterator = 0
 func _round_robin_save_chunks_to_disk():
 	if backup_strategy <= BACKUP_STRATEGY.CONSTANT_RR: return
-	if chunks.is_empty(): return
+	if chunks_by_position.is_empty(): return
 	
 	sctd_iterator += 1
-	if sctd_iterator >= chunks.size():
+	if sctd_iterator >= chunks_by_position.size():
 		sctd_iterator = 0
 	
-	var chunk : Chunk = chunks.values()[sctd_iterator]
+	var chunk : Chunk = chunks_by_position.values()[sctd_iterator]
 	if chunk.data_changed:
 		print("changed data found")
 		chunk.save_to_disk(get_globalpath(chunk.position))
@@ -372,7 +375,7 @@ func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	point -= Vector3i(chunk_size/2,chunk_size/2,chunk_size/2)
 	var snapped_position = point.snapped(Vector3i(chunk_size,chunk_size,chunk_size))
 	
-	var found_chunk = chunks.get(snapped_position)
+	var found_chunk = chunks_by_position.get(snapped_position)
 	if found_chunk:
 		return found_chunk
 	
@@ -383,8 +386,9 @@ func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	new_chunk.name = Chunk.get_filename(chunk_size,snapped_position)
 	new_chunk.position = snapped_position
 	new_chunk.size = chunk_size
-	chunks[new_chunk.position] = new_chunk
+	chunks_by_position[new_chunk.position] = new_chunk
 	_calculate_distance_to_closest_hotspot_for(new_chunk)
+	chunks_by_distance.insert(new_chunk)
 	new_chunk.initialized = true
 	emit_signal.call_deferred("chunk_initialized", new_chunk)
 	return new_chunk
@@ -398,13 +402,15 @@ func load_chunk(chunk : Chunk):
 	
 	if FileAccess.file_exists(get_globalpath(chunk.position)):
 		var disk_chunk = Chunk.load_from_disk(get_globalpath(chunk.position))
-		chunks[chunk.position].persistent_data = disk_chunk.persistent_data
+		chunks_by_position[chunk.position].persistent_data = disk_chunk.persistent_data
 	else:
 		emit_signal.call_deferred("new_chunk_created", chunk)
 		
 	loaded_chunks[chunk.position] = chunk
 	chunk.loaded = true
 	_calculate_distance_to_closest_hotspot_for(chunk)
+	chunks_by_distance.update(chunk)
+	
 	emit_signal.call_deferred("chunk_loaded", chunk)
 
 
@@ -454,7 +460,8 @@ func delete_chunk(chunk : Chunk):
 	
 	emit_signal("chunk_deleted", chunk)
 	chunk.transient_data.clear()
-	chunks.erase(chunk.position)
+	chunks_by_position.erase(chunk.position)
+	chunks_by_distance.erase(chunk)
 	chunk.queue_free()
 
 

@@ -22,7 +22,13 @@ var active = false
 var data_changed = false
 
 ## shortest axial distance to nearest hotspot in cubic space
-var dist_to_closest_hotspot : float = 0.0
+var dist_to_closest_hotspot : float = 0.0:
+	set(nv):
+		dist_to_closest_hotspot = nv
+		_sorted_array_key = nv
+
+## needed for inserting into a SortedArray, set in dist_to_closest_hotspot setter
+var _sorted_array_key : int
 
 ## Save all persistent_data to disk
 func save_to_disk(completefilepath):
