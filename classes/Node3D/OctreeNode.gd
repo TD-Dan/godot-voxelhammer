@@ -13,8 +13,6 @@ var paint_stack : VoxelPaintStack
 
 var leaf_mesh : VoxelInstance3D
 
-var type = OCTREE_TYPE.TRUNK
-
 var _debug_mesh : Node3D
 
 var octree_initial_positions = [
@@ -27,13 +25,6 @@ var octree_initial_positions = [
 	Vector3i(0,1,1),
 	Vector3i(1,1,1),
 ]
-
-enum OCTREE_TYPE {
-	ROOT,
-	TRUNK,
-	BRANCH,
-	LEAF
-}
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -60,7 +51,6 @@ func refresh_position(target_pos : Vector3) -> bool:
 		# if already at smallest size, update it
 		if size == leaf_size:
 			if not leaf_mesh:
-				type = OCTREE_TYPE.LEAF
 				_debug_mesh.mesh_color = Color(0.25,1,0.25)
 				leaf_mesh = VoxelInstance3D.new()
 				leaf_mesh.voxel_data = VoxelData.new()
@@ -69,7 +59,7 @@ func refresh_position(target_pos : Vector3) -> bool:
 				leaf_mesh.paint_stack = paint_stack
 				add_child.call_deferred(leaf_mesh)
 			#else:
-			#	leaf_mesh.apply_paintstack()
+			#	leaf_mesh.apply_paintstack() # Not good will constantly repaint
 			return true
 		
 		# Test if we need more detailed sub trees
@@ -81,13 +71,11 @@ func refresh_position(target_pos : Vector3) -> bool:
 				is_inside = true
 		
 		if is_inside:
-			type = OCTREE_TYPE.TRUNK
 			_debug_mesh.mesh_color.b = 1
 		
 			if size > leaf_size and sub_nodes.is_empty():
 				for i in range(8):
 					var new_sub_node = OctreeNode.new()
-					new_sub_node.type = OCTREE_TYPE.TRUNK
 					new_sub_node.size = size / 2
 					new_sub_node.leaf_size = leaf_size
 					new_sub_node.position = octree_initial_positions[i] * size / 2
@@ -96,7 +84,6 @@ func refresh_position(target_pos : Vector3) -> bool:
 					sub_nodes.append(new_sub_node)
 					add_child.call_deferred(new_sub_node)
 		else:
-			type = OCTREE_TYPE.BRANCH
 			for sub in sub_nodes:
 				sub.queue_free()
 			sub_nodes = []

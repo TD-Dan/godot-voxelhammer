@@ -4,6 +4,7 @@ extends Node3D
 
 class_name VoxelTerrain3D
 
+
 @export var configuration : Resource  = null
 @export var paint_stack : Resource  = null
 
@@ -101,7 +102,9 @@ func _calculate_num_cascades():
 	_chunk_cascades = n
 
 
-var _octrees : Array[OctreeNode] = []
+var chunks : ChunkManager
+#var _cascades : CascadeManager
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -115,50 +118,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	_refresh_octrees()
+	pass
 
 
-var octree_initial_positions = [
-	Vector3i(0,0,0),
-	Vector3i(1,0,0),
-	Vector3i(0,1,0),
-	Vector3i(1,1,0),
-	Vector3i(0,0,1),
-	Vector3i(1,0,1),
-	Vector3i(0,1,1),
-	Vector3i(1,1,1),
-]
 
-var iterator = -1
-
-func _refresh_octrees():
-		
-	if _octrees.is_empty():
-		for i in range(8):
-			var new_subtree = OctreeNode.new()
-			new_subtree.size = _cascade_biggest_size
-			new_subtree.leaf_size = _cascade_smallest_size
-			new_subtree.position = octree_initial_positions[i]*_cascade_biggest_size
-			new_subtree.type = OctreeNode.OCTREE_TYPE.ROOT
-			new_subtree.configuration = configuration
-			new_subtree.paint_stack = paint_stack
-			_octrees.append(new_subtree)
-			add_child.call_deferred(new_subtree)
-	
-	if iterator == -1:
-		iterator = _octrees.size()-1
-		if _tracking_target:
-			_target_position = _tracking_target.global_position
-
-	
-	if iterator > -1:
-		var tree = _octrees[iterator]
-	
-		for i in range(0,3):
-			if tree.position[i] > _target_position[i] + _cascade_biggest_size/2:
-				tree.position[i] -= _cascade_biggest_size*2
-			elif tree.position[i] < _target_position[i] - _cascade_biggest_size - _cascade_biggest_size/2:
-				tree.position[i] += _cascade_biggest_size*2
-		tree.refresh_position(_target_position)
-		
-		iterator -= 1
