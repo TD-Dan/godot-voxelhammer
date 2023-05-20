@@ -26,8 +26,9 @@ func insert(value : Variant):
 	_order.insert(position, value)
 
 
-func update(value : Variant):
-	if _order.size() < 2: return
+## returns new position in the array
+func update(value : Variant) -> int:
+	if _order.size() < 2: return 1
 	
 	var current_position = _order.find(value)
 	
@@ -48,7 +49,11 @@ func update(value : Variant):
 			current_position -= 1
 		else:
 			break
+	
+	return current_position
 
+func is_empty():
+	return _order.is_empty()
 
 func erase(value : Variant):
 	_order.erase(value)

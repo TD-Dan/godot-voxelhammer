@@ -168,17 +168,29 @@ func _process(delta):
 		_round_robin_add_potential_chunks()
 	elif frame < 2:
 		_round_robin_keep_hotspots_active()
+	elif frame < 3:
+		_round_robin_calculate_distances(4, 1)
 	elif frame < 4:
-		_round_robin_calculate_distances(4) # 0.05 - 0.1 ms operation. can calculate several iterations per frame
+		_round_robin_calculate_distances(4, 1)
 	elif frame < 5:
-		_round_robin_load_and_activate()
+		_round_robin_calculate_distances(4, 1)
+	elif frame < 6:
+		_round_robin_set_state_by_distance(50,4,1)
 	elif frame < 7:
-		_round_robin_deactivate_unload_and_contract()
+		_round_robin_set_state_by_distance(50,4,1)
 	elif frame < 8:
+		_round_robin_set_state_by_distance(50,4,1)
+	#elif frame < 7:
+	#	_round_robin_set_state_by_distance(50,2,4)
+	#elif frame < 5:
+	#	_round_robin_load_and_activate()
+	#elif frame < 7:
+	#	_round_robin_deactivate_unload_and_contract()
+	elif frame < 9:
 		_round_robin_save_chunks_to_disk()
 		
 	frame += 1
-	if frame > 8:
+	if frame == 9:
 		frame = 0
 
 
@@ -196,9 +208,8 @@ func _round_robin_add_potential_chunks(iterations : int = 8):
 	var hotspot_node : Node3D = hotspots.keys()[apc_iterator]
 	var hotspot = hotspots[hotspot_node]
 	
-	
 	# get array of iterations needed for one side of cube
-	var range = ceili(hotspot.radius*1.5)
+	var range = ceili(hotspot.radius)
 	var side_iterables = range(range)
 	var start_point = hotspot_node.global_position - Vector3(range*chunk_size/2., range*chunk_size/2., range*chunk_size/2.)
 	
@@ -234,17 +245,68 @@ func _round_robin_keep_hotspots_active():
 
 
 var cd_iterator = 0
-func _round_robin_calculate_distances(iterations : int = 1):
+func _round_robin_calculate_distances(iterations : int = 1, subset_from_start : int = 1):
 	if chunks_by_position.is_empty(): return
-	for it in range(min(iterations, chunks_by_position.size())):
+	var max_index = chunks_by_position.size() / subset_from_start
+	for it in range(min(iterations, max_index)):
 		cd_iterator += 1
-		if cd_iterator >= chunks_by_position.size():
+		if cd_iterator >= max_index:
 			cd_iterator = 0
 		
 		if not hotspots.is_empty():
 			var chunk : Chunk = chunks_by_position.values()[cd_iterator]
 			_calculate_distance_to_closest_hotspot_for(chunk)
 			chunks_by_distance.update(chunk)
+
+
+var ssbd_iterator = -1
+func _round_robin_set_state_by_distance(iterations : int = 1, actions : int = 1, subset_from_start : int = 1):
+	if chunks_by_distance.is_empty(): return
+	var max_index = chunks_by_distance.size() / subset_from_start
+	var action_count = 0
+	for i in range(iterations):
+		ssbd_iterator += 1
+		if ssbd_iterator >= max_index:
+			ssbd_iterator = 0
+	
+		var chunk = chunks_by_distance.get_array_for_read_only()[ssbd_iterator]
+		if _set_state_by_index(chunk, ssbd_iterator):
+			max_index = chunks_by_distance.size() / subset_from_start
+			action_count += 1
+			if action_count >= actions:
+				return
+
+
+## return true if any action was taken
+func _set_state_by_index(chunk : Chunk, index_position : int) -> bool:
+	var actions_taken = 0
+
+	if index_position > max_chunks:
+		delete_chunk(chunk)
+		return true
+	
+	if index_position < max_active and not chunk.active:
+		activate_chunk(chunk)
+		actions_taken += 1
+	if index_position < max_loaded and not chunk.loaded:
+		load_chunk(chunk)
+		actions_taken += 1
+		if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
+	
+	if index_position > max_loaded and chunk.loaded:
+		unload_chunk(chunk)
+		actions_taken += 1
+		if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
+	if index_position > max_active and chunk.active:
+		deactivate_chunk(chunk)
+		actions_taken += 1
+		if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
+	
+	if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
+	
+	if actions_taken == 0:
+		return false
+	return true
 
 
 var laa_iterator = 0
@@ -362,9 +424,10 @@ func remove_hotspot(hotspot : Node3D):
 func _update_all_hotspots():
 	if hotspots.is_empty(): return
 	
-	# Allocate all hotspot radiuses from the max_active variable
-	# Calculates a single side lenght of a cube so that the total volume of all hotspots equals max_active volume
-	var radius_portion = pow(float(max_active) / float(hotspots.size()), 1.0/3.0)
+	# Allocate all hotspot radiuses from the max_chunks variable
+	# Calculates a single side lenght of a cube so that the total volume of all hotspots equals max_chunks volume
+	# hotspot.radius is in chunk units, not world units
+	var radius_portion = pow(float(max_chunks) / float(hotspots.size()), 1.0/3.0)
 	for hotspot in hotspots.values():
 		hotspot.radius = radius_portion
 
@@ -390,7 +453,7 @@ func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	_calculate_distance_to_closest_hotspot_for(new_chunk)
 	chunks_by_distance.insert(new_chunk)
 	new_chunk.initialized = true
-	emit_signal.call_deferred("chunk_initialized", new_chunk)
+	emit_signal("chunk_initialized", new_chunk)
 	return new_chunk
 
 
@@ -404,14 +467,14 @@ func load_chunk(chunk : Chunk):
 		var disk_chunk = Chunk.load_from_disk(get_globalpath(chunk.position))
 		chunks_by_position[chunk.position].persistent_data = disk_chunk.persistent_data
 	else:
-		emit_signal.call_deferred("new_chunk_created", chunk)
+		emit_signal("new_chunk_created", chunk)
 		
 	loaded_chunks[chunk.position] = chunk
 	chunk.loaded = true
 	_calculate_distance_to_closest_hotspot_for(chunk)
 	chunks_by_distance.update(chunk)
 	
-	emit_signal.call_deferred("chunk_loaded", chunk)
+	emit_signal("chunk_loaded", chunk)
 
 
 func activate_chunk(chunk : Chunk):
@@ -424,17 +487,17 @@ func activate_chunk(chunk : Chunk):
 	
 	active_chunks[chunk.position] = chunk
 	chunk.active = true
-	emit_signal.call_deferred("chunk_activated", chunk)
+	emit_signal("chunk_activated", chunk)
 
 
 func deactivate_chunk(chunk : Chunk):
 	if not chunk.active:
-		push_error("%s: Trying to activate already active chunk %s" % [self, chunk])
+		push_error("%s: Trying to deactivate already deactive chunk %s" % [self, chunk])
 		return
 	
 	active_chunks.erase(chunk.position)
 	chunk.active = false
-	emit_signal.call_deferred("chunk_deactivated", chunk)
+	emit_signal("chunk_deactivated", chunk)
 
 
 func unload_chunk(chunk : Chunk):
@@ -453,10 +516,12 @@ func unload_chunk(chunk : Chunk):
 
 
 func delete_chunk(chunk : Chunk):
-	if chunk.active:
-		push_error("%s: Trying to remove active chunk %s\n Please deactivate first." % [self, chunk])
+	#if chunk.active:
+	#	deactivate_chunk(chunk)
+		#push_error("%s: Trying to remove active chunk %s\n Please deactivate first." % [self, chunk])
 	if chunk.loaded:
-		push_error("%s: Trying to remove loaded chunk %s\n Please unload first." % [self, chunk])
+		unload_chunk(chunk)
+		#push_error("%s: Trying to remove loaded chunk %s\n Please unload first." % [self, chunk])
 	
 	emit_signal("chunk_deleted", chunk)
 	chunk.transient_data.clear()
