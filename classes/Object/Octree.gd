@@ -7,7 +7,12 @@ class_name Octree
 signal branch_added(OctreeBranch)
 
 var roots : Dictionary # as Vector3i:Octet
-var leaves : Array # as Octet for faster leaf lookups
+
+var cache_size = 4:
+	set(nv):
+		cache_size = nv
+		branch_cache.resize(cache_size)
+var branch_cache : Array
 
 @export var max_size : int = 16:
 	set(nv):
@@ -28,7 +33,6 @@ class OctreeBranch:
 	var position : Vector3i
 	var size : int
 	var children
-	var is_root : bool
 	var level : int
 	var user_data
 	
@@ -61,7 +65,16 @@ class OctreeBranch:
 		
 		return self
 
+func _init():
+	branch_cache.resize(cache_size)
+
+var cache_rotating_index = 0
 func get_branch(position : Vector3i, max_depth = -1, create_missing = true) -> OctreeBranch:
+	if cache_size > 0:
+		for cached_branch in branch_cache:
+			if cached_branch and cached_branch.position == position:
+				return cached_branch
+	
 	var root_position = position - Vector3i(max_size/2,max_size/2,max_size/2)
 	root_position = root_position.snapped(Vector3i(max_size,max_size,max_size))
 	var found_root = roots.get(root_position)
@@ -70,16 +83,29 @@ func get_branch(position : Vector3i, max_depth = -1, create_missing = true) -> O
 		
 		found_root.position = root_position
 		found_root.size = max_size
-		found_root.is_root = true
 		found_root.level = levels
 		
 		roots[root_position] = found_root
-		emit_signal("branch_added", found_root)
+		_on_create_branch(found_root)
 	
 	if found_root:
-		return found_root.get_branch(position, max_depth, create_missing, _on_create_branch)
+		var found_branch = found_root.get_branch(position, max_depth, create_missing, _on_create_branch)
+		if found_branch:
+			if cache_size > 0:
+				if cache_rotating_index >= cache_size:
+					cache_rotating_index = 0
+				branch_cache[cache_rotating_index] = found_branch
+				cache_rotating_index +=1
+			
+			return found_branch
+		
+		return found_root
 	
 	return null
+
+
+func clear():
+	roots.clear()
 
 
 func _on_create_branch(branch : OctreeBranch):
