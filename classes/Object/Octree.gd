@@ -104,26 +104,6 @@ func get_branch(positionf : Vector3, max_depth = -1, create_missing = true) -> O
 	
 	return null
 
-var octet_positions = [
-	Vector3(0,0,0),
-	Vector3(1,0,0),
-	Vector3(0,1,0),
-	Vector3(1,1,0),
-	Vector3(0,0,1),
-	Vector3(1,0,1),
-	Vector3(0,1,1),
-	Vector3(1,1,1),
-]
-
-func create_nearest_octet_neighbours(position : Vector3, branch, apply_to_parents = true):
-	var sides = Vector3i(-1,-1,-1)
-	if position.x > float(branch.position.x)+branch.size/2.0: sides.x = 1
-	if position.y > float(branch.position.y)+branch.size/2.0: sides.y = 1
-	if position.z > float(branch.position.z)+branch.size/2.0: sides.z = 1
-	
-	for octpos in octet_positions:
-		get_branch(Vector3i(Vector3(branch.position)+octpos*Vector3(sides).snapped(Vector3(branch.size, branch.size, branch.size))), branch.level)
-
 
 func clear():
 	roots.clear()
