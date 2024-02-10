@@ -21,7 +21,8 @@ func append_array(array : Array):
 
 
 ## Insert into SortedArray using value._sorted_array_key to find the last right place
-func insert(value : Variant):
+func insert(insert_at : int, value : Variant):
+	value._sorted_array_key = insert_at
 	var position = _order.bsearch_custom(value, func(a,b): return a._sorted_array_key < b._sorted_array_key, false)
 	_order.insert(position, value)
 

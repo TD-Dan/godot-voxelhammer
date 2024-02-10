@@ -451,7 +451,7 @@ func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	new_chunk.size = chunk_size
 	chunks_by_position[new_chunk.position] = new_chunk
 	_calculate_distance_to_closest_hotspot_for(new_chunk)
-	chunks_by_distance.insert(new_chunk)
+	chunks_by_distance.insert(new_chunk._sorted_array_key, new_chunk)
 	new_chunk.initialized = true
 	emit_signal("chunk_initialized", new_chunk)
 	return new_chunk
