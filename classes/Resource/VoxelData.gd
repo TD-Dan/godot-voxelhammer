@@ -11,7 +11,7 @@ class_name VoxelData
 #
 # IMPORTANT! For limitations of godot this class cannot ensure thread safety
 # (Resource class type limitation?). Luckily this is also faster because no copies are made.
-# Every user of this class MUST call data_mutex.lock() and .unlock() when accessing or editing size and data variables directly
+# For future multithread compability every user of this class MUST call data_mutex.lock() and .unlock() when accessing or editing size and data variables directly
 
 
 signal voxel_data_changed

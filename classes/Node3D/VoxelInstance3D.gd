@@ -318,12 +318,14 @@ func _advance_operation_stack():
 				VoxelConfiguration.THREAD_MODE.NONE:
 					#print("%s: running operation (blocking main thread)..." % self)
 					var run_start_us = Time.get_ticks_usec()
+					current_operation.prepare_run_operation()
 					current_operation.run_operation()
 					var delta_time_us = Time.get_ticks_usec() - run_start_us
 					print("%s: finished %s in %s seconds" % [self, current_operation, delta_time_us/1000000.0])
 					current_operation = null
 				VoxelConfiguration.THREAD_MODE.SIMPLE:
 					#var run_start_us = Time.get_ticks_usec()
+					current_operation.prepare_run_operation()
 					worker_thread.start(_run_op_thread.bind(current_operation))
 					#var delta_time_us = Time.get_ticks_usec() - run_start_us
 					#print("%s: thread start took %s seconds" % [self, delta_time_us/1000000.0])

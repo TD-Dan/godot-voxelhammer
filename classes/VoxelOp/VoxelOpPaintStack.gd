@@ -4,28 +4,28 @@ class_name VoxelOpPaintStack
 
 var paint_stack
 
+var local_position_offset = Vector3(0,0,0)
+var local_scale = 1.0
+
 
 func _init(paint_stack : VoxelPaintStack):
 	super("VoxelOpPaintStack", VoxelOperation.CALCULATION_LEVEL.VOXEL+20)
 	self.paint_stack = paint_stack
 
 
-# This code is potentially executed in another thread!
-func run_operation():
-	#print("!!! VoxelOpPaintStack executing!")
-		
-	voxel_instance.data_buffer_mutex.lock()
-	var local_position_offset = Vector3(0,0,0)
-	var local_scale = 1.0
-	
+# Called in main thread before executing 'run_operation'
+func prepare_run_operation():
 	if paint_stack.use_global_coordinates:
 		local_position_offset = voxel_instance.global_position
 		local_scale = voxel_instance.mesh_scale
-	
-	voxel_instance.data_buffer_mutex.unlock()
+
+
+# This code is potentially executed in another thread!
+func run_operation():
+	#print("!!! VoxelOpPaintStack executing!")
 	
 	do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.blend_buffer, voxel_instance.voxel_data.size, paint_stack, local_position_offset, local_scale)
-		
+	
 	voxel_instance.voxel_data.call_deferred("notify_data_changed")
 
 

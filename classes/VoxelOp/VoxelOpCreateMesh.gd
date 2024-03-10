@@ -227,8 +227,10 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 #						surface_tools[material_at_index].add_smooth_group(false)
 #						smooth_group_active = false
 					
+					# UV:s need to be created for moving instances. static meshes can be drawn with faster triplanar mapping
+					
 					# Reminder to not test:
-					# NO UV:s! Mesh generation is faster without and triplanar texturing makes things so much more easier 
+					
 					# No add_triangle_fan(...): no way to alter vertex coordinates
 					
 					if x == 0 or not data[ci-1]:
