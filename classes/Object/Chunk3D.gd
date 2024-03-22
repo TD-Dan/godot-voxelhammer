@@ -2,16 +2,23 @@
 
 extends Node
 
-class_name Chunk
+class_name Chunk3D
 
-## Real world snapped position of the chunk
-@export var position : Vector3i = Vector3i.ZERO
+## Represents a cube area of potentially infinite 3d space
+##
+## stores position/size of the area
+## stores references to persistent data that is contained within the chunk
 
-@export var size : int = 16
+
+## Real world position of the chunk, snapped to integer values
+@export var chunk_position : Vector3i = Vector3i.ZERO
+## Real world size of the chunk, snapped to integer values
+@export var chunk_size : Vector3i = Vector3i(16,16,16)
 
 ## Data that is saved between sessions
 @export var persistent_data : Dictionary = Dictionary()
-## Data that is not saved to disk and gets discarded after Chunk has been unloaded
+
+## Data that is not saved to disk and gets discarded after Chunk has been unloaded, used for debugging
 var transient_data : Dictionary = Dictionary()
 
 var initialized = false

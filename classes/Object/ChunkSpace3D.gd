@@ -1,10 +1,10 @@
 @tool
 
-extends Node
+extends Node3D
 
-class_name ChunkManager
+class_name ChunkSpace3D
 
-## Manages a persistent state of loaded chunks
+## Manages a target amount of loaded chunks around given hotspots
 ##
 ## - Keeps a target amount of loaded chunks in memory
 ## - Keeps a target amount of active chunks around hotspots
@@ -36,27 +36,15 @@ signal chunk_deleted
 signal shortest_distance_updated
 
 
+## Chunk size
 @export var chunk_size : int = 16:
 	set(nv):
 		chunk_size = nv
-		half_chunk = Vector3i(nv/2,nv/2,nv/2)
-@export var half_chunk : Vector3i
+		_half_chunk = Vector3i(nv/2,nv/2,nv/2)
 
+# helper to get half chunk size without calculations
+var _half_chunk : Vector3i
 
-@export_group("Database File")
-## database base folder, usually "user://somefolder"
-@export var database_folder : String = ""
-## unique id to distinguish for different saves/users, even if they use same database name
-@export var database_uid : String = ""
-## Human readable part of database name
-@export var database_name : String = ""
-## Savefile format, currently supported tscn and scn
-@export var database_format : String = ""
-
-## Create database folder if it does not exist
-## Note to not try: this could be made to happen automatically when any database_* variables changes, but in editor this will create all folders from editing the prompts like : "d", "da", "dat", "data" ... as godot refreshes variable after every edit
-@export var create_database_folder : bool = false:
-	set(nv): rebuild_database_folder()
 
 @export_group("Chunk generation")
 ## How many unloaded chunks to keep in search area
@@ -92,8 +80,6 @@ signal shortest_distance_updated
 
 ## Dictionary of key:value as Vector3i:Chunk
 var chunks_by_position : Dictionary = {}
-## Array of all chunks sorted by their distance to closest hotspot
-var chunks_by_distance : SortedArray = SortedArray.new()
 ## Dictionary of key:value as Vector3i:Chunk
 var loaded_chunks : Dictionary = {}
 ## Dictionary of key:value as Vector3i:Chunk
@@ -126,34 +112,10 @@ enum BACKUP_STRATEGY {
 
 
 func _ready():
-	if database_folder == "":
-		database_folder = "user://chunkdata"
-	if database_uid == "":
-		var rando = RandomNumberGenerator.new()
-		rando.randomize()
-		database_uid = str(str(rando.randi())+OS.get_unique_id()).sha256_text().left(10)
-	if database_name == "":
-		database_name = "UnNamed"
-	if database_format == "":
-		database_format = "tscn"
-	rebuild_database_folder()
-
-
-func rebuild_database_folder():
-	var global_path = ProjectSettings.globalize_path(database_folder)
-	var full_path = global_path+"/"+database_name+"-"+database_uid+"/"
-	if not DirAccess.dir_exists_absolute(full_path):
-		print("%s:Creating FOLDER %s at %s" % [self, database_folder, full_path])
-		var error = DirAccess.make_dir_absolute(full_path)
-		if error:
-			push_error("%s: CANT CREATE FOLDER %s %s : %s" % [self, database_folder, full_path, error_string(error)])
-	else:
-		print("%s: Found chunkdata %s at %s" % [self, database_folder, full_path])
-
+	pass
 
 func _exit_tree():
-	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
-		save_all_chunks_to_disk()
+	pass
 
 
 func save_all_chunks_to_disk():
@@ -166,26 +128,7 @@ var frame = 0
 func _process(delta):	
 	if frame < 1:
 		_round_robin_add_potential_chunks()
-	elif frame < 2:
-		_round_robin_keep_hotspots_active()
-	elif frame < 3:
-		_round_robin_calculate_distances(4, 1)
-	elif frame < 4:
-		_round_robin_calculate_distances(4, 1)
-	elif frame < 5:
-		_round_robin_calculate_distances(4, 1)
-	elif frame < 6:
-		_round_robin_set_state_by_distance(50,4,1)
-	elif frame < 7:
-		_round_robin_set_state_by_distance(50,4,1)
-	elif frame < 8:
-		_round_robin_set_state_by_distance(50,4,1)
-	#elif frame < 7:
-	#	_round_robin_set_state_by_distance(50,2,4)
-	#elif frame < 5:
-	#	_round_robin_load_and_activate()
-	#elif frame < 7:
-	#	_round_robin_deactivate_unload_and_contract()
+	
 	elif frame < 9:
 		_round_robin_save_chunks_to_disk()
 		
@@ -224,89 +167,7 @@ func _round_robin_add_potential_chunks(iterations : int = 8):
 		apc_sub_iterator = 0
 
 
-# Ensure most important chunks are kept in active state
-var kha_iterator = 0
-func _round_robin_keep_hotspots_active():
-	if hotspots.is_empty(): return
-	
-	kha_iterator += 1
-	if kha_iterator >= hotspots.size():
-		kha_iterator = 0
-		
-	var hotspot_node : Node3D = hotspots.keys()[kha_iterator]
-	
-	var found_chunk = get_chunk_at(hotspot_node.global_position)
-	if not found_chunk:
-		push_error("%s: Can't find chunk at hotspot %s" % [self, hotspot_node])
-		return
-	
-	if not found_chunk.active:
-		activate_chunk(found_chunk)
 
-
-var cd_iterator = 0
-func _round_robin_calculate_distances(iterations : int = 1, subset_from_start : int = 1):
-	if chunks_by_position.is_empty(): return
-	var max_index = chunks_by_position.size() / subset_from_start
-	for it in range(min(iterations, max_index)):
-		cd_iterator += 1
-		if cd_iterator >= max_index:
-			cd_iterator = 0
-		
-		if not hotspots.is_empty():
-			var chunk : Chunk = chunks_by_position.values()[cd_iterator]
-			_calculate_distance_to_closest_hotspot_for(chunk)
-			chunks_by_distance.update(chunk)
-
-
-var ssbd_iterator = -1
-func _round_robin_set_state_by_distance(iterations : int = 1, actions : int = 1, subset_from_start : int = 1):
-	if chunks_by_distance.is_empty(): return
-	var max_index = chunks_by_distance.size() / subset_from_start
-	var action_count = 0
-	for i in range(iterations):
-		ssbd_iterator += 1
-		if ssbd_iterator >= max_index:
-			ssbd_iterator = 0
-	
-		var chunk = chunks_by_distance.get_array_for_read_only()[ssbd_iterator]
-		if _set_state_by_index(chunk, ssbd_iterator):
-			max_index = chunks_by_distance.size() / subset_from_start
-			action_count += 1
-			if action_count >= actions:
-				return
-
-
-## return true if any action was taken
-func _set_state_by_index(chunk : Chunk, index_position : int) -> bool:
-	var actions_taken = 0
-
-	if index_position > max_chunks:
-		delete_chunk(chunk)
-		return true
-	
-	if index_position < max_active and not chunk.active:
-		activate_chunk(chunk)
-		actions_taken += 1
-	if index_position < max_loaded and not chunk.loaded:
-		load_chunk(chunk)
-		actions_taken += 1
-		if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
-	
-	if index_position > max_loaded and chunk.loaded:
-		unload_chunk(chunk)
-		actions_taken += 1
-		if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
-	if index_position > max_active and chunk.active:
-		deactivate_chunk(chunk)
-		actions_taken += 1
-		if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
-	
-	if actions_taken > 1: push_error("ChunkManager BUG: logic error: should not allow more than one action.")
-	
-	if actions_taken == 0:
-		return false
-	return true
 
 
 var laa_iterator = 0
@@ -449,9 +310,8 @@ func get_chunk_at(point : Vector3i, create_missing = true) -> Chunk:
 	new_chunk.name = Chunk.get_filename(chunk_size,snapped_position)
 	new_chunk.position = snapped_position
 	new_chunk.size = chunk_size
+	
 	chunks_by_position[new_chunk.position] = new_chunk
-	_calculate_distance_to_closest_hotspot_for(new_chunk)
-	chunks_by_distance.insert(new_chunk._sorted_array_key, new_chunk)
 	new_chunk.initialized = true
 	emit_signal("chunk_initialized", new_chunk)
 	return new_chunk
@@ -471,12 +331,11 @@ func load_chunk(chunk : Chunk):
 		
 	loaded_chunks[chunk.position] = chunk
 	chunk.loaded = true
-	_calculate_distance_to_closest_hotspot_for(chunk)
-	chunks_by_distance.update(chunk)
 	
 	emit_signal("chunk_loaded", chunk)
 
 
+## Designate chunk as active so as to update and potentially being displayed by a player
 func activate_chunk(chunk : Chunk):
 	if chunk.active:
 		push_error("%s: Trying to activate already active chunk %s" % [self, chunk])
@@ -526,7 +385,6 @@ func delete_chunk(chunk : Chunk):
 	emit_signal("chunk_deleted", chunk)
 	chunk.transient_data.clear()
 	chunks_by_position.erase(chunk.position)
-	chunks_by_distance.erase(chunk)
 	chunk.queue_free()
 
 
@@ -539,7 +397,7 @@ func _on_hotspot_deleted(hotspot):
 func _calculate_distance_to_closest_hotspot_for(chunk):
 	var first_iteration = true
 	for hotspot in hotspots.keys():
-		var dist_to_hotspot = Vector3( Vector3(chunk.position) - hotspot.global_position + Vector3(half_chunk) ).abs()
+		var dist_to_hotspot = Vector3( Vector3(chunk.position) - hotspot.global_position + Vector3(_half_chunk) ).abs()
 		var cubic_dist = max(dist_to_hotspot.x, dist_to_hotspot.y, dist_to_hotspot.z)
 		if first_iteration or chunk.dist_to_closest_hotspot > cubic_dist:
 			chunk.dist_to_closest_hotspot = cubic_dist
@@ -548,4 +406,4 @@ func _calculate_distance_to_closest_hotspot_for(chunk):
 
 
 func get_globalpath(pos : Vector3i) -> String:
-	return "%s/%s-%s/%s.%s" % [database_folder, database_name, database_uid, Chunk.get_filename(chunk_size, pos), database_format]
+	return "%s/%s-%s/%s.%s" % [database_root_folder, database_name, database_uid, Chunk.get_filename(chunk_size, pos), database_format]
