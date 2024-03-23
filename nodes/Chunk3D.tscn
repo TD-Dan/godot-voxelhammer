@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bu34bg5dok4ly"]
+
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/Node3D/Chunk3D.gd" id="1_wik3d"]
+
+[node name="Chunk3D" type="Node3D"]
+script = ExtResource("1_wik3d")

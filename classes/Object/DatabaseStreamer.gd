@@ -74,21 +74,29 @@ func _ready():
 		database_format = "scn"
 	rebuild_database_folder()
 	
+	
 	_post_ready.call_deferred()
 
 func _post_ready():
-	connect_to_streamables_in_stream_group()
 	
 	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
 	for node : Streamable in stream_nodes:
+		node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
 		load_from_disk(node)
+	
+	for node : Streamable in stream_nodes:
+	
+	get_tree().node_added.connect(_on_node_added)
+	get_tree().node_removed.connect(_on_node_removed)
+
+
+func _exit_tree():
+	get_tree().node_added.disconnect(_on_node_added)
+	get_tree().node_removed.disconnect(_on_node_removed)
+
 
 
 func connect_to_streamables_in_stream_group():
-	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
-	
-	for node : Streamable in stream_nodes:
-		node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
 
 
 func _on_stream_data_changed(data : Streamable):
@@ -114,11 +122,6 @@ func rebuild_database_folder():
 		print("%s: Found chunkdata %s at %s" % [self, database_location, full_path])
 
 
-func _exit_tree():
-	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
-		save_all_changes()
-
-
 var delta_counter = 0.0
 func _process(delta):
 	if Engine.is_editor_hint():
@@ -139,6 +142,7 @@ func _process(delta):
 func save_all_changes():
 	print("%s: saving all" % self)
 	for streamable in get_tree().get_nodes_in_group(stream_group):
+		print(streamable)
 		save_to_disk(streamable)
 
 

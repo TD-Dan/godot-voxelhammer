@@ -4,11 +4,10 @@ extends Node3D
 
 class_name VoxelInstance3D
 
-#
 ## VoxelData instance inside SceneTree
-#
-# Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
-#
+##
+## Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
+##
 
 # Emitted when data is modified
 signal data_changed(what)
@@ -97,16 +96,19 @@ func apply_paintstack(draw_stack : VoxelPaintStack = null):
 			push_voxel_operation(VoxelOpPaintStack.new(draw_stack))
 
 
-var _col_sibling # only one editing this value is _update_collision_sibling!
+# Collision object that is added to the parent 
+var _col_sibling
 
+## Type of collision shape to use with CollisionObject3D and its subclasses
 enum COLLISION_MODE{
-	NONE,
-	CUBE,
-	CONVEX_MESH,
-	CONCAVE_MESH
+	NONE,			## No collision object is created
+	CUBE,			## Simple cube encasing the whole voxel shape
+	CONVEX_MESH,	## Convex mesh (no indents)
+	CONCAVE_MESH	## Concave mesh that matches the actual voxel data, *might* be slow to process
 }
 
 var _generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE
+## Generate collision shape to use with CollisionObject3D and its subclasses
 @export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
 	set(nv):
 		_generate_collision_sibling = nv
@@ -464,8 +466,8 @@ func _update_collision_sibling():
 				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node to generate a collision sibling. Set to NONE.")
 				_generate_collision_sibling = COLLISION_MODE.NONE
 				return
-			
-			
+		
+		
 		_col_sibling = CollisionShape3D.new()
 		_col_sibling.name = "VoxelShape3D"
 		#print("%s: Adding Collision sibling %s" % [self, _col_sibling])

@@ -11,6 +11,7 @@ class_name Streamable
 
 
 signal stream_data_changed
+signal stream_disconnecting
 
 
 ## Unique id used to match database content to this node. Leave empty to generate automatically. If database already has entry with this id, all data will be loaded from it.
@@ -36,3 +37,7 @@ func _ready():
 func _post_ready():
 	if stream_data_id == "" or not stream_data_id:
 		stream_data_id = str(self.get_instance_id())
+
+
+func _exit_tree():
+	stream_disconnecting.emit()
