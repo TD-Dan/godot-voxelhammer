@@ -10,7 +10,7 @@ var name = "VoxelOperation"
 ####
 
 
-var voxel_instance : VoxelInstance3D
+var voxel_instance : VoxelInstance
 
 
 enum CALCULATION_LEVEL {

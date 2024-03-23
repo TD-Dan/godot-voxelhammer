@@ -2,9 +2,9 @@
 
 extends Node3D
 
-class_name VoxelInstance3D
+class_name VoxelInstance
 
-## VoxelData instance inside SceneTree
+## VoxelData as a mesh instance inside SceneTree
 ##
 ## Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
 ##
@@ -67,13 +67,13 @@ func _on_voxel_configuration_changed(what="all"):
 				#print("%s: connect %s" % [self,voxel_data])
 
 func _on_voxels_changed():
-	#print("VoxelInstance3D: _on_voxels_changed")
+	#print("%s: _on_voxels_changed" % self)
 	#if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
 	#	print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
 	#	return
 	
-	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
+	#print("%s: %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
 	
 	_debug_mesh_color = Color(0.5,0,0)
 
@@ -165,7 +165,10 @@ var PENDING_OPERATIONS_LIMIT = 3
 var current_operation : VoxelOperation = null
 
 func _ready():
-	#print("VoxelInstance3D: _ready")
+	#print("%s: _ready" % self)
+	
+	# Set grouping on in editor to prevent accidental moving of submesh
+	set_meta("_edit_group_", true)
 	
 	if not voxel_data:
 		voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_M_on_block.tres").duplicate()
@@ -193,7 +196,7 @@ func _ready():
 	# Force load configuration, wich will initiate mesh cvalculation
 	_on_voxel_configuration_changed()
 	
-	#print("VoxelInstance3D: _ready is done")
+	#print("%s: _ready is done" % self)
 
 
 ## Create new or find existing mesh_child object
@@ -216,7 +219,7 @@ func _enter_tree():
 	pass
 
 func _exit_tree():
-	#print("VoxelInstance3D %s: _exit_tree" % self)
+	#print("%s: _exit_tree" % self)
 	
 	if current_operation:
 		current_operation.cancel = true
@@ -226,7 +229,7 @@ func _exit_tree():
 	if worker_thread and worker_thread.is_started():
 		worker_thread.wait_to_finish()
 	
-	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor. This removes the sibling alongside the VoxelInstance3D.
+	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor. This removes the sibling alongside the VoxelInstance.
 
 
 func _notification(what):
@@ -250,7 +253,7 @@ func _notification(what):
 
 func _to_string():
 	var idstr : String = str(get_instance_id())
-	return "[VoxelInstance3D..%s]" % idstr.substr(idstr.length()-4)
+	return "[VoxelInstance%s]" % idstr.substr(idstr.length()-4)
 
 # Set single voxel. Thread safe. Index safe. return true on succces
 func set_voxel(pos : Vector3i, value : int) -> bool:
@@ -310,12 +313,12 @@ func _advance_operation_stack():
 	#if not is_inside_tree():
 	#	return true
 		
-	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
+	#print("%s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
 	if not current_operation:
 		#print("popping from stack %s" % str(current_operation))
 		current_operation = pending_operations.pop_front()
 		if current_operation:
-			#print("VoxelInstance3D %s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
+			#print("%s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
 			match configuration.thread_mode:
 				VoxelConfiguration.THREAD_MODE.NONE:
 					#print("%s: running operation (blocking main thread)..." % self)
@@ -512,7 +515,7 @@ func _set_editor_as_owner(node):
 
 
 func _on_show_debug_gizmos_changed(value):
-	#print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
+	#print("%s: Changing debug mesh visibility to %s" %[sef,str(value)])
 	_debug_mesh_visible = value
 	
 	_update_collision_sibling() # ! important ! updates editor as owner of _col_sibling

@@ -31,11 +31,11 @@ var selection = null:
 		button_paint.button_pressed = false
 		
 		if nv is VoxelBody3D:
-			var child = nv.get_node_or_null("VoxelInstance3D")
+			var child = nv.get_node_or_null("VoxelInstance")
 			if child:
 				nv = child
 			
-		if nv is VoxelInstance3D:
+		if nv is VoxelInstance:
 			selection = nv
 			
 			if not selection.is_connected("data_changed", _on_selection_data_changed):
@@ -192,7 +192,7 @@ func _on_button_paint_toggled(button_pressed):
 		if selection.mesh_scale != 1.0:
 			push_warning("Paint mode not supported for scaled meshes. This is a Godot limitation. Use 'Mesh Scale' 1.0 to enable live paint.")
 			failed_to_enter_mode = true
-		elif selection.generate_collision_sibling != VoxelInstance3D.COLLISION_MODE.CONCAVE_MESH:
+		elif selection.generate_collision_sibling != VoxelInstance.COLLISION_MODE.CONCAVE_MESH:
 			push_warning("Paint mode supported only when a concave mesh is present. Set 'Generate Collision Sibling' to 'Concave Mesh' to enable live paint.")
 			failed_to_enter_mode = true
 		
@@ -224,8 +224,8 @@ func _on_add_vox_instance_pressed():
 		new_parent = sel[0]
 	
 	if new_parent:
-		var new_vox = VoxelInstance3D.new()
-		new_vox.name = "VoxelInstance3D"
+		var new_vox = VoxelInstance.new()
+		new_vox.name = "VoxelInstance"
 		new_parent.add_child(new_vox,true)
 		new_vox.owner = new_owner
 

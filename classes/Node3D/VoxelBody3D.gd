@@ -7,7 +7,7 @@ class_name VoxelBody3D
 @export var paint_mode : bool = false
 @export var paint_mat : int = 2
 
-var voxel_instance : VoxelInstance3D
+var voxel_instance : VoxelInstance
 
 # Called when the node enters the scene tree for the first time.
 func _ready():	
@@ -17,14 +17,14 @@ func _ready():
 
 
 func _post_ready_deferred():
-	voxel_instance = get_node_or_null("VoxelInstance3D")
+	voxel_instance = get_node_or_null("VoxelInstance")
 	
 	if not voxel_instance:
 		print("creating new")
-		voxel_instance = VoxelInstance3D.new()
-		voxel_instance.name = "VoxelInstance3D"
+		voxel_instance = VoxelInstance.new()
+		voxel_instance.name = "VoxelInstance"
 		voxel_instance.voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_B_on_block.tres").duplicate()
-		voxel_instance.generate_collision_sibling = VoxelInstance3D.COLLISION_MODE.CONCAVE_MESH
+		voxel_instance.generate_collision_sibling = VoxelInstance.COLLISION_MODE.CONCAVE_MESH
 		add_child(voxel_instance)
 	
 	if Engine.is_editor_hint():

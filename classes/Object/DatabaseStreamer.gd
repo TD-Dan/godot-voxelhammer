@@ -81,27 +81,25 @@ func _post_ready():
 	
 	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
 	for node : Streamable in stream_nodes:
-		node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
-		load_from_disk(node)
+		connect_to_streamable(node)
 	
-	for node : Streamable in stream_nodes:
-	
-	get_tree().node_added.connect(_on_node_added)
-	get_tree().node_removed.connect(_on_node_removed)
+	get_tree().node_added.connect(_on_node_added_to_tree)
+	get_tree().node_removed.connect(_on_node_removed_from_tree)
 
 
 func _exit_tree():
-	get_tree().node_added.disconnect(_on_node_added)
-	get_tree().node_removed.disconnect(_on_node_removed)
+	get_tree().node_added.disconnect(_on_node_added_to_tree)
+	get_tree().node_removed.disconnect(_on_node_removed_from_tree)
 
 
+func connect_to_streamable(node):
+	node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
+	load_from_disk(node)
 
-func connect_to_streamables_in_stream_group():
-
-
-func _on_stream_data_changed(data : Streamable):
-	if backup_strategy == BACKUP_STRATEGY.INSTANT:
-		save_to_disk(data)
+func disconnect_from_streamable(node):
+	node.stream_data_changed.disconnect(_on_stream_data_changed)
+	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
+		save_to_disk(node)
 
 
 func rebuild_database_folder():
@@ -134,8 +132,8 @@ func _process(delta):
 		match backup_strategy:
 			BACKUP_STRATEGY.INTERVAL:
 				save_all_changes()
-			BACKUP_STRATEGY.INTERVAL_RR:
-				_round_robin_save_changes()
+			#BACKUP_STRATEGY.INTERVAL_RR:
+			#	_round_robin_save_changes()
 
 
 ## Save all changes to disk
@@ -187,5 +185,21 @@ func load_from_disk(data : Streamable):
 		return
 	
 	print("Loading from disk : %s : %s" % [data.stream_data_id, completefilepath])
-	#var load_packet : PackedScene = ResourceLoader.load(completefilepath, "", ResourceLoader.CACHE_MODE_IGNORE)
+	var load_packet : PackedScene = ResourceLoader.load(completefilepath, "", ResourceLoader.CACHE_MODE_IGNORE)
 	
+	data.get_parent().replace_by(load_packet.instantiate())
+
+
+func _on_stream_data_changed(data : Streamable):
+	if backup_strategy == BACKUP_STRATEGY.INSTANT:
+		save_to_disk(data)
+
+
+func _on_node_added_to_tree(node: Node):
+	if node.is_in_group(stream_group):
+		connect_to_streamable(node)
+	
+
+func _on_node_removed_from_tree(node: Node):
+	if node.is_in_group(stream_group):
+		disconnect_from_streamable(node)
