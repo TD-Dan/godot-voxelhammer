@@ -6,9 +6,11 @@ class_name DatabaseStreamer
 
 ## Streams node data between memory and a file database
 ##
-## - Save and load data from local folder
-## - Backup data automatically according to chosen strategy
+## + Save and load data from local folder using Streamable.stream_data_id as filename
+## + Backup data automatically according to chosen strategy
 ## ! Does not know and does not need to know about contents
+## ! Does not crete new objects on its own: needs an existing streamable for connecting to existing data
+
 
 ## Group name of objects to stream
 @export var stream_group = "all_streamables"
@@ -75,11 +77,23 @@ func _ready():
 	_post_ready.call_deferred()
 
 func _post_ready():
-	# Connect to stream group
+	connect_to_streamables_in_stream_group()
+	
+	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
+	for node : Streamable in stream_nodes:
+		load_from_disk(node)
+
+
+func connect_to_streamables_in_stream_group():
 	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
 	
-	for node in stream_nodes:
-		load_from_disk(node)
+	for node : Streamable in stream_nodes:
+		node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
+
+
+func _on_stream_data_changed(data : Streamable):
+	if backup_strategy == BACKUP_STRATEGY.INSTANT:
+		save_to_disk(data)
 
 
 func rebuild_database_folder():
@@ -107,6 +121,9 @@ func _exit_tree():
 
 var delta_counter = 0.0
 func _process(delta):
+	if Engine.is_editor_hint():
+		return
+	
 	delta_counter += delta
 	if delta_counter > backup_interval_seconds:
 		delta_counter -= backup_interval_seconds
@@ -120,13 +137,14 @@ func _process(delta):
 
 ## Save all changes to disk
 func save_all_changes():
+	print("%s: saving all" % self)
 	for streamable in get_tree().get_nodes_in_group(stream_group):
-		print(streamable)
-		pass
+		save_to_disk(streamable)
 
 
 var rr_iterator = 0
 func _round_robin_save_changes():
+	print("%s: round robing saving" % self)
 	pass
 
 
@@ -139,25 +157,31 @@ func get_stream_full_filename_and_path(stream_id : String):
 
 ## Save all persistent_data to disk
 func save_to_disk(data : Streamable):
-	#print("Chunk saving to disk : " + completefilepath)
+	var completefilepath = get_stream_full_filename_and_path(data.stream_data_id)
+	print("%s: Saving Streamable %s to disk as %s" % [self, data, completefilepath])
+	
 	var packet = PackedScene.new()
-	var save_node = self
+	var save_node = data.get_parent()
 	var error = packet.pack(save_node)
 	if error:
-		push_error("Chunk packing for saving failed: %s" % error_string(error))
+		push_error("%s: Packing for saving failed: %s" % [self, error_string(error)])
 		return
-	#error = ResourceSaver.save(packet, completefilepath, ResourceSaver.FLAG_COMPRESS)
-	#if error:
-	#	push_error("Chunk save to %s failed: %s" % [completefilepath, error_string(error)])
+	error = ResourceSaver.save(packet, completefilepath, ResourceSaver.FLAG_COMPRESS)
+	if error:
+		push_error("%s: Chunk save to %s failed: %s" % [self, completefilepath, error_string(error)])
 		return
 
 
 ## Load all persistent_data from disk and return a Chunk containing it
-func load_from_disk(node : Streamable):
-	var completefilepath = get_stream_full_filename_and_path(node.stream_data_id)
+func load_from_disk(data : Streamable):
+	if not data.stream_data_id:
+		print("%s : %s has empty stream_data_id" % [self, data])
+		return
+	var completefilepath = get_stream_full_filename_and_path(data.stream_data_id)
+	if not FileAccess.file_exists(completefilepath):
+		print("%s : %s, No file named %s exists, skipping stream load." % [self, data, completefilepath])
+		return
 	
-	print("Loading from disk : %s : %s" % [node.stream_data_id, completefilepath])
+	print("Loading from disk : %s : %s" % [data.stream_data_id, completefilepath])
 	#var load_packet : PackedScene = ResourceLoader.load(completefilepath, "", ResourceLoader.CACHE_MODE_IGNORE)
 	
-	var loaded_stream = {}
-	node.load_from_stream(loaded_stream)

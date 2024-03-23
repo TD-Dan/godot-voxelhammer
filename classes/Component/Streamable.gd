@@ -1,12 +1,10 @@
-@tool
-
 extends Node
 
 class_name Streamable
 
 ## Allows parent Node to be streamed by DatabaseStreamer
 ##
-## + provides an stream_data_id to match data with database
+## + provides a stream_data_id to match data with database
 ## + stores what variables to persist from parent node, set by parent script or user via editor
 ## + signals changes to listeners
 ## ! does not need to know anything about parent or DatabaseStreamer
@@ -15,7 +13,7 @@ class_name Streamable
 signal stream_data_changed
 
 
-## unique id used to match database content to this node. If database already has entry with this id, all data will be loaded from it.
+## Unique id used to match database content to this node. Leave empty to generate automatically. If database already has entry with this id, all data will be loaded from it.
 @export var stream_data_id : String = ""
 
 ## Node contents has been changed and should be streamed to database
@@ -28,33 +26,13 @@ func notify_stream_data_changed():
 	stream_data_changed.emit()
 
 
-## Parent node variables that are saved to the stream. F.ex "text" would save "text" variable in parent node and "/
-@export var persistent_data : Array[String]
-
-## Data that is not saved to disk and gets discarded after Chunk has been unloaded, used for debugging
-var transient_data : Dictionary = Dictionary()
-
-
 func _ready():
-	
 	if get_groups().is_empty():
 		add_to_group("all_streamables",true)
 	
 	_post_ready.call_deferred()
 
+
 func _post_ready():
-	
 	if stream_data_id == "" or not stream_data_id:
 		stream_data_id = str(self.get_instance_id())
-
-
-## Save all persistent_data to a dictionary
-func save_to_stream() -> Dictionary:
-	var parent = get_parent()
-	
-	data_changed = false
-	return {}
-
-## Load all persistent_data from disk and return a Chunk containing it
-static func load_from_stream(stream : Dictionary):
-	return
