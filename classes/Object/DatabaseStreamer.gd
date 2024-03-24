@@ -20,7 +20,7 @@ class_name DatabaseStreamer
 	set(nv):
 		active_in_editor = nv
 		if active_in_editor:
-			rebuild_database_folder.call_deferred()
+			_rebuild_database_folder.call_deferred()
 			_connect_to_streamables_and_monitor_tree.call_deferred()
 
 
@@ -62,7 +62,7 @@ enum BACKUP_STRATEGY {
 ## Create database folder if it does not exist
 ## Note to not try: this *could* be made to happen automatically when any database_* variables changes, but in editor this will create all folders from editing the prompts like : "d", "da", "dat", "data" ... as godot refreshes variable after every edit
 @export var create_database_folder : bool = false:
-	set(nv): rebuild_database_folder()
+	set(nv): _rebuild_database_folder()
 ## Helper to open the user folder in OS
 @export var open_user_folder : bool = false:
 	set(nv):
@@ -84,7 +84,7 @@ func _ready():
 	if Engine.is_editor_hint() and not active_in_editor:
 		return
 	
-	rebuild_database_folder()
+	_rebuild_database_folder()
 	
 	_connect_to_streamables_and_monitor_tree.call_deferred()
 
@@ -92,7 +92,7 @@ func _connect_to_streamables_and_monitor_tree():
 	
 	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
 	for node : Streamable in stream_nodes:
-		connect_to_streamable(node)
+		_connect_to_streamable(node)
 	
 	get_tree().node_added.connect(_on_node_added_to_tree)
 	get_tree().node_removed.connect(_on_node_removed_from_tree)
@@ -104,37 +104,6 @@ func _connect_to_streamables_and_monitor_tree():
 #	
 #	get_tree().node_added.disconnect(_on_node_added_to_tree)
 #	get_tree().node_removed.disconnect(_on_node_removed_from_tree)
-
-
-func connect_to_streamable(node):
-	node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
-	load_from_disk(node)
-
-func disconnect_from_streamable(node):
-	node.stream_data_changed.disconnect(_on_stream_data_changed)
-	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
-		save_to_disk(node)
-
-
-func rebuild_database_folder():
-	if Engine.is_editor_hint() and not active_in_editor:
-		return
-	
-	var global_path = ProjectSettings.globalize_path(database_location)
-	if not DirAccess.dir_exists_absolute(global_path):
-		print("%s:Creating database root at %s" % [self, global_path])
-		var error = DirAccess.make_dir_absolute(global_path)
-		if error:
-			push_error("%s: CANT CREATE DATABASE ROOT %s, ERROR: %s" % [self, global_path, error_string(error)])
-		
-	var full_path = global_path+"/"+database_name+"-"+database_uid+"/"
-	if not DirAccess.dir_exists_absolute(full_path):
-		print("%s:Creating FOLDER %s at %s" % [self, database_location, full_path])
-		var error = DirAccess.make_dir_absolute(full_path)
-		if error:
-			push_error("%s: CANT CREATE FOLDER %s %s : %s" % [self, database_location, full_path, error_string(error)])
-	else:
-		print("%s: Found chunkdata %s at %s" % [self, database_location, full_path])
 
 
 var delta_counter = 0.0
@@ -186,11 +155,22 @@ func save_to_disk(data : Streamable):
 	print("%s: Saving Streamable %s to disk as %s" % [self, data, completefilepath])
 	
 	var packet = PackedScene.new()
-	var save_node = data.get_parent()
+	var parent_node = data.get_parent()
 	
-	# Exlude Streamable from the savefile, its redundant
+	# Include children owned by editor to the savefile
+	# using dictionary instead of metadata because metadata gets saved in the file
+	var old_parent = Dictionary()
+	for child in parent_node.get_children():
+		if child.owner != parent_node:
+			old_parent[child] = child.owner
+			child.owner = parent_node
 	
-	var error = packet.pack(save_node)
+	var error = packet.pack(parent_node)
+	
+	# Return modified children owners to old values
+	for child in old_parent.keys():
+			child.owner = old_parent[child]
+	
 	if error:
 		push_error("%s: Packing for saving failed: %s" % [self, error_string(error)])
 		return
@@ -220,6 +200,38 @@ func load_from_disk(data : Streamable):
 	# data.get_parent().replace_by(load_packet.instantiate())
 
 
+func _rebuild_database_folder():
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
+	var global_path = ProjectSettings.globalize_path(database_location)
+	if not DirAccess.dir_exists_absolute(global_path):
+		print("%s:Creating database root at %s" % [self, global_path])
+		var error = DirAccess.make_dir_absolute(global_path)
+		if error:
+			push_error("%s: CANT CREATE DATABASE ROOT %s, ERROR: %s" % [self, global_path, error_string(error)])
+		
+	var full_path = global_path+"/"+database_name+"-"+database_uid+"/"
+	if not DirAccess.dir_exists_absolute(full_path):
+		print("%s:Creating FOLDER %s at %s" % [self, database_location, full_path])
+		var error = DirAccess.make_dir_absolute(full_path)
+		if error:
+			push_error("%s: CANT CREATE FOLDER %s %s : %s" % [self, database_location, full_path, error_string(error)])
+	else:
+		print("%s: Found chunkdata %s at %s" % [self, database_location, full_path])
+
+
+func _connect_to_streamable(node):
+	node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
+	load_from_disk(node)
+
+
+func _disconnect_from_streamable(node):
+	node.stream_data_changed.disconnect(_on_stream_data_changed)
+	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
+		save_to_disk(node)
+
+
 func _on_stream_data_changed(data : Streamable):
 	if backup_strategy == BACKUP_STRATEGY.INSTANT:
 		save_to_disk(data)
@@ -227,9 +239,9 @@ func _on_stream_data_changed(data : Streamable):
 
 func _on_node_added_to_tree(node: Node):
 	if node.is_in_group(stream_group):
-		connect_to_streamable(node)
+		_connect_to_streamable(node)
 	
 
 func _on_node_removed_from_tree(node: Node):
 	if node.is_in_group(stream_group):
-		disconnect_from_streamable(node)
+		_disconnect_from_streamable(node)
