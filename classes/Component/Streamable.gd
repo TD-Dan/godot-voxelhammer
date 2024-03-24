@@ -6,30 +6,47 @@ class_name Streamable
 
 ## Allows parent Node to be streamed by DatabaseStreamer
 ##
+## + Acts as an adapter between DatabaseStreamer and Nodes
 ## + provides a stream_data_id to match data with database
-## + stores what variables to persist from parent node, set by parent script or user via editor
-## + signals changes to listeners
-## ! does not need to know anything about parent or DatabaseStreamer
+##
+## ! does not need to know anything about parent, files or DatabaseStreamers
 
 
-## Something in the Streamables parent and or its children has changed
+## Emitted when something in the Streamables parent and or its children has changed
 signal stream_data_changed(data_stream : Streamable)
 
-## Parent and streamable are removed from scene tree
+## Emitted when streamable is removed from scene tree
 signal stream_exitted(data_stream : Streamable)
 
 
 ## Unique id used to match database content to this node. Leave empty to generate automatically. If database already has entry with this id, all data will be loaded from it.
 @export var stream_data_id : String = ""
 
-## Node contents has been changed and should be streamed to database
-var has_unwritten_data = false
+
+var _has_unwritten_data = false
+## Parent or its children content has been changed and should be streamed to database according to 
+func has_unwritten_data():
+	return _has_unwritten_data
 
 
+## Streaming can be disabled f.ex. if critical errors are encountered
+var disable = false:
+	set(nv):
+		disable = nv
+		if disable:
+			push_error("%s is disabled!" % self)
+
+
+## Tell the Streamable that some variable in its parent or parents children have changed
 func notify_stream_data_changed():
 	#print("Received notification")
-	has_unwritten_data = true
+	_has_unwritten_data = true
 	stream_data_changed.emit(self)
+
+
+## Tell the Streamable that it has been saved to file
+func notify_stream_has_been_saved():
+	_has_unwritten_data = false
 
 
 func _ready():
