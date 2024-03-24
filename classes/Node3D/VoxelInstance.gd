@@ -167,9 +167,6 @@ var current_operation : VoxelOperation = null
 func _ready():
 	#print("%s: _ready" % self)
 	
-	# Set grouping on in editor to prevent accidental moving of submesh
-	set_meta("_edit_group_", true)
-	
 	if not voxel_data:
 		voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_M_on_block.tres").duplicate()
 	
@@ -212,7 +209,8 @@ func _establish_mesh_child():
 	mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
 	# if in editor update owner to view it scenetree and enable selection of this object
 	if Engine.is_editor_hint():
-		call_deferred("_set_editor_as_owner", mesh_child)
+		mesh_child.owner = self
+		#call_deferred("_set_editor_as_owner", mesh_child)
 
 
 func _enter_tree():
@@ -239,21 +237,23 @@ func _notification(what):
 			#Exclude children from save file
 			if mesh_child:
 				mesh_child.owner = null
-				mesh_child.queue_free()
-				mesh_child = null
+				#mesh_child.queue_free()
+				#mesh_child = null
 			if _col_sibling:
 				_col_sibling.owner = null
-				_col_sibling.queue_free()
-				_col_sibling = null
+				#_col_sibling.queue_free()
+				#_col_sibling = null
 		NOTIFICATION_EDITOR_POST_SAVE:
 			#print("%s: POST_SAVE")
-			# Restore editor view of children by recreating them
-			remesh()
+			# Restore editor view of children
+			mesh_child.owner = self
+			_col_sibling.owner = self
 
 
 func _to_string():
 	var idstr : String = str(get_instance_id())
 	return "[VoxelInstance%s]" % idstr.substr(idstr.length()-4)
+
 
 # Set single voxel. Thread safe. Index safe. return true on succces
 func set_voxel(pos : Vector3i, value : int) -> bool:
@@ -280,6 +280,7 @@ func set_mesh(new_mesh:Mesh):
 	mesh_child.mesh = new_mesh
 	#print("MESH READY")
 	emit_signal("mesh_ready")
+
 
 # Force redraw of mesh
 func remesh():
@@ -340,6 +341,7 @@ func _advance_operation_stack():
 		#else:
 		#	print("no current op")
 
+
 # Run operation in local simple thread mode
 func _run_op_thread(op : VoxelOperation):
 	#print("[Thread:%s]: running operation ..." % OS.get_thread_caller_id())
@@ -358,6 +360,7 @@ func _run_op_thread(op : VoxelOperation):
 	#	print("[Thread..%s]: finished %s in %s seconds" % [idstr, op, delta_time_us/1000000.0])
 	
 	call_deferred("join_worker_thread")
+
 
 func join_worker_thread():
 	worker_thread.wait_to_finish()
@@ -502,16 +505,13 @@ func _update_collision_sibling():
 				
 		# if in editor update owner to view in scenetree
 		if Engine.is_editor_hint():
-			call_deferred("_set_editor_as_owner", _col_sibling)
+			_col_sibling.owner = self
+			#call_deferred("_set_editor_as_owner", _col_sibling)
 		
 		var delta_time = Time.get_ticks_usec() - start_time
 		if _col_sibling.shape:
 			#print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
 			_debug_mesh_color = Color(0.5,1.0,0.5)
-
-func _set_editor_as_owner(node):
-	if get_tree():
-		node.owner = get_tree().edited_scene_root
 
 
 func _on_show_debug_gizmos_changed(value):

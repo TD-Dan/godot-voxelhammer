@@ -38,3 +38,6 @@ func _ready():
 func _post_ready():
 	if stream_data_id == "" or not stream_data_id:
 		stream_data_id = str(self.get_instance_id())
+	
+	if Engine.is_editor_hint() and owner == null:
+		owner = get_tree().edited_scene_root

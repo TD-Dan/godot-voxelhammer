@@ -15,6 +15,14 @@ class_name DatabaseStreamer
 ## Group name of objects to stream
 @export var stream_group = "all_streamables"
 
+## Stream while inside editor, beware this can modify your scene tree!
+@export var active_in_editor = false:
+	set(nv):
+		active_in_editor = nv
+		if active_in_editor:
+			rebuild_database_folder.call_deferred()
+			_connect_to_streamables_and_monitor_tree.call_deferred()
+
 
 @export_group("Database Location")
 ## database base folder, usually "user://somefolder"
@@ -72,12 +80,15 @@ func _ready():
 		database_name = "Unnamed"
 	if database_format == "":
 		database_format = "scn"
+		
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
 	rebuild_database_folder()
 	
-	
-	_post_ready.call_deferred()
+	_connect_to_streamables_and_monitor_tree.call_deferred()
 
-func _post_ready():
+func _connect_to_streamables_and_monitor_tree():
 	
 	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
 	for node : Streamable in stream_nodes:
@@ -87,9 +98,12 @@ func _post_ready():
 	get_tree().node_removed.connect(_on_node_removed_from_tree)
 
 
-func _exit_tree():
-	get_tree().node_added.disconnect(_on_node_added_to_tree)
-	get_tree().node_removed.disconnect(_on_node_removed_from_tree)
+#func _exit_tree():
+#	if Engine.is_editor_hint() and not active_in_editor:
+#		return
+#	
+#	get_tree().node_added.disconnect(_on_node_added_to_tree)
+#	get_tree().node_removed.disconnect(_on_node_removed_from_tree)
 
 
 func connect_to_streamable(node):
@@ -103,6 +117,9 @@ func disconnect_from_streamable(node):
 
 
 func rebuild_database_folder():
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
 	var global_path = ProjectSettings.globalize_path(database_location)
 	if not DirAccess.dir_exists_absolute(global_path):
 		print("%s:Creating database root at %s" % [self, global_path])
@@ -138,6 +155,9 @@ func _process(delta):
 
 ## Save all changes to disk
 func save_all_changes():
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
 	print("%s: saving all" % self)
 	for streamable in get_tree().get_nodes_in_group(stream_group):
 		print(streamable)
@@ -159,11 +179,17 @@ func get_stream_full_filename_and_path(stream_id : String):
 
 ## Save all persistent_data to disk
 func save_to_disk(data : Streamable):
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
 	var completefilepath = get_stream_full_filename_and_path(data.stream_data_id)
 	print("%s: Saving Streamable %s to disk as %s" % [self, data, completefilepath])
 	
 	var packet = PackedScene.new()
 	var save_node = data.get_parent()
+	
+	# Exlude Streamable from the savefile, its redundant
+	
 	var error = packet.pack(save_node)
 	if error:
 		push_error("%s: Packing for saving failed: %s" % [self, error_string(error)])
@@ -176,6 +202,9 @@ func save_to_disk(data : Streamable):
 
 ## Load all persistent_data from disk and return a Chunk containing it
 func load_from_disk(data : Streamable):
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
 	if not data.stream_data_id:
 		print("%s : %s has empty stream_data_id" % [self, data])
 		return
@@ -187,7 +216,8 @@ func load_from_disk(data : Streamable):
 	print("Loading from disk : %s : %s" % [data.stream_data_id, completefilepath])
 	var load_packet : PackedScene = ResourceLoader.load(completefilepath, "", ResourceLoader.CACHE_MODE_IGNORE)
 	
-	data.get_parent().replace_by(load_packet.instantiate())
+	# TEMP DISABLED
+	# data.get_parent().replace_by(load_packet.instantiate())
 
 
 func _on_stream_data_changed(data : Streamable):
