@@ -10,6 +10,8 @@ class_name DatabaseStreamer
 ## + Backup data automatically according to chosen strategy
 ## ! Does not know and does not need to know about contents
 ## ! Does not crete new objects on its own: needs an existing streamable for connecting to existing data
+##
+## ! Either Streamables or DatabaseStreamer might get deleted first so both cases need to be accounted for
 
 
 ## Group name of objects to stream
@@ -21,7 +23,9 @@ class_name DatabaseStreamer
 		active_in_editor = nv
 		if active_in_editor:
 			_rebuild_database_folder.call_deferred()
-			_connect_to_streamables_and_monitor_tree.call_deferred()
+			_connect_to_streamables_in_group.call_deferred()
+			_connect_to_monitor_tree.call_deferred()
+			load_all_from_disk.call_deferred()
 
 
 @export_group("Database Location")
@@ -85,25 +89,29 @@ func _ready():
 		return
 	
 	_rebuild_database_folder()
+	_connect_to_streamables_in_group()
+	_connect_to_monitor_tree.call_deferred()
 	
-	_connect_to_streamables_and_monitor_tree.call_deferred()
+	load_all_from_disk()
 
-func _connect_to_streamables_and_monitor_tree():
-	
+
+func _connect_to_streamables_in_group():
 	var stream_nodes = get_tree().get_nodes_in_group(stream_group)
 	for node : Streamable in stream_nodes:
 		_connect_to_streamable(node)
+
+
+func _connect_to_monitor_tree():
+	if not get_tree().node_added.is_connected(_on_node_added_to_tree):
+		get_tree().node_added.connect(_on_node_added_to_tree)
+
+
+func _exit_tree():
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
 	
-	get_tree().node_added.connect(_on_node_added_to_tree)
-	get_tree().node_removed.connect(_on_node_removed_from_tree)
-
-
-#func _exit_tree():
-#	if Engine.is_editor_hint() and not active_in_editor:
-#		return
-#	
-#	get_tree().node_added.disconnect(_on_node_added_to_tree)
-#	get_tree().node_removed.disconnect(_on_node_removed_from_tree)
+	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
+		save_all_changes()
 
 
 var delta_counter = 0.0
@@ -122,6 +130,16 @@ func _process(delta):
 			#	_round_robin_save_changes()
 
 
+## Load all streamables from disk
+func load_all_from_disk():
+	if Engine.is_editor_hint() and not active_in_editor:
+		return
+	
+	print("%s: loading all" % self)
+	for streamable in get_tree().get_nodes_in_group(stream_group):
+		load_from_disk(streamable)
+
+
 ## Save all changes to disk
 func save_all_changes():
 	if Engine.is_editor_hint() and not active_in_editor:
@@ -129,7 +147,6 @@ func save_all_changes():
 	
 	print("%s: saving all" % self)
 	for streamable in get_tree().get_nodes_in_group(stream_group):
-		print(streamable)
 		save_to_disk(streamable)
 
 
@@ -147,37 +164,45 @@ func get_stream_full_filename_and_path(stream_id : String):
 	
 
 ## Save all persistent_data to disk
-func save_to_disk(data : Streamable):
+func save_to_disk(data_stream : Streamable):
 	if Engine.is_editor_hint() and not active_in_editor:
 		return
 	
-	var completefilepath = get_stream_full_filename_and_path(data.stream_data_id)
-	print("%s: Saving Streamable %s to disk as %s" % [self, data, completefilepath])
+	if not data_stream.has_unwritten_data:
+		print("%s: Skipping saving %s: no changes." % [self, data_stream])
+		return
+	
+	var completefilepath = get_stream_full_filename_and_path(data_stream.stream_data_id)
+	print("%s: Saving %s to disk as %s" % [self, data_stream, completefilepath])
 	
 	var packet = PackedScene.new()
-	var parent_node = data.get_parent()
+	var parent_node = data_stream.get_parent()
 	
 	# Include children owned by editor to the savefile
 	# using dictionary instead of metadata because metadata gets saved in the file
-	var old_parent = Dictionary()
+	var old_parents = Dictionary()
 	for child in parent_node.get_children():
 		if child.owner != parent_node:
-			old_parent[child] = child.owner
+			old_parents[child] = child.owner
 			child.owner = parent_node
 	
 	var error = packet.pack(parent_node)
 	
 	# Return modified children owners to old values
-	for child in old_parent.keys():
-			child.owner = old_parent[child]
+	for child in old_parents.keys():
+		if old_parents[child] != null:
+			child.owner = old_parents[child]
 	
 	if error:
 		push_error("%s: Packing for saving failed: %s" % [self, error_string(error)])
 		return
+	
 	error = ResourceSaver.save(packet, completefilepath, ResourceSaver.FLAG_COMPRESS)
 	if error:
 		push_error("%s: Chunk save to %s failed: %s" % [self, completefilepath, error_string(error)])
 		return
+	
+	data_stream.has_unwritten_data = false
 
 
 ## Load all persistent_data from disk and return a Chunk containing it
@@ -185,12 +210,17 @@ func load_from_disk(data : Streamable):
 	if Engine.is_editor_hint() and not active_in_editor:
 		return
 	
+	if data.has_unwritten_data:
+		push_warning("Discarding changes by loading from disk!")
+	
 	if not data.stream_data_id:
 		print("%s : %s has empty stream_data_id" % [self, data])
+		data.has_unwritten_data = true
 		return
 	var completefilepath = get_stream_full_filename_and_path(data.stream_data_id)
 	if not FileAccess.file_exists(completefilepath):
 		print("%s : %s, No file named %s exists, skipping stream load." % [self, data, completefilepath])
+		data.has_unwritten_data = true
 		return
 	
 	print("Loading from disk : %s : %s" % [data.stream_data_id, completefilepath])
@@ -198,6 +228,8 @@ func load_from_disk(data : Streamable):
 	
 	# TEMP DISABLED
 	# data.get_parent().replace_by(load_packet.instantiate())
+	
+	data.has_unwritten_data = false
 
 
 func _rebuild_database_folder():
@@ -221,27 +253,26 @@ func _rebuild_database_folder():
 		print("%s: Found chunkdata %s at %s" % [self, database_location, full_path])
 
 
-func _connect_to_streamable(node):
-	node.stream_data_changed.connect(_on_stream_data_changed.bind(node))
-	load_from_disk(node)
+func _connect_to_streamable(data_stream : Streamable):
+	if not data_stream.stream_data_changed.is_connected(_on_stream_data_changed):
+		data_stream.stream_data_changed.connect(_on_stream_data_changed)
+	if not data_stream.stream_exitted.is_connected(_on_stream_exitted):
+		data_stream.stream_exitted.connect(_on_stream_exitted)
 
 
-func _disconnect_from_streamable(node):
-	node.stream_data_changed.disconnect(_on_stream_data_changed)
-	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
-		save_to_disk(node)
-
-
-func _on_stream_data_changed(data : Streamable):
+func _on_stream_data_changed(data_stream : Streamable):
 	if backup_strategy == BACKUP_STRATEGY.INSTANT:
-		save_to_disk(data)
+		save_to_disk(data_stream)
+
+
+func _on_stream_exitted(data_stream : Streamable):
+	if backup_strategy >= BACKUP_STRATEGY.AT_EXIT:
+		save_to_disk(data_stream)
 
 
 func _on_node_added_to_tree(node: Node):
-	if node.is_in_group(stream_group):
+	if node.is_in_group(stream_group) and node is Streamable:
+		print("found new Streamable in group")
 		_connect_to_streamable(node)
+		load_from_disk(node)
 	
-
-func _on_node_removed_from_tree(node: Node):
-	if node.is_in_group(stream_group):
-		_disconnect_from_streamable(node)
