@@ -12,17 +12,16 @@ class_name ChunkSpace3D
 ## ! Does not know and does not need to know about chunk contents or their internal loading processes
 
 
+## New Chunk3D was added to the graph
+signal chunk_added(chunk)
+
 ## Chunk size
 @export var chunk_size : Vector3i = Vector3i(16,16,16):
 	set(nv):
 		chunk_size = nv
-		_half_chunk = Vector3i(nv.x/2,nv.y/2,nv.z/2)
+		_half_chunk = chunk_size / 2
 # helper to get half chunk size without calculations
 var _half_chunk : Vector3i
-
-
-## Wether to utilize threading for chunk logic
-@export var use_threads : bool
 
 
 ## Dictionary of key:value as Vector3i:Chunk
@@ -59,7 +58,14 @@ var ix = 0
 var iy = 0
 var iz = 0
 
-func _process(_delta):	
+func _ready():
+	hotspot_iterator = -1
+	
+	if _hotspots.is_empty():
+		process_mode = Node.PROCESS_MODE_DISABLED
+
+
+func _process(_delta):
 	if hotspot_iterator >= 0 and hotspot_iterator < _hotspots.size():
 		
 		get_chunk_at(start_point + Vector3i(ix, iy, iz)*chunk_size)
@@ -87,15 +93,16 @@ func _process(_delta):
 ## Translate global coordinate into chunk coordinate
 func to_chunk(point: Vector3i) -> Vector3i:
 	point -= _half_chunk
-	var snapped_position = point.snapped(chunk_size)
+	var snapped_position = point.snapped(chunk_size)/chunk_size
 	return snapped_position
 
 
 ## Get the chunk that contains the given point
 func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
-	#print("ChunkManager: getting chunk at %s" % point)
-	
-	var found_chunk = chunks_by_position.get(to_chunk(point))
+	print("%s: getting chunk at %s" % [self, point])
+	var in_chunkspace = to_chunk(point)
+	print("%s: = chunk position %s" % [self, in_chunkspace])
+	var found_chunk = chunks_by_position.get(in_chunkspace)
 	if found_chunk:
 		return found_chunk
 	elif generate_missing:
@@ -104,6 +111,7 @@ func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
 		new_chunk.chunk_size = chunk_size
 		
 		chunks_by_position[new_chunk.chunk_position] = new_chunk
+		chunk_added.emit(new_chunk)
 		return new_chunk
 	else:
 		return null
