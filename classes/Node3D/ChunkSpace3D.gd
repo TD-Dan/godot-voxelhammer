@@ -35,14 +35,53 @@ var _hotspots : Array[Node3D] = []
 ## Add new hotspot keep chunks loaded/active around
 func add_hotspot(hotspot : Node3D):
 	_hotspots.append(hotspot)
+	process_mode = Node.PROCESS_MODE_INHERIT
 
 ## Remove previously added hotspot keep chunks loaded/active around
 func remove_hotspot(hotspot : Node3D):
 	_hotspots.erase(hotspot)
+	if _hotspots.is_empty():
+		process_mode = Node.PROCESS_MODE_DISABLED
 
 
 ## Distance for chunks to update around hotspots
-@export var active_radius : int = 4
+@export var active_area : Vector3i = Vector3i(4,4,4):
+	set(nv):
+		active_area = nv
+		_total_chunks_in_area = active_area.x * active_area.y * active_area.z
+
+var _total_chunks_in_area = 0
+
+
+var hotspot_iterator : int = -1
+var start_point : Vector3i
+var ix = 0
+var iy = 0
+var iz = 0
+
+func _process(_delta):	
+	if hotspot_iterator >= 0 and hotspot_iterator < _hotspots.size():
+		
+		get_chunk_at(start_point + Vector3i(ix, iy, iz)*chunk_size)
+		
+		ix += 1
+		if ix < active_area.x: return
+		else:
+			ix = 0
+			iy += 1
+			if iy < active_area.y: return
+			else:
+				iy = 0
+				iz += 1
+				if iz < active_area.z: return
+				else:
+					iz = 0
+	
+	hotspot_iterator += 1
+	if hotspot_iterator >= _hotspots.size():
+		hotspot_iterator = 0
+	
+	start_point = Vector3i(_hotspots[hotspot_iterator].global_position) - (_half_chunk * chunk_size)
 
 
 ## Translate global coordinate into chunk coordinate
