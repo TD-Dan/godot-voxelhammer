@@ -8,12 +8,18 @@ var dock
 
 func _enter_tree():
 	print("VoxelHammer plugin loading...")
-	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh_w.png"))
 	add_custom_type("VoxelData", "Resource", preload("./classes/Resource/VoxelData.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("DatabaseStreamer", "Node", preload("./classes/Object/DatabaseStreamer.gd"), preload("./res/icon_vh_w.png"))
+	add_custom_type("Streamable", "Node", preload("./classes/Component/Streamable.gd"), preload("./res/icon_vh_w.png"))
+	
 	add_custom_type("VoxelInstance", "Node3D", preload("./classes/Node3D/VoxelInstance.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelBody3D", "StaticBody3D", preload("./classes/Node3D/VoxelBody3D.gd"), preload("./res/icon_vh.png"))
-	#add_custom_type("VoxelChunkManager", "Object", preload("./classes/Object/ChunkManager.gd"), preload("./res/icon_vh.png"))
-	add_custom_type("VoxelPaintStack", "Resource", preload("./classes/PaintOp/VoxelPaintStack.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("VoxelTerrain", "Node3D", preload("./classes/Node3D/VoxelTerrain.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("VoxelPaintStack", "Resource", preload("./classes/PaintOp/VoxelPaintStack.gd"), preload("./res/icon_vh_w.png"))
 	name = "VoxelHammerPlugin"
 	
 	ed_sel = get_editor_interface().get_selection()
@@ -32,10 +38,17 @@ func _enter_tree():
 
 func _exit_tree():
 	print("VoxelHammer plugin unloading...")
+	
 	remove_custom_type("VoxelConfiguration")
 	remove_custom_type("VoxelData")
+	
+	remove_custom_type("DatabaseStreamer")
+	remove_custom_type("Streamable")
+	
 	remove_custom_type("VoxelInstance")
-	#remove_custom_type("VoxelTerrain3D")
+	remove_custom_type("VoxelBody3D")
+	remove_custom_type("VoxelTerrain")
+	
 	remove_custom_type("VoxelPaintStack")
 	#remove_custom_type("VoxelThing")
 
@@ -54,7 +67,7 @@ func _handles(object: Object) -> bool:
 		return true
 	if object is VoxelBody3D:
 		return true
-	if object is VoxelTerrain3D:
+	if object is VoxelTerrain:
 		return true
 	return false
 
