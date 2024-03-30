@@ -60,7 +60,6 @@ var iz = 0
 
 func _ready():
 	hotspot_iterator = -1
-	
 	if _hotspots.is_empty():
 		process_mode = Node.PROCESS_MODE_DISABLED
 
@@ -87,21 +86,20 @@ func _process(_delta):
 	if hotspot_iterator >= _hotspots.size():
 		hotspot_iterator = 0
 	
-	start_point = Vector3i(_hotspots[hotspot_iterator].global_position) - (_half_chunk * chunk_size)
+	start_point = Vector3i(_hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
 
 
 ## Translate global coordinate into chunk coordinate
 func to_chunk(point: Vector3i) -> Vector3i:
-	point -= _half_chunk
 	var snapped_position = point.snapped(chunk_size)/chunk_size
 	return snapped_position
 
 
 ## Get the chunk that contains the given point
 func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
-	print("%s: getting chunk at %s" % [self, point])
+	#print("%s: getting chunk at %s" % [self, point])
 	var in_chunkspace = to_chunk(point)
-	print("%s: = chunk position %s" % [self, in_chunkspace])
+	#print("%s: = chunk position %s" % [self, in_chunkspace])
 	var found_chunk = chunks_by_position.get(in_chunkspace)
 	if found_chunk:
 		return found_chunk
