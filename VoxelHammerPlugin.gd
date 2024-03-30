@@ -10,8 +10,9 @@ func _enter_tree():
 	print("VoxelHammer plugin loading...")
 	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelData", "Resource", preload("./classes/Resource/VoxelData.gd"), preload("./res/icon_vh.png"))
-	add_custom_type("VoxelInstance3D", "Node3D", preload("./classes/Node3D/VoxelInstance3D.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("VoxelInstance", "Node3D", preload("./classes/Node3D/VoxelInstance.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelBody3D", "StaticBody3D", preload("./classes/Node3D/VoxelBody3D.gd"), preload("./res/icon_vh.png"))
+	#add_custom_type("VoxelChunkManager", "Object", preload("./classes/Object/ChunkManager.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelPaintStack", "Resource", preload("./classes/PaintOp/VoxelPaintStack.gd"), preload("./res/icon_vh.png"))
 	name = "VoxelHammerPlugin"
 	
@@ -33,9 +34,9 @@ func _exit_tree():
 	print("VoxelHammer plugin unloading...")
 	remove_custom_type("VoxelConfiguration")
 	remove_custom_type("VoxelData")
-	remove_custom_type("VoxelInstance3D")
+	remove_custom_type("VoxelInstance")
+	#remove_custom_type("VoxelTerrain3D")
 	remove_custom_type("VoxelPaintStack")
-	#remove_custom_type("VoxelTerrain")
 	#remove_custom_type("VoxelThing")
 
 	if dock:
@@ -49,7 +50,7 @@ func _exit_tree():
 
 func _handles(object: Object) -> bool:
 	#print("_handles? : %s" % str(object))
-	if object is VoxelInstance3D:
+	if object is VoxelInstance:
 		return true
 	if object is VoxelBody3D:
 		return true

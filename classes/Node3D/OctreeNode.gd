@@ -11,7 +11,7 @@ var sub_nodes : Array[OctreeNode] = []
 var configuration : VoxelConfiguration
 var paint_stack : VoxelPaintStack
 
-var leaf_mesh : VoxelInstance3D
+var leaf_mesh : VoxelInstance
 
 var _debug_mesh : Node3D
 
@@ -52,7 +52,7 @@ func refresh_position(target_pos : Vector3) -> bool:
 		if size == leaf_size:
 			if not leaf_mesh:
 				_debug_mesh.mesh_color = Color(0.25,1,0.25)
-				leaf_mesh = VoxelInstance3D.new()
+				leaf_mesh = VoxelInstance.new()
 				leaf_mesh.voxel_data = VoxelData.new()
 				leaf_mesh.voxel_data.size = Vector3i(size,size,size)
 				leaf_mesh.configuration = configuration

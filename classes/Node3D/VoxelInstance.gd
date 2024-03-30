@@ -2,13 +2,12 @@
 
 extends Node3D
 
-class_name VoxelInstance3D
+class_name VoxelInstance
 
-#
-## VoxelData instance inside SceneTree
-#
-# Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
-#
+## VoxelData as a mesh instance inside SceneTree
+##
+## Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
+##
 
 # Emitted when data is modified
 signal data_changed(what)
@@ -68,13 +67,13 @@ func _on_voxel_configuration_changed(what="all"):
 				#print("%s: connect %s" % [self,voxel_data])
 
 func _on_voxels_changed():
-	#print("VoxelInstance3D: _on_voxels_changed")
+	#print("%s: _on_voxels_changed" % self)
 	#if not my_self_bug_check_hack:
 		# TODO: check if this Godot bug in signal emitting has been fixed
 	#	print("%s: BUG_HACK: I'm not real! -> ingnoring." % self)
 	#	return
 	
-	#print("VoxelInstance3D %s %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
+	#print("%s: %s: _on_voxels_changed [0]=%s" % [self,my_self_bug_check_hack,str(voxel_data.data[0])])
 	
 	_debug_mesh_color = Color(0.5,0,0)
 
@@ -97,16 +96,19 @@ func apply_paintstack(draw_stack : VoxelPaintStack = null):
 			push_voxel_operation(VoxelOpPaintStack.new(draw_stack))
 
 
-var _col_sibling # only one editing this value is _update_collision_sibling!
+# Collision object that is added to the parent 
+var _col_sibling
 
+## Type of collision shape to use with CollisionObject3D and its subclasses
 enum COLLISION_MODE{
-	NONE,
-	CUBE,
-	CONVEX_MESH,
-	CONCAVE_MESH
+	NONE,			## No collision object is created
+	CUBE,			## Simple cube encasing the whole voxel shape
+	CONVEX_MESH,	## Convex mesh (no indents)
+	CONCAVE_MESH	## Concave mesh that matches the actual voxel data, *might* be slow to process
 }
 
 var _generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE
+## Generate collision shape to use with CollisionObject3D and its subclasses
 @export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
 	set(nv):
 		_generate_collision_sibling = nv
@@ -163,7 +165,7 @@ var PENDING_OPERATIONS_LIMIT = 3
 var current_operation : VoxelOperation = null
 
 func _ready():
-	#print("VoxelInstance3D: _ready")
+	#print("%s: _ready" % self)
 	
 	if not voxel_data:
 		voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_M_on_block.tres").duplicate()
@@ -191,7 +193,7 @@ func _ready():
 	# Force load configuration, wich will initiate mesh cvalculation
 	_on_voxel_configuration_changed()
 	
-	#print("VoxelInstance3D: _ready is done")
+	#print("%s: _ready is done" % self)
 
 
 ## Create new or find existing mesh_child object
@@ -207,14 +209,15 @@ func _establish_mesh_child():
 	mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
 	# if in editor update owner to view it scenetree and enable selection of this object
 	if Engine.is_editor_hint():
-		call_deferred("_set_editor_as_owner", mesh_child)
+		mesh_child.owner = self
+		#call_deferred("_set_editor_as_owner", mesh_child)
 
 
 func _enter_tree():
 	pass
 
 func _exit_tree():
-	#print("VoxelInstance3D %s: _exit_tree" % self)
+	#print("%s: _exit_tree" % self)
 	
 	if current_operation:
 		current_operation.cancel = true
@@ -224,7 +227,7 @@ func _exit_tree():
 	if worker_thread and worker_thread.is_started():
 		worker_thread.wait_to_finish()
 	
-	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor. This removes the sibling alongside the VoxelInstance3D.
+	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor. This removes the sibling alongside the VoxelInstance.
 
 
 func _notification(what):
@@ -234,21 +237,23 @@ func _notification(what):
 			#Exclude children from save file
 			if mesh_child:
 				mesh_child.owner = null
-				mesh_child.queue_free()
-				mesh_child = null
+				#mesh_child.queue_free()
+				#mesh_child = null
 			if _col_sibling:
 				_col_sibling.owner = null
-				_col_sibling.queue_free()
-				_col_sibling = null
+				#_col_sibling.queue_free()
+				#_col_sibling = null
 		NOTIFICATION_EDITOR_POST_SAVE:
 			#print("%s: POST_SAVE")
-			# Restore editor view of children by recreating them
-			remesh()
+			# Restore editor view of children
+			mesh_child.owner = self
+			_col_sibling.owner = self
 
 
 func _to_string():
 	var idstr : String = str(get_instance_id())
-	return "[VoxelInstance3D..%s]" % idstr.substr(idstr.length()-4)
+	return "[VoxelInstance%s]" % idstr.substr(idstr.length()-4)
+
 
 # Set single voxel. Thread safe. Index safe. return true on succces
 func set_voxel(pos : Vector3i, value : int) -> bool:
@@ -275,6 +280,7 @@ func set_mesh(new_mesh:Mesh):
 	mesh_child.mesh = new_mesh
 	#print("MESH READY")
 	emit_signal("mesh_ready")
+
 
 # Force redraw of mesh
 func remesh():
@@ -308,22 +314,24 @@ func _advance_operation_stack():
 	#if not is_inside_tree():
 	#	return true
 		
-	#print("VoxelInstance3D %s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
+	#print("%s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
 	if not current_operation:
 		#print("popping from stack %s" % str(current_operation))
 		current_operation = pending_operations.pop_front()
 		if current_operation:
-			#print("VoxelInstance3D %s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
+			#print("%s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
 			match configuration.thread_mode:
 				VoxelConfiguration.THREAD_MODE.NONE:
 					#print("%s: running operation (blocking main thread)..." % self)
 					var run_start_us = Time.get_ticks_usec()
+					current_operation.prepare_run_operation()
 					current_operation.run_operation()
 					var delta_time_us = Time.get_ticks_usec() - run_start_us
 					print("%s: finished %s in %s seconds" % [self, current_operation, delta_time_us/1000000.0])
 					current_operation = null
 				VoxelConfiguration.THREAD_MODE.SIMPLE:
 					#var run_start_us = Time.get_ticks_usec()
+					current_operation.prepare_run_operation()
 					worker_thread.start(_run_op_thread.bind(current_operation))
 					#var delta_time_us = Time.get_ticks_usec() - run_start_us
 					#print("%s: thread start took %s seconds" % [self, delta_time_us/1000000.0])
@@ -332,6 +340,7 @@ func _advance_operation_stack():
 					# TODO use TaskServer if available
 		#else:
 		#	print("no current op")
+
 
 # Run operation in local simple thread mode
 func _run_op_thread(op : VoxelOperation):
@@ -351,6 +360,7 @@ func _run_op_thread(op : VoxelOperation):
 	#	print("[Thread..%s]: finished %s in %s seconds" % [idstr, op, delta_time_us/1000000.0])
 	
 	call_deferred("join_worker_thread")
+
 
 func join_worker_thread():
 	worker_thread.wait_to_finish()
@@ -462,8 +472,8 @@ func _update_collision_sibling():
 				push_warning("Cant add collision sibling to top level node! Add this node as a child to a PhysicsBody3D Node to generate a collision sibling. Set to NONE.")
 				_generate_collision_sibling = COLLISION_MODE.NONE
 				return
-			
-			
+		
+		
 		_col_sibling = CollisionShape3D.new()
 		_col_sibling.name = "VoxelShape3D"
 		#print("%s: Adding Collision sibling %s" % [self, _col_sibling])
@@ -495,20 +505,17 @@ func _update_collision_sibling():
 				
 		# if in editor update owner to view in scenetree
 		if Engine.is_editor_hint():
-			call_deferred("_set_editor_as_owner", _col_sibling)
+			_col_sibling.owner = self
+			#call_deferred("_set_editor_as_owner", _col_sibling)
 		
 		var delta_time = Time.get_ticks_usec() - start_time
 		if _col_sibling.shape:
 			#print("%s: collision shape calculated in %s seconds: %s" % [self, delta_time/1000000.0, str(_col_sibling.shape)])
 			_debug_mesh_color = Color(0.5,1.0,0.5)
 
-func _set_editor_as_owner(node):
-	if get_tree():
-		node.owner = get_tree().edited_scene_root
-
 
 func _on_show_debug_gizmos_changed(value):
-	#print("VoxelInstance3D: Changing debug mesh visibility to " + str(value))
+	#print("%s: Changing debug mesh visibility to %s" %[sef,str(value)])
 	_debug_mesh_visible = value
 	
 	_update_collision_sibling() # ! important ! updates editor as owner of _col_sibling

@@ -102,7 +102,7 @@ func _calculate_num_cascades():
 	_chunk_cascades = n
 
 
-var chunks : ChunkManager
+var chunks : ChunkSpace3D
 #var _cascades : CascadeManager
 
 
