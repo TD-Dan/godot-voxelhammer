@@ -24,6 +24,6 @@ Chunky voxels for minecraft style generating and rendering of 3d geometry
 Generating and meshing around 1 Million voxels/second on AMD FX-8320
 
 
-## Related repositories:
+## Examples and Tests:
 
 https://github.com/TD-Dan/godot_voxelhammer-examples
