@@ -8,10 +8,19 @@ class_name Chunk3D
 ## - Stores position/size of the area
 
 
-## chunkspace position of the chunk
-@export var chunk_position : Vector3i
+## Chunkspace position of the chunk
+@export var chunk_position : Vector3i:
+	set(nv):
+		chunk_position = nv
+		position = chunk_position * chunk_size
+
+
 ## Real world size of the chunk
-@export var chunk_size : Vector3i = Vector3i(16,16,16)
+@export var chunk_size : Vector3i = Vector3i(16,16,16):
+	set(nv):
+		chunk_size = nv
+		position = chunk_position * chunk_size
+
 
 var active : bool = false
 

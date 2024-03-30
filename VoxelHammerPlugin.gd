@@ -15,6 +15,9 @@ func _enter_tree():
 	add_custom_type("DatabaseStreamer", "Node", preload("./classes/Object/DatabaseStreamer.gd"), preload("./res/icon_vh_w.png"))
 	add_custom_type("Streamable", "Node", preload("./classes/Component/Streamable.gd"), preload("./res/icon_vh_w.png"))
 	
+	add_custom_type("Chunk3D", "Node3D", preload("./classes/Node3D/Chunk3D.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("ChunkSpace3D", "Node3D", preload("./classes/Node3D/ChunkSpace3D.gd"), preload("./res/icon_vh.png"))
+	
 	add_custom_type("VoxelInstance", "Node3D", preload("./classes/Node3D/VoxelInstance.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelBody3D", "StaticBody3D", preload("./classes/Node3D/VoxelBody3D.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelTerrain", "Node3D", preload("./classes/Node3D/VoxelTerrain.gd"), preload("./res/icon_vh.png"))
@@ -44,6 +47,9 @@ func _exit_tree():
 	
 	remove_custom_type("DatabaseStreamer")
 	remove_custom_type("Streamable")
+	
+	remove_custom_type("Chunk3D")
+	remove_custom_type("ChunkSpace3D")
 	
 	remove_custom_type("VoxelInstance")
 	remove_custom_type("VoxelBody3D")
