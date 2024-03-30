@@ -15,6 +15,9 @@ class_name ChunkSpace3D
 ## New Chunk3D was added to the graph
 signal chunk_added(chunk)
 
+## Chunk3D was removed to the graph
+signal chunk_removed(chunk)
+
 ## Chunk size
 @export var chunk_size : Vector3i = Vector3i(16,16,16):
 	set(nv):
@@ -85,6 +88,12 @@ func _process(_delta):
 	hotspot_iterator += 1
 	if hotspot_iterator >= _hotspots.size():
 		hotspot_iterator = 0
+		for chunk in chunks_by_position.values():
+			if not chunk.active:
+				chunks_by_position.erase(chunks_by_position.find_key(chunk))
+				chunk_removed.emit(chunk)
+				chunk.queue_free()
+			chunk.active = false
 	
 	start_point = Vector3i(_hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
 
@@ -102,6 +111,7 @@ func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
 	#print("%s: = chunk position %s" % [self, in_chunkspace])
 	var found_chunk = chunks_by_position.get(in_chunkspace)
 	if found_chunk:
+		found_chunk.active = true
 		return found_chunk
 	elif generate_missing:
 		var new_chunk = Chunk3D.new()
@@ -110,6 +120,7 @@ func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
 		
 		chunks_by_position[new_chunk.chunk_position] = new_chunk
 		chunk_added.emit(new_chunk)
+		new_chunk.active = true
 		return new_chunk
 	else:
 		return null

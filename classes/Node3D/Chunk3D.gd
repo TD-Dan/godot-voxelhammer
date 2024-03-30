@@ -6,13 +6,14 @@ class_name Chunk3D
 ##
 ## - Acts as a container (and connector?) sitting between ChunkSpace3D and any content nodes
 ## - Stores position/size of the area
-## - 
 
 
 ## chunkspace position of the chunk
 @export var chunk_position : Vector3i
 ## Real world size of the chunk
 @export var chunk_size : Vector3i = Vector3i(16,16,16)
+
+var active : bool = false
 
 
 func _enter_tree():
