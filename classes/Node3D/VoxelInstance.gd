@@ -246,8 +246,10 @@ func _notification(what):
 		NOTIFICATION_EDITOR_POST_SAVE:
 			#print("%s: POST_SAVE")
 			# Restore editor view of children
-			mesh_child.owner = self
-			_col_sibling.owner = self
+			if mesh_child:
+				mesh_child.owner = self
+			if _col_sibling:
+				_col_sibling.owner = self
 
 
 func _to_string():
