@@ -86,6 +86,8 @@ func _on_voxels_changed():
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
 		paint_stack = nv
+		if not voxel_data:
+			push_error("%s: Please create voxel_data before changing paint_stack!" % self)
 		voxel_data.clear()
 		apply_paintstack()
 
@@ -190,7 +192,7 @@ func _ready():
 			push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
 			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
-	# Force load configuration, wich will initiate mesh cvalculation
+	# Force load configuration, wich will initiate mesh calculation
 	_on_voxel_configuration_changed()
 	
 	#print("%s: _ready is done" % self)

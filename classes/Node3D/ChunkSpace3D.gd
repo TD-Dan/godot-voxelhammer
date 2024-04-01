@@ -112,9 +112,7 @@ func _process(_delta):
 		hotspot_iterator = 0
 		for chunk in chunks_by_position.values():
 			if not chunk.active:
-				chunks_by_position.erase(chunks_by_position.find_key(chunk))
-				chunk_removed.emit(chunk)
-				chunk.queue_free()
+				_remove_chunk(chunk)
 			chunk.active = false
 	
 	start_point = Vector3i(hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
@@ -139,11 +137,20 @@ func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
 		var new_chunk = Chunk3D.new()
 		new_chunk.chunk_position = to_chunk(point)
 		new_chunk.chunk_size = chunk_size
-		
-		chunks_by_position[new_chunk.chunk_position] = new_chunk
-		chunk_added.emit(new_chunk)
+		_add_chunk(new_chunk)
 		new_chunk.active = true
 		return new_chunk
 	else:
 		return null
 
+
+func _add_chunk(chunk):
+	chunks_by_position[chunk.chunk_position] = chunk
+	chunk_added.emit(chunk)
+	add_child(chunk)
+
+
+func _remove_chunk(chunk):
+	chunks_by_position.erase(chunks_by_position.find_key(chunk))
+	chunk_removed.emit(chunk)
+	chunk.queue_free()

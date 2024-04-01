@@ -43,10 +43,17 @@ func _on_chunk_added(chunk : Chunk3D):
 	print("chunk added")
 	var new_vi = VoxelInstance.new()
 	new_vi.configuration = configuration
+	
+	new_vi.voxel_data = VoxelData.new()
+	new_vi.voxel_data.size = chunk_space.chunk_size
+	
 	new_vi.paint_stack = paint_stack
+	
+	voxel_chunks[chunk] = new_vi
 	chunk.add_child(new_vi)
 
 
 func _on_chunk_removed(chunk : Chunk3D):
 	print("chunk removed")
-	pass
+	if not voxel_chunks.erase(chunk):
+		push_warning("%s: Trying to remove %s: Does not exist in VoxelTerrain! (not added in the first place?)" % [self, chunk])
