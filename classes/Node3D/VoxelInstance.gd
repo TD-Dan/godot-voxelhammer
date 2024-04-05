@@ -85,11 +85,26 @@ func _on_voxels_changed():
 
 @export var paint_stack : Resource  = null: #VoxelPaintStack
 	set(nv):
+		# Disconnect from previous paint_stack
+		if paint_stack:
+			if paint_stack.operation_stack_changed.is_connected(_paint_stack_changed):
+				paint_stack.operation_stack_changed.connect(_paint_stack_changed)
+		
 		paint_stack = nv
+		
+		# Connect to new paint_stack
+		if paint_stack:
+			if not paint_stack.operation_stack_changed.is_connected(_paint_stack_changed):
+				paint_stack.operation_stack_changed.connect(_paint_stack_changed)
+		
 		if not voxel_data:
 			push_error("%s: Please create voxel_data before changing paint_stack!" % self)
 		voxel_data.clear()
 		apply_paintstack()
+
+func _paint_stack_changed():
+	apply_paintstack()
+
 
 func apply_paintstack(draw_stack : VoxelPaintStack = null):
 	if not draw_stack: draw_stack = paint_stack
@@ -210,7 +225,7 @@ func _establish_mesh_child():
 	mesh_child.rotation = Vector3.ZERO
 	mesh_child.scale = Vector3(mesh_scale,mesh_scale,mesh_scale)
 	# if in editor update owner to view it scenetree and enable selection of this object
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() and is_inside_tree():
 		mesh_child.owner = self
 		#call_deferred("_set_editor_as_owner", mesh_child)
 

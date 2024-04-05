@@ -4,13 +4,18 @@ extends StaticBody3D
 
 class_name VoxelBody3D
 
+
+## ! DEPRECATING
+## Will be removed in favor of PaintableVoxels component class
+
+
 @export var paint_mode : bool = false
 @export var paint_mat : int = 2
 
 var voxel_instance : VoxelInstance
 
 # Called when the node enters the scene tree for the first time.
-func _ready():	
+func _ready():
 	connect("input_event", _on_input_event)
 	
 	call_deferred("_post_ready_deferred")

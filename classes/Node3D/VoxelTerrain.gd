@@ -8,6 +8,12 @@ class_name VoxelTerrain
 @export var configuration : Resource  = null
 @export var paint_stack : Resource  = null
 
+@export var enable_collisions : bool = false:
+	set(nv):
+		enable_collisions = nv
+		if is_inside_tree():
+			push_warning("%s: Changing enable_collisions only takes effect when loading a scene.")
+
 var chunk_space : ChunkSpace3D
 
 # Chunk3D : VoxelInstance
@@ -40,7 +46,7 @@ func _ready():
 
 
 func _on_chunk_added(chunk : Chunk3D):
-	print("chunk added")
+	#print("chunk added")
 	var new_vi = VoxelInstance.new()
 	new_vi.configuration = configuration
 	
@@ -49,11 +55,19 @@ func _on_chunk_added(chunk : Chunk3D):
 	
 	new_vi.paint_stack = paint_stack
 	
-	voxel_chunks[chunk] = new_vi
-	chunk.add_child(new_vi)
+	var add_to_chunk = new_vi
+	
+	if enable_collisions:
+		var new_body = StaticBody3D.new()
+		new_vi.generate_collision_sibling = VoxelInstance.COLLISION_MODE.CONCAVE_MESH
+		new_body.add_child(new_vi)
+		add_to_chunk = new_body
+	
+	voxel_chunks[chunk] = add_to_chunk
+	chunk.add_child(add_to_chunk)
 
 
 func _on_chunk_removed(chunk : Chunk3D):
-	print("chunk removed")
+	#print("chunk removed")
 	if not voxel_chunks.erase(chunk):
 		push_warning("%s: Trying to remove %s: Does not exist in VoxelTerrain! (not added in the first place?)" % [self, chunk])
