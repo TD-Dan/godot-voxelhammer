@@ -4,11 +4,10 @@ extends Resource
 
 class_name VoxelPaintStack
 
-#
 ## Stack of Voxel paint operations
-#
-# Used for parametric generation of voxel geometry such as terrains and coloration patterns
-#
+##
+## Used for parametric generation of voxel geometry such as terrains and coloration patterns
+##
 
 
 signal operation_stack_changed
@@ -17,28 +16,35 @@ signal operation_stack_changed
 @export var use_global_coordinates = true:
 	set(nv):
 		use_global_coordinates = nv
-		emit_signal("operation_stack_changed")
+		operation_stack_changed.emit()
 
 
 ## Clear voxel_data to 0 before applying PaintStack
 @export var clear_voxel_data = true:
 	set(nv):
 		clear_voxel_data = nv
-		emit_signal("operation_stack_changed")
+		operation_stack_changed.emit()
 
 
 ## Clear blend_buffer to 0 before applying PaintStack
 @export var clear_blend_buffer = false:
 	set(nv):
 		clear_blend_buffer = nv
-		emit_signal("operation_stack_changed")
+		operation_stack_changed.emit()
 
 
-# Array of PaintOperations
+## Array of PaintOperations
 @export var operation_stack : Array = Array():
 	set(nv):
 		operation_stack = nv
-		emit_signal("operation_stack_changed")
+		operation_stack_changed.emit()
+
+
+@export_group("Helpers")
+@export var notify_stack_changed : bool = false:
+	set(nv):
+		operation_stack_changed.emit()
+
 
 enum AXIS_PLANE {
 	X,
@@ -70,9 +76,11 @@ func add_paint_operation(paint_op):
 	#if paint_op is PaintOperation:
 	#	error("paint_op needs to be subclass of PaintOperation")
 	operation_stack.append(paint_op)
+	operation_stack_changed.emit()
 
 func remove_paint_operation(paint_op):
 	operation_stack.erase(paint_op)
+	operation_stack_changed.emit()
 
 func move_paint_operation(paint_op, new_indx):
 	if new_indx >= operation_stack.size():
@@ -90,6 +98,8 @@ func move_paint_operation(paint_op, new_indx):
 	#	new_indx -= 1
 	operation_stack.erase(paint_op)
 	operation_stack.insert(new_indx, paint_op)
+	
+	operation_stack_changed.emit()
 
 
 func get_op_count():

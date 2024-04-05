@@ -8,11 +8,21 @@ var dock
 
 func _enter_tree():
 	print("VoxelHammer plugin loading...")
-	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh_w.png"))
 	add_custom_type("VoxelData", "Resource", preload("./classes/Resource/VoxelData.gd"), preload("./res/icon_vh.png"))
-	add_custom_type("VoxelInstance3D", "Node3D", preload("./classes/Node3D/VoxelInstance3D.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("DatabaseStreamer", "Node", preload("./classes/Object/DatabaseStreamer.gd"), preload("./res/icon_vh_w.png"))
+	add_custom_type("Streamable", "Node", preload("./classes/Component/Streamable.gd"), preload("./res/icon_vh_w.png"))
+	
+	add_custom_type("Chunk3D", "Node3D", preload("./classes/Node3D/Chunk3D.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("ChunkSpace3D", "Node3D", preload("./classes/Node3D/ChunkSpace3D.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("VoxelInstance", "Node3D", preload("./classes/Node3D/VoxelInstance.gd"), preload("./res/icon_vh.png"))
 	add_custom_type("VoxelBody3D", "StaticBody3D", preload("./classes/Node3D/VoxelBody3D.gd"), preload("./res/icon_vh.png"))
-	add_custom_type("VoxelPaintStack", "Resource", preload("./classes/PaintOp/VoxelPaintStack.gd"), preload("./res/icon_vh.png"))
+	add_custom_type("VoxelTerrain", "Node3D", preload("./classes/Node3D/VoxelTerrain.gd"), preload("./res/icon_vh.png"))
+	
+	add_custom_type("VoxelPaintStack", "Resource", preload("./classes/PaintOp/VoxelPaintStack.gd"), preload("./res/icon_vh_w.png"))
 	name = "VoxelHammerPlugin"
 	
 	ed_sel = get_editor_interface().get_selection()
@@ -31,11 +41,21 @@ func _enter_tree():
 
 func _exit_tree():
 	print("VoxelHammer plugin unloading...")
+	
 	remove_custom_type("VoxelConfiguration")
 	remove_custom_type("VoxelData")
-	remove_custom_type("VoxelInstance3D")
+	
+	remove_custom_type("DatabaseStreamer")
+	remove_custom_type("Streamable")
+	
+	remove_custom_type("Chunk3D")
+	remove_custom_type("ChunkSpace3D")
+	
+	remove_custom_type("VoxelInstance")
+	remove_custom_type("VoxelBody3D")
+	remove_custom_type("VoxelTerrain")
+	
 	remove_custom_type("VoxelPaintStack")
-	#remove_custom_type("VoxelTerrain")
 	#remove_custom_type("VoxelThing")
 
 	if dock:
@@ -49,11 +69,11 @@ func _exit_tree():
 
 func _handles(object: Object) -> bool:
 	#print("_handles? : %s" % str(object))
-	if object is VoxelInstance3D:
+	if object is VoxelInstance:
 		return true
 	if object is VoxelBody3D:
 		return true
-	if object is VoxelTerrain3D:
+	if object is VoxelTerrain:
 		return true
 	return false
 
