@@ -28,7 +28,9 @@ func _post_ready_deferred():
 		print("creating new")
 		voxel_instance = VoxelInstance.new()
 		voxel_instance.name = "VoxelInstance"
-		voxel_instance.voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_B_on_block.tres").duplicate()
+		var voxel_hammer_autoload = get_node_or_null("/root/VoxelHammer")
+		if voxel_hammer_autoload:
+			voxel_instance.voxel_data = load(voxel_hammer_autoload.plugin_directory + "res/vox_Letter_B_on_block.tres").duplicate()
 		voxel_instance.generate_collision_sibling = VoxelInstance.COLLISION_MODE.CONCAVE_MESH
 		add_child(voxel_instance)
 	
