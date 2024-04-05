@@ -4,11 +4,10 @@ extends Resource
 
 class_name VoxelPaintStack
 
-#
 ## Stack of Voxel paint operations
-#
-# Used for parametric generation of voxel geometry such as terrains and coloration patterns
-#
+##
+## Used for parametric generation of voxel geometry such as terrains and coloration patterns
+##
 
 
 signal operation_stack_changed
@@ -34,7 +33,7 @@ signal operation_stack_changed
 		emit_signal("operation_stack_changed")
 
 
-# Array of PaintOperations
+## Array of PaintOperations
 @export var operation_stack : Array = Array():
 	set(nv):
 		operation_stack = nv

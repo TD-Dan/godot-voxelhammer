@@ -31,21 +31,6 @@ var _half_chunk : Vector3i
 var chunks_by_position : Dictionary = {}
 
 
-# Hotspots keep chunks loaded/active around them
-var _hotspots : Array[Node3D] = []
-
-## Add new hotspot keep chunks loaded/active around
-func add_hotspot(hotspot : Node3D):
-	_hotspots.append(hotspot)
-	process_mode = Node.PROCESS_MODE_INHERIT
-
-## Remove previously added hotspot keep chunks loaded/active around
-func remove_hotspot(hotspot : Node3D):
-	_hotspots.erase(hotspot)
-	if _hotspots.is_empty():
-		process_mode = Node.PROCESS_MODE_DISABLED
-
-
 ## Distance for chunks to update around hotspots
 @export var active_area : Vector3i = Vector3i(4,4,4):
 	set(nv):
@@ -53,6 +38,43 @@ func remove_hotspot(hotspot : Node3D):
 		_total_chunks_in_area = active_area.x * active_area.y * active_area.z
 
 var _total_chunks_in_area = 0
+
+
+@export_group("Tracking")
+
+## Hotspots keep chunks loaded/active around them
+@export var hotspots : Array[Node3D] = []
+
+
+## Add Node3D for tracking
+@export var _add_hotspot : Node3D:
+	set(nv):
+		add_hotspot(nv)
+		notify_property_list_changed()
+
+## Remove Node3D from tracking
+@export var _remove_hotspot : Node3D:
+	set(nv):
+		remove_hotspot(nv)
+		notify_property_list_changed()
+
+
+## Add new hotspot keep chunks loaded/active around
+func add_hotspot(hotspot : Node3D):
+	if hotspots.has(hotspot):
+		push_warning("%s: Hotspot already in tracking: %s, ignoring add_hotspot" % [self, hotspot])
+		return
+	
+	hotspots.append(hotspot)
+	process_mode = Node.PROCESS_MODE_INHERIT
+
+## Remove previously added hotspot keep chunks loaded/active around
+func remove_hotspot(hotspot : Node3D):
+	hotspots.erase(hotspot)
+	if hotspots.is_empty():
+		process_mode = Node.PROCESS_MODE_DISABLED
+
+
 
 
 var hotspot_iterator : int = -1
@@ -63,12 +85,12 @@ var iz = 0
 
 func _ready():
 	hotspot_iterator = -1
-	if _hotspots.is_empty():
+	if hotspots.is_empty():
 		process_mode = Node.PROCESS_MODE_DISABLED
 
 
 func _process(_delta):
-	if hotspot_iterator >= 0 and hotspot_iterator < _hotspots.size():
+	if hotspot_iterator >= 0 and hotspot_iterator < hotspots.size():
 		
 		get_chunk_at(start_point + Vector3i(ix, iy, iz)*chunk_size)
 		
@@ -86,16 +108,14 @@ func _process(_delta):
 					iz = 0
 	
 	hotspot_iterator += 1
-	if hotspot_iterator >= _hotspots.size():
+	if hotspot_iterator >= hotspots.size():
 		hotspot_iterator = 0
 		for chunk in chunks_by_position.values():
 			if not chunk.active:
-				chunks_by_position.erase(chunks_by_position.find_key(chunk))
-				chunk_removed.emit(chunk)
-				chunk.queue_free()
+				_remove_chunk(chunk)
 			chunk.active = false
 	
-	start_point = Vector3i(_hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
+	start_point = Vector3i(hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
 
 
 ## Translate global coordinate into chunk coordinate
@@ -117,11 +137,20 @@ func get_chunk_at(point : Vector3i, generate_missing = true) -> Chunk3D:
 		var new_chunk = Chunk3D.new()
 		new_chunk.chunk_position = to_chunk(point)
 		new_chunk.chunk_size = chunk_size
-		
-		chunks_by_position[new_chunk.chunk_position] = new_chunk
-		chunk_added.emit(new_chunk)
+		_add_chunk(new_chunk)
 		new_chunk.active = true
 		return new_chunk
 	else:
 		return null
 
+
+func _add_chunk(chunk):
+	chunks_by_position[chunk.chunk_position] = chunk
+	chunk_added.emit(chunk)
+	add_child(chunk)
+
+
+func _remove_chunk(chunk):
+	chunks_by_position.erase(chunks_by_position.find_key(chunk))
+	chunk_removed.emit(chunk)
+	chunk.queue_free()
