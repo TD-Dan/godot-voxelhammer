@@ -34,7 +34,7 @@ func _enter_tree():
 	dock.editor_interface = get_editor_interface()
 	add_control_to_dock(DOCK_SLOT_RIGHT_BL, dock)
 	
-	add_autoload_singleton("VoxelHammer", "res://addons/godot-voxelhammer/VoxelHammer.gd")
+	add_autoload_singleton("VoxelHammer", "VoxelHammer.gd")
 	
 	print("VoxelHammer plugin load ready")
 

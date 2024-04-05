@@ -10,9 +10,11 @@ class_name VoxelOpCreateMesh
 var mesh_buffer
 var material_table
 
+var voxel_hammer_autoload
 
 func _init():
 	super("VoxOpCreateMesh", VoxelOperation.CALCULATION_LEVEL.MESH)
+	voxel_hammer_autoload = VoxelHammer
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
@@ -108,12 +110,12 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	for z in range(sz):
 		for y in range(sy):
 			# Guard SurfaceTool against paraller access, see GODOT bugs on top of file
-			VoxelHammer.surface_tool_guard_mutex.lock()
+			voxel_hammer_autoload.surface_tool_guard_mutex.lock()
 			
 			for x in range(sx):
 				
 				if cancel:
-					VoxelHammer.surface_tool_guard_mutex.unlock()
+					voxel_hammer_autoload.surface_tool_guard_mutex.unlock()
 					return
 		
 				var ci : int = x + y*sx + z*sx*sy
@@ -152,7 +154,7 @@ func construct_mesh_cubes(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						#st.set_normal(Vector3(cube_normals[i][0],cube_normals[i][1],cube_normals[i][2]))
 						st.add_vertex(Vector3(cube_vertices[i][0]+x,cube_vertices[i][1]+y,cube_vertices[i][2]+z))
 			
-			VoxelHammer.surface_tool_guard_mutex.unlock()
+			voxel_hammer_autoload.surface_tool_guard_mutex.unlock()
 	
 	# Add all surfaces to mesh
 	
@@ -198,12 +200,12 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 	for x in range(sx):
 		for y in range(sy):
 			# Guard SurfaceTool against paraller access, see GODOT bugs on top of file
-			VoxelHammer.surface_tool_guard_mutex.lock()
+			voxel_hammer_autoload.surface_tool_guard_mutex.lock()
 	
 			for z in range(sz):
 				
 				if cancel: 
-					VoxelHammer.surface_tool_guard_mutex.unlock()
+					voxel_hammer_autoload.surface_tool_guard_mutex.unlock()
 					return
 				
 				var ci : int = x + y*sx + z*sx*sy
@@ -250,7 +252,7 @@ func construct_mesh_faces(data : PackedInt64Array, vis_buffer : PackedByteArray,
 						for vert in cube_face_right:
 							st.add_vertex(Vector3(vert[0]+x,vert[1]+y,vert[2]+z))
 	
-			VoxelHammer.surface_tool_guard_mutex.unlock()
+			voxel_hammer_autoload.surface_tool_guard_mutex.unlock()
 	
 	# Add all surfaces to mesh
 	var i = 0

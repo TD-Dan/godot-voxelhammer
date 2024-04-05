@@ -185,7 +185,9 @@ func _ready():
 	#print("%s: _ready" % self)
 	
 	if not voxel_data:
-		voxel_data = load(VoxelHammer.plugin_directory + "res/vox_Letter_M_on_block.tres").duplicate()
+		var voxel_hammer_autoload = get_node_or_null("/root/VoxelHammer")
+		if voxel_hammer_autoload:
+			voxel_data = load(voxel_hammer_autoload.plugin_directory + "res/vox_Letter_M_on_block.tres").duplicate()
 	
 	_establish_mesh_child()
 	
@@ -458,7 +460,9 @@ func _update_debug_mesh():
 	st.add_vertex(Vector3(0,size.y,size.z))
 	
 	_debug_mesh_child.mesh = st.commit()
-	_debug_mesh_child.mesh.surface_set_material(0, load(VoxelHammer.plugin_directory+"res/line.tres"))
+	var voxel_hammer_autoload = get_node_or_null("/root/VoxelHammer")
+	if voxel_hammer_autoload:
+		_debug_mesh_child.mesh.surface_set_material(0, load(voxel_hammer_autoload.plugin_directory+"res/line.tres"))
 
 
 func _update_collision_sibling():
