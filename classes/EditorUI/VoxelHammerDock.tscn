@@ -19,9 +19,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="HFlowContainer" type="HFlowContainer" parent="Panel/VBoxContainer"]
 layout_mode = 2
@@ -45,11 +48,13 @@ icon = ExtResource("3_njf8o")
 layout_mode = 2
 
 [node name="SelectedInfo" type="Label" parent="Panel/VBoxContainer"]
+custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 text = "Selection:none"
 autowrap_mode = 2
 
 [node name="SelectedMoreInfo" type="Label" parent="Panel/VBoxContainer"]
+custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 text = "Info on node"
 autowrap_mode = 2
@@ -91,30 +96,30 @@ icon = ExtResource("5_embum")
 [node name="HSeparator2" type="HSeparator" parent="Panel/VBoxContainer"]
 layout_mode = 2
 
-[node name="SelectedScrollContainer" type="ScrollContainer" parent="Panel/VBoxContainer"]
+[node name="PaintStackTools" type="ScrollContainer" parent="Panel/VBoxContainer"]
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel/VBoxContainer/SelectedScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/VBoxContainer/PaintStackTools"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer/PaintStackTools/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="Panel/VBoxContainer/PaintStackTools/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Paint Stack:"
 
-[node name="RepaintButton" type="Button" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer"]
+[node name="RepaintButton" type="Button" parent="Panel/VBoxContainer/PaintStackTools/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "Repaint"
 icon = ExtResource("5_embum")
 
-[node name="PaintStackEditor" parent="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer" instance=ExtResource("2_4p7xf")]
+[node name="PaintStackEditor" parent="Panel/VBoxContainer/PaintStackTools/VBoxContainer" instance=ExtResource("2_4p7xf")]
 layout_mode = 2
 
 [connection signal="pressed" from="Panel/VBoxContainer/HFlowContainer/EditGlobalsButton" to="." method="_on_EditGlobalsButton_pressed"]
@@ -124,4 +129,4 @@ layout_mode = 2
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonFill" to="." method="_on_button_fill_pressed"]
 [connection signal="toggled" from="Panel/VBoxContainer/VoxelEditTools/ButtonPaint" to="." method="_on_button_paint_toggled"]
 [connection signal="pressed" from="Panel/VBoxContainer/VoxelEditTools/ButtonMesh" to="." method="_on_button_mesh_pressed"]
-[connection signal="pressed" from="Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/HBoxContainer/RepaintButton" to="." method="_on_RepaintButton_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/PaintStackTools/VBoxContainer/HBoxContainer/RepaintButton" to="." method="_on_RepaintButton_pressed"]
