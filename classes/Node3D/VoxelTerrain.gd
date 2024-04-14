@@ -34,6 +34,9 @@ func _ready():
 		if not configuration:
 			configuration = vh.default_configuration
 	
+	if not paint_stack:
+		paint_stack = preload("res://addons/godot-voxelhammer/res/default_voxel_paintstack.tres")
+	
 	chunk_space = get_node_or_null("ChunkSpace3D")
 	if not chunk_space:
 		chunk_space = ChunkSpace3D.new()

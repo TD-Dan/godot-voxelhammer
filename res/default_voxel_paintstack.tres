@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="VoxelPaintStack" load_steps=7 format=3 uid="uid://d47pxkbceob5"]
+
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/PaintOp/PaintOpNoise.gd" id="1_wdeta"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/PaintOp/PaintOpGradient.gd" id="2_34alo"]
+[ext_resource type="Script" path="res://addons/godot-voxelhammer/classes/PaintOp/VoxelPaintStack.gd" id="4_qd6om"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5nj68"]
+frequency = 0.02
+fractal_octaves = 3
+domain_warp_frequency = 0.001
+
+[sub_resource type="Resource" id="Resource_yabuf"]
+script = ExtResource("1_wdeta")
+noise = SubResource("FastNoiseLite_5nj68")
+paint_mode = 4
+blend_mode = 0
+blend_amount = 0.9
+material = 2
+active = true
+
+[sub_resource type="Resource" id="Resource_i8w08"]
+script = ExtResource("2_34alo")
+offset = 0
+distance = 50
+mirror = false
+reverse = false
+plane = 1
+paint_mode = 0
+blend_mode = 4
+blend_amount = 2.0
+material = 2
+active = true
+
+[resource]
+script = ExtResource("4_qd6om")
+use_global_coordinates = true
+clear_voxel_data = true
+clear_blend_buffer = false
+operation_stack = [SubResource("Resource_yabuf"), SubResource("Resource_i8w08")]
+notify_stack_changed = false
