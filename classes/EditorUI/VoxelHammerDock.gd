@@ -8,11 +8,11 @@ var editor_interface : EditorInterface
 
 @onready var selected_info = $Panel/VBoxContainer/SelectedInfo
 @onready var selected_info_more = $Panel/VBoxContainer/SelectedMoreInfo
-@onready var selected_container = $Panel/VBoxContainer/SelectedScrollContainer
 
 @onready var voxel_edit_tools = $Panel/VBoxContainer/VoxelEditTools
+@onready var paint_stack_tools = $Panel/VBoxContainer/PaintStackTools
 @onready var voxel_edit_material = $Panel/VBoxContainer/VoxelEditTools/SpinBoxMaterial
-@onready var paint_stack_editor = $Panel/VBoxContainer/SelectedScrollContainer/VBoxContainer/PaintStackEditor
+@onready var paint_stack_editor = $Panel/VBoxContainer/PaintStackTools/VBoxContainer/PaintStackEditor
 
 @onready var button_paint = $Panel/VBoxContainer/VoxelEditTools/ButtonPaint
 var mousemode_paint = false
@@ -22,9 +22,7 @@ var paint_marker : Node3D
 
 var selection = null:
 	set(nv):
-		#print("VoxelHammerDock: setting selection")
-		if selection and selection.is_connected("data_changed", _on_selection_data_changed):
-			selection.disconnect("data_changed", _on_selection_data_changed)
+		print("VoxelHammerDock: setting selection")
 		
 		#TODO enable / make smarter
 		
@@ -35,14 +33,13 @@ var selection = null:
 			if child:
 				nv = child
 			
-		if nv is VoxelInstance:
+		elif nv is VoxelInstance:
 			selection = nv
 			
-			if not selection.is_connected("data_changed", _on_selection_data_changed):
-				selection.connect("data_changed", _on_selection_data_changed)
+			if not selection.data_changed.is_connected(_on_selection_data_changed):
+				selection.data_changed.connect(_on_selection_data_changed)
 				
 			voxel_edit_tools.visible = true
-			selected_container.visible = true
 			selected_info.text = "Selection: %s" % selection
 			var vox_count = 0
 			if selection.voxel_data:
@@ -55,10 +52,13 @@ var selection = null:
 	#		_selection = nv.voxel_body
 	#	elif nv is VoxelTerrain:
 	#		_selection = nv
+	
+		elif nv is VoxelTerrain:
+			selection = nv
+		
 		else:
 			selection = null
 			voxel_edit_tools.visible = false
-			selected_container.visible = false
 			paint_stack_editor.paint_stack = null
 		
 		_update_selected_info_text()
@@ -70,23 +70,23 @@ func _on_selection_data_changed(what):
 func _update_selected_info_text():
 	if selection:
 		selected_info.text = "Selection: %s" % selection
-		var vox_count = 0
-		if selection.voxel_data:
-			vox_count = selection.voxel_data.get_voxel_count()
-		selected_info_more.text = "Voxel count: %s" % vox_count
+		if "voxel_data" in selection and selection.voxel_data:
+			var vox_count = selection.voxel_data.get_voxel_count()
+			selected_info_more.text = "Voxels: %s" % vox_count
 		if "visibility_count" in selection:
 			selected_info_more.text += ", Visible: %s" % selection.visibility_count
-		
 		if "mesh_surfaces_count" in selection:
 			selected_info_more.text += ", Surfaces-Faces: %s-%s" % [selection.mesh_surfaces_count, selection.mesh_faces_count]
-	
+		
+		if "voxel_chunks" in selection:
+			selected_info_more.text = "Chunks: %s, Voxels: %s" % [selection.voxel_chunks.size(), selection.get_total_voxels()]
+		
 	else:
 		selected_info.text = "Selection: none"
 		selected_info_more.text = "Select a VoxelHammer node in editor to edit here"
 
 
 func _ready():
-	selected_container.visible = false
 	paint_stack_editor.connect("paint_stack_changed", _on_paint_stack_changed)
 	paint_stack_editor.editor_interface = editor_interface
 

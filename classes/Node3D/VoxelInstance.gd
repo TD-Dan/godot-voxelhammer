@@ -42,9 +42,8 @@ func _on_voxel_configuration_changed(what="all"):
 			VoxelConfiguration.THREAD_MODE.SIMPLE:
 				if not worker_thread:
 					worker_thread = Thread.new()
-			VoxelConfiguration.THREAD_MODE.TASKSERVER:
+			VoxelConfiguration.THREAD_MODE.WORKER_THREAD_POOL:
 				pass # dont bother to delete worker_thread
-				# TODO use TaskServer if available
 	
 	# Force recalculation of mesh
 	_on_voxels_changed()
@@ -177,6 +176,9 @@ var _debug_mesh_color : Color = Color(0,0,0):
 
 var worker_thread : Thread = null
 
+var worker_pool_task_number
+
+
 var pending_operations = []
 var PENDING_OPERATIONS_LIMIT = 3
 var current_operation : VoxelOperation = null
@@ -201,13 +203,13 @@ func _ready():
 			configuration = vh.default_configuration
 	
 	# TODO: If TaskServer plugin is present connect to it
-	var th_autoload_global = get_node_or_null("/root/TaskHammer")
-	if th_autoload_global:
-		print("Found TaskHammer plugin! Integrating...")
-	else:
-		if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.TASKSERVER:
-			push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
-			configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
+	#var th_autoload_global = get_node_or_null("/root/TaskHammer")
+	#if th_autoload_global:
+		#print("Found TaskHammer plugin! Integrating...")
+	#else:
+		#if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.TASKSERVER:
+			#push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
+			#configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
 	
 	# Force load configuration, wich will initiate mesh calculation
 	_on_voxel_configuration_changed()
@@ -232,8 +234,9 @@ func _establish_mesh_child():
 		#call_deferred("_set_editor_as_owner", mesh_child)
 
 
-func _enter_tree():
-	pass
+#func _enter_tree():
+#	pass
+
 
 func _exit_tree():
 	#print("%s: _exit_tree" % self)
@@ -245,6 +248,10 @@ func _exit_tree():
 	
 	if worker_thread and worker_thread.is_started():
 		worker_thread.wait_to_finish()
+	
+	if worker_pool_task_number:
+		WorkerThreadPool.wait_for_task_completion(worker_pool_task_number)
+		worker_pool_task_number = null
 	
 	_update_collision_sibling()  # !important! needs to be updated incase we are inside editor. This removes the sibling alongside the VoxelInstance.
 
@@ -319,6 +326,7 @@ func push_voxel_operation(vox_op : VoxelOperation, in_front = false, respect_lim
 	
 	call_deferred("_deferred_push_voxel_op", vox_op, in_front)
 
+
 func _deferred_push_voxel_op(vox_op : VoxelOperation, in_front):
 	
 	vox_op.voxel_instance = self
@@ -343,7 +351,7 @@ func _advance_operation_stack():
 			#print("%s: pop&run operation %s (pending_stack: %s)" % [self,current_operation, str(pending_operations)])
 			match configuration.thread_mode:
 				VoxelConfiguration.THREAD_MODE.NONE:
-					#print("%s: running operation (blocking main thread)..." % self)
+					print("%s: running operation (blocking main thread)..." % self)
 					var run_start_us = Time.get_ticks_usec()
 					current_operation.prepare_run_operation()
 					current_operation.run_operation()
@@ -356,9 +364,10 @@ func _advance_operation_stack():
 					worker_thread.start(_run_op_thread.bind(current_operation))
 					#var delta_time_us = Time.get_ticks_usec() - run_start_us
 					#print("%s: thread start took %s seconds" % [self, delta_time_us/1000000.0])
-				VoxelConfiguration.THREAD_MODE.TASKSERVER:
-					pass
-					# TODO use TaskServer if available
+				VoxelConfiguration.THREAD_MODE.WORKER_THREAD_POOL:
+					current_operation.prepare_run_operation()
+					worker_pool_task_number = WorkerThreadPool.add_task(_run_op_worker_pool.bind(current_operation))
+					
 		#else:
 		#	print("no current op")
 
@@ -389,6 +398,23 @@ func join_worker_thread():
 	_advance_operation_stack()
 
 
+# Run operation in local simple thread mode
+func _run_op_worker_pool(op : VoxelOperation):
+	#print("[WorkerThreadPool:%s]: running operation ...")
+
+	if not op.cancel:
+		op.run_operation()
+	
+	call_deferred("join_worker_pool")
+
+
+func join_worker_pool():
+	WorkerThreadPool.wait_for_task_completion(worker_pool_task_number)
+	current_operation = null
+	worker_pool_task_number = null
+	_advance_operation_stack()
+	
+	
 func notify_visibility_calculated():
 	visibility_count = vis_buffer.count(1)
 	

@@ -50,7 +50,7 @@ enum ACCEL_MODE {
 enum THREAD_MODE {
 	NONE,
 	SIMPLE,
-	TASKSERVER
+	WORKER_THREAD_POOL
 }
 ## Threading mode to use, will fall back to NONE if not available on target system
 @export var thread_mode : THREAD_MODE = THREAD_MODE.NONE:

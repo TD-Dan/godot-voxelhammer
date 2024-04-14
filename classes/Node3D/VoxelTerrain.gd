@@ -16,8 +16,15 @@ class_name VoxelTerrain
 
 var chunk_space : ChunkSpace3D
 
-# Chunk3D : VoxelInstance
+## Chunk3D : VoxelInstance
 var voxel_chunks : Dictionary
+
+
+var _total_voxels : int = 0
+## Total count of voxels loaded
+func get_total_voxels():
+		return _total_voxels
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -65,9 +72,21 @@ func _on_chunk_added(chunk : Chunk3D):
 	
 	voxel_chunks[chunk] = add_to_chunk
 	chunk.add_child(add_to_chunk)
+	
+	var num_voxels_added = new_vi.voxel_data.get_voxel_count()
+	chunk.set_meta("___total_voxels", num_voxels_added)
+	_total_voxels += num_voxels_added
 
 
 func _on_chunk_removed(chunk : Chunk3D):
 	#print("chunk removed")
-	if not voxel_chunks.erase(chunk):
+	if voxel_chunks.erase(chunk):
+		var num_voxels = chunk.get_meta("___total_voxels")
+		_total_voxels -= num_voxels
+	else:
 		push_warning("%s: Trying to remove %s: Does not exist in VoxelTerrain! (not added in the first place?)" % [self, chunk])
+
+
+func _to_string():
+	var idstr : String = str(get_instance_id())
+	return "[VoxelTerrain%s]" % idstr.substr(idstr.length()-4)
