@@ -4,6 +4,9 @@ extends Resource
 
 class_name VoxelConfiguration
 
+
+## Configuration has changed
+## what = Variable that was changed
 signal voxel_configuration_changed(what)
 
 
@@ -11,14 +14,14 @@ signal voxel_configuration_changed(what)
 @export var materials : Array[Material]:
 	set(v):
 		materials = v
-		emit_signal("voxel_configuration_changed", "materials")
+		voxel_configuration_changed.emit("materials")
 
 ## Voxel reference size in game units. Does not change actual mesh or voxel sizes, but can be used to scale world entities, gravity etc. from one place.
 ## Voxel to mesh size is alway 1:1 to keep mesh gewneration as fast as possible.
 @export_range(0.01, 32.0, 0.01) var voxel_reference_size : float = 1.0:
 	set(v):
 		voxel_reference_size = v
-		emit_signal("voxel_configuration_changed", "voxel_reference_size")
+		voxel_configuration_changed.emit("voxel_reference_size")
 
 ## Mesh generation strategy to use
 enum MESH_MODE {
@@ -30,7 +33,7 @@ enum MESH_MODE {
 @export var mesh_mode : MESH_MODE = MESH_MODE.FACES:
 	set(v):
 		mesh_mode = v
-		emit_signal("voxel_configuration_changed", "mesh_mode")
+		voxel_configuration_changed.emit("mesh_mode")
 
 ## NOT IMPLEMENTED. Hardware acceleration mode to use, will fall back to NONE if not available on target system.
 enum ACCEL_MODE {
@@ -43,7 +46,7 @@ enum ACCEL_MODE {
 @export var accel_mode : ACCEL_MODE = ACCEL_MODE.NONE:
 	set(v):
 		accel_mode = v
-		emit_signal("voxel_configuration_changed", "accel_mode")
+		voxel_configuration_changed.emit("accel_mode")
 		
 
 ## Threading mode to use, will fall back to NONE if not available on target system
@@ -54,8 +57,11 @@ enum THREAD_MODE {
 	TASK_SERVER				## Uses TaskServer plugin ('github.com/TD-Dan/godot_task_server') to manage an advanced thread pool with work item priorities.
 }
 ## Threading mode to use
-@export var thread_mode : THREAD_MODE = THREAD_MODE.NONE
-	
+@export var thread_mode : THREAD_MODE = THREAD_MODE.NONE:
+	set(v):
+		thread_mode = v
+		voxel_configuration_changed.emit("thread_mode")
+
 
 @export_group("Helper tools")
 
@@ -84,7 +90,7 @@ enum THREAD_MODE {
 
 
 func _init():
-	pass
+	
 	# TODO: test if fixed
 	#Hack to circumvent resource loading bug
 	materials.clear()

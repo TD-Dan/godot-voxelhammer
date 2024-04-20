@@ -45,15 +45,12 @@ signal mesh_ready
 
 func _on_voxel_configuration_changed(what="all"):
 	#print("VoxelNode: _on_voxel_configuration_changed %s" % what)
-	if what == "all" or what == "thread_mode":
-		match configuration.thread_mode:
-			VoxelConfiguration.THREAD_MODE.NONE:
-				pass # dont bother to delete worker_thread
-			VoxelConfiguration.THREAD_MODE.SIMPLE:
-				if not worker_thread:
-					worker_thread = Thread.new()
-			VoxelConfiguration.THREAD_MODE.WORKER_THREAD_POOL:
-				pass # dont bother to delete worker_thread
+	if what == "thread_mode":
+		if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.SIMPLE:
+			if not worker_thread:
+				worker_thread = Thread.new()
+			# Note: dont bother to delete worker_thread in other cases; it gets deleted at exit anyway
+	
 	
 	# Force recalculation of mesh
 	_on_voxels_changed()
