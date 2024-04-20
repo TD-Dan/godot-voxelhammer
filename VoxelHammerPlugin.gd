@@ -7,7 +7,7 @@ var ed_sel
 var dock
 
 func _enter_tree():
-	print("VoxelHammer plugin loading...")
+	print("VoxelHammerPlugin loading...")
 	
 	add_custom_type("VoxelConfiguration", "Resource", preload("./classes/Resource/VoxelConfiguration.gd"), preload("./res/icon_vh_w.png"))
 	add_custom_type("VoxelData", "Resource", preload("./classes/Resource/VoxelData.gd"), preload("./res/icon_vh.png"))
@@ -36,11 +36,11 @@ func _enter_tree():
 	
 	add_autoload_singleton("VoxelHammer", "VoxelHammer.gd")
 	
-	print("VoxelHammer plugin load ready")
+	print("VoxelHammerPlugin load ready")
 
 
 func _exit_tree():
-	print("VoxelHammer plugin unloading...")
+	print("VoxelHammerPlugin unloading...")
 	
 	remove_custom_type("VoxelConfiguration")
 	remove_custom_type("VoxelData")
@@ -64,7 +64,7 @@ func _exit_tree():
 	
 	remove_autoload_singleton("VoxelHammer")
 	
-	print("VoxelHammer plugin unload ready")
+	print("VoxelHammerPlugin unload ready")
 
 
 func _handles(object: Object) -> bool:

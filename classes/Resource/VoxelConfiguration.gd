@@ -32,7 +32,7 @@ enum MESH_MODE {
 		mesh_mode = v
 		emit_signal("voxel_configuration_changed", "mesh_mode")
 
-## Hardware acceleration mode to use, will fall back to NONE if not available on target system
+## NOT IMPLEMENTED. Hardware acceleration mode to use, will fall back to NONE if not available on target system.
 enum ACCEL_MODE {
 	NONE,
 	NATIVE,
@@ -48,15 +48,14 @@ enum ACCEL_MODE {
 
 ## Threading mode to use, will fall back to NONE if not available on target system
 enum THREAD_MODE {
-	NONE,
-	SIMPLE,
-	WORKER_THREAD_POOL
+	NONE,					## No threading used, all calculations will be done in main thread. This will most propably cause stuttering to the framerate.
+	SIMPLE,					## Every operation is executed on its own thread. Will cause stuttering if too many threads get launched at the same time.
+	WORKER_THREAD_POOL,		## Uses Godots inbuilt thread pool to limit thread count to number of cores specified in the Project setting "threading/worker_pool/max_threads"
+	TASK_SERVER				## Uses TaskServer plugin ('github.com/TD-Dan/godot_task_server') to manage an advanced thread pool with work item priorities.
 }
-## Threading mode to use, will fall back to NONE if not available on target system
-@export var thread_mode : THREAD_MODE = THREAD_MODE.NONE:
-	set(v):
-		thread_mode = v
-		emit_signal("voxel_configuration_changed", "thread_mode")
+## Threading mode to use
+@export var thread_mode : THREAD_MODE = THREAD_MODE.NONE
+	
 
 @export_group("Helper tools")
 

@@ -4,10 +4,20 @@ extends Node3D
 
 class_name VoxelInstance
 
-## VoxelData as a mesh instance inside SceneTree
+## Displays Voxels as a mesh inside SceneTree
 ##
-## Uses settings from VoxelConfiguration to generate and display a Mesh out of VoxelData
+## Uses VoxelData and VoxelConfiguration to generate and display a MeshInstance3D and
+## optionally a CollisionShape3D
 ##
+## Acts as a connector and collector between various other classes:
+## 		-Collects togerther VoxelHammer functionality from VoxelConfiguration, VoxelData, PaintStack
+##		-Creates Godot nodes for MeshInstance3D, CollisionShape3D
+##		-Uses and selects Thread, WorkerThreadPool, TaskServer (if available) to do calculations
+##
+## Note: This class is way big and convopluted, it should possibly be divided into main class and
+## few optional supporting classes living as child nodes.
+## (such as PaintStackApplicator, CollisionSiblingGenerator, ...)
+
 
 # Emitted when data is modified
 signal data_changed(what)
@@ -183,6 +193,9 @@ var pending_operations = []
 var PENDING_OPERATIONS_LIMIT = 3
 var current_operation : VoxelOperation = null
 
+var task_server = null
+
+
 func _ready():
 	#print("%s: _ready" % self)
 	
@@ -202,14 +215,12 @@ func _ready():
 		if not configuration:
 			configuration = vh.default_configuration
 	
-	# TODO: If TaskServer plugin is present connect to it
-	#var th_autoload_global = get_node_or_null("/root/TaskHammer")
-	#if th_autoload_global:
-		#print("Found TaskHammer plugin! Integrating...")
-	#else:
-		#if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.TASKSERVER:
-			#push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple thread execution..")
-			#configuration.thread_mode = VoxelConfiguration.THREAD_MODE.SIMPLE
+	
+	task_server = VoxelHammer.task_server_plugin
+	if not task_server and configuration.thread_mode == VoxelConfiguration.THREAD_MODE.TASK_SERVER:
+		push_warning("(OPTIONAL) TaskServer Global Autoload NOT found. TaskServer plugin installed? Falling back to simple threaded execution..")
+		configuration.thread_mode = VoxelConfiguration.THREAD_MODE.WORKER_THREAD_POOL
+	
 	
 	# Force load configuration, wich will initiate mesh calculation
 	_on_voxel_configuration_changed()
@@ -223,7 +234,8 @@ func _establish_mesh_child():
 	if not mesh_child:
 		mesh_child = MeshInstance3D.new()
 		mesh_child.name = "VoxelMeshInstance3D"
-		call_deferred("add_child", mesh_child)
+		#call_deferred("add_child", mesh_child)  ..no need for this anymore?
+		add_child(mesh_child)
 	
 	mesh_child.position = Vector3.ZERO
 	mesh_child.rotation = Vector3.ZERO
@@ -367,6 +379,8 @@ func _advance_operation_stack():
 				VoxelConfiguration.THREAD_MODE.WORKER_THREAD_POOL:
 					current_operation.prepare_run_operation()
 					worker_pool_task_number = WorkerThreadPool.add_task(_run_op_worker_pool.bind(current_operation))
+				VoxelConfiguration.THREAD_MODE.TASK_SERVER:
+					print("%s: Scheduling operation to TaskServer..." % self)
 					
 		#else:
 		#	print("no current op")

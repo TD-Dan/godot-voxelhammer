@@ -22,7 +22,7 @@ var paint_marker : Node3D
 
 var selection = null:
 	set(nv):
-		print("VoxelHammerDock: setting selection")
+		#print("VoxelHammerDock: setting selection")
 		
 		#TODO enable / make smarter
 		
