@@ -26,7 +26,8 @@ func run_operation():
 	
 	do_paint_stack(voxel_instance.voxel_data.data, voxel_instance.blend_buffer, voxel_instance.voxel_data.size, paint_stack, local_position_offset, local_scale)
 	
-	voxel_instance.voxel_data.call_deferred("notify_data_changed")
+	voxel_instance.voxel_data.notify_data_changed.call_deferred()
+	voxel_instance.notify_operation_is_ready.call_deferred()
 
 
 # This code is executed in another thread so it can not access voxel_node variable!

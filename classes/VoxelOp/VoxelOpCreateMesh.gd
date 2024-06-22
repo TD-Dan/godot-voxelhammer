@@ -18,7 +18,7 @@ func _init():
 
 
 # This code is executed in another thread so it can not access voxel_node variable!
-func run_operation():	
+func run_operation():
 	#print("%s: run_operation on %s" % [self,voxel_instance])
 	#print("!!! VoxelOpCreateMesh executing!")
 	var mesh_empty = false
@@ -67,7 +67,8 @@ func run_operation():
 		
 		voxel_instance.call_deferred("set_mesh", mesh_buffer)
 	
-	voxel_instance.call_deferred("notify_mesh_calculated")
+	voxel_instance.notify_mesh_calculated.call_deferred()
+	voxel_instance.notify_operation_is_ready.call_deferred()
 
 
 #Vertices of a cube

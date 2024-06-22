@@ -60,6 +60,13 @@ enum THREAD_MODE {
 @export var thread_mode : THREAD_MODE = THREAD_MODE.NONE:
 	set(v):
 		thread_mode = v
+		
+		if thread_mode == THREAD_MODE.WORKER_THREAD_POOL:
+			var system_threads = ProjectSettings.get_setting("threading/worker_pool/use_system_threads_for_low_priority_tasks")
+			if system_threads:
+				push_warning("VoxelHammer: Setting threading/worker_pool/use_system_threads_for_low_priority_tasks to false: Will cause frame stuttering if used.")
+				ProjectSettings.set_setting("threading/worker_pool/use_system_threads_for_low_priority_tasks", false)
+		
 		voxel_configuration_changed.emit("thread_mode")
 
 

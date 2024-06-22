@@ -90,32 +90,33 @@ func _ready():
 
 
 func _process(_delta):
-	if hotspot_iterator >= 0 and hotspot_iterator < hotspots.size():
-		
-		get_chunk_at(start_point + Vector3i(ix, iy, iz)*chunk_size)
-		
-		ix += 1
-		if ix < active_area.x: return
-		else:
-			ix = 0
-			iy += 1
-			if iy < active_area.y: return
+	#for n in range(10):
+		if hotspot_iterator >= 0 and hotspot_iterator < hotspots.size():
+			
+			get_chunk_at(start_point + Vector3i(ix, iy, iz)*chunk_size)
+			
+			ix += 1
+			if ix < active_area.x: return
 			else:
-				iy = 0
-				iz += 1
-				if iz < active_area.z: return
+				ix = 0
+				iy += 1
+				if iy < active_area.y: return
 				else:
-					iz = 0
-	
-	hotspot_iterator += 1
-	if hotspot_iterator >= hotspots.size():
-		hotspot_iterator = 0
-		for chunk in chunks_by_position.values():
-			if not chunk.active:
-				_remove_chunk(chunk)
-			chunk.active = false
-	
-	start_point = Vector3i(hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
+					iy = 0
+					iz += 1
+					if iz < active_area.z: return
+					else:
+						iz = 0
+		
+		hotspot_iterator += 1
+		if hotspot_iterator >= hotspots.size():
+			hotspot_iterator = 0
+			for chunk in chunks_by_position.values():
+				if not chunk.active:
+					_remove_chunk(chunk)
+				chunk.active = false
+		
+		start_point = Vector3i(hotspots[hotspot_iterator].global_position) - ((chunk_size*active_area)/2)
 
 
 ## Translate global coordinate into chunk coordinate

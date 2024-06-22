@@ -24,6 +24,7 @@ signal data_changed(what)
 # emitted when compilation of mesh (+ uv + normals and all) is complete
 signal mesh_ready
 
+
 @export var configuration : Resource:#VoxelConfiguration:
 	set(nv):
 		#print("set configuration to %s" % new_value)
@@ -44,16 +45,16 @@ signal mesh_ready
 		_on_voxel_configuration_changed()
 
 func _on_voxel_configuration_changed(what="all"):
-	#print("VoxelNode: _on_voxel_configuration_changed %s" % what)
-	if what == "thread_mode":
-		if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.SIMPLE:
-			if not worker_thread:
-				worker_thread = Thread.new()
-			# Note: dont bother to delete worker_thread in other cases; it gets deleted at exit anyway
+	
+	if configuration.thread_mode == VoxelConfiguration.THREAD_MODE.SIMPLE:
+		if not worker_thread:
+			worker_thread = Thread.new()
+		# Note: dont bother to delete worker_thread in other cases; it gets deleted at exit anyway
 	
 	
 	# Force recalculation of mesh
 	_on_voxels_changed()
+
 
 @export var voxel_data : Resource: # VoxelData
 	set(nv):
@@ -93,22 +94,22 @@ func _on_voxels_changed():
 	set(nv):
 		# Disconnect from previous paint_stack
 		if paint_stack:
-			if paint_stack.operation_stack_changed.is_connected(_paint_stack_changed):
-				paint_stack.operation_stack_changed.connect(_paint_stack_changed)
+			if paint_stack.operation_stack_changed.is_connected(_on_paint_stack_changed):
+				paint_stack.operation_stack_changed.connect(_on_paint_stack_changed)
 		
 		paint_stack = nv
 		
 		# Connect to new paint_stack
 		if paint_stack:
-			if not paint_stack.operation_stack_changed.is_connected(_paint_stack_changed):
-				paint_stack.operation_stack_changed.connect(_paint_stack_changed)
+			if not paint_stack.operation_stack_changed.is_connected(_on_paint_stack_changed):
+				paint_stack.operation_stack_changed.connect(_on_paint_stack_changed)
 		
 		if not voxel_data:
 			push_error("%s: Please create voxel_data before changing paint_stack!" % self)
 		voxel_data.clear()
 		apply_paintstack()
 
-func _paint_stack_changed():
+func _on_paint_stack_changed():
 	apply_paintstack()
 
 
@@ -130,6 +131,7 @@ enum COLLISION_MODE{
 	CONCAVE_MESH	## Concave mesh that matches the actual voxel data, *might* be slow to process
 }
 
+
 var _generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE
 ## Generate collision shape to use with CollisionObject3D and its subclasses
 @export var generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE:
@@ -138,6 +140,7 @@ var _generate_collision_sibling : COLLISION_MODE = COLLISION_MODE.NONE
 		_update_collision_sibling()
 	get:
 		return _generate_collision_sibling
+
 
 ## Mesh scale. When other than 1.0, mesh type collision siblings are not available, as Godot does not support scaled collision shapes
 @export_range(0.1, 10.0, 0.1) var mesh_scale : float = 1.0:
@@ -183,14 +186,16 @@ var _debug_mesh_color : Color = Color(0,0,0):
 
 var worker_thread : Thread = null
 
+
 var worker_pool_task_number
+
+
+var task_server = null
 
 
 var pending_operations = []
 var PENDING_OPERATIONS_LIMIT = 3
 var current_operation : VoxelOperation = null
-
-var task_server = null
 
 
 func _ready():
@@ -203,14 +208,12 @@ func _ready():
 	
 	_establish_mesh_child()
 	
-	# Connect to VoxelHammer autoload
-	var vh = get_node_or_null("/root/VoxelHammer")
-	if vh:
-		_debug_mesh_visible = vh.show_debug_gizmos
-		vh.connect("show_debug_gizmos_changed", _on_show_debug_gizmos_changed)
+	# Connect to VoxelHammer
+	_debug_mesh_visible = VoxelHammer.show_debug_gizmos
+	VoxelHammer.show_debug_gizmos_changed.connect(_on_show_debug_gizmos_changed)
 			
-		if not configuration:
-			configuration = vh.default_configuration
+	if not configuration:
+		configuration = VoxelHammer.default_configuration
 	
 	
 	task_server = VoxelHammer.task_server_plugin
@@ -352,7 +355,7 @@ func _advance_operation_stack():
 	#if not is_inside_tree():
 	#	return true
 		
-	#print("%s: advance_operation_stack, stack: %s" % [self,str(pending_operations)])
+	#print("%s: advance_operation_stack, stack: %s, current operation: %s" % [self,str(pending_operations),current_operation])
 	if not current_operation:
 		#print("popping from stack %s" % str(current_operation))
 		current_operation = pending_operations.pop_front()
@@ -377,7 +380,13 @@ func _advance_operation_stack():
 					current_operation.prepare_run_operation()
 					worker_pool_task_number = WorkerThreadPool.add_task(_run_op_worker_pool.bind(current_operation))
 				VoxelConfiguration.THREAD_MODE.TASK_SERVER:
+					current_operation.prepare_run_operation()
 					print("%s: Scheduling operation to TaskServer..." % self)
+					var work_item = task_server.create_work_item()
+					work_item.metadata.name = current_operation.name
+					work_item.function = current_operation.run_operation
+					#work_item.priority = 10.0 - VoxelHammer.get_distance_to_player()
+					task_server.post_work(work_item)
 					
 		#else:
 		#	print("no current op")
@@ -405,8 +414,7 @@ func _run_op_thread(op : VoxelOperation):
 
 func join_worker_thread():
 	worker_thread.wait_to_finish()
-	current_operation = null
-	_advance_operation_stack()
+	notify_operation_is_ready()
 
 
 # Run operation in local simple thread mode
@@ -421,11 +429,15 @@ func _run_op_worker_pool(op : VoxelOperation):
 
 func join_worker_pool():
 	WorkerThreadPool.wait_for_task_completion(worker_pool_task_number)
-	current_operation = null
 	worker_pool_task_number = null
+	notify_operation_is_ready()
+
+
+func notify_operation_is_ready():
+	current_operation = null
 	_advance_operation_stack()
-	
-	
+
+
 func notify_visibility_calculated():
 	visibility_count = vis_buffer.count(1)
 	
@@ -440,7 +452,6 @@ func notify_visibility_calculated():
 
 
 func notify_mesh_calculated():
-	
 	_debug_mesh_color = Color(0,0.5,0)
 	
 	mesh_surfaces_count = 0

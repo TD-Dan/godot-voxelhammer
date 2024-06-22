@@ -19,8 +19,8 @@ signal show_debug_gizmos_changed(value)
 		emit_signal("show_debug_gizmos_changed", show_debug_gizmos)
 
 
-var task_server_plugin = null
 
+var task_server_plugin = null
 
 var native_rust_worker_script = null
 var native_worker = null
@@ -68,7 +68,7 @@ func _enter_tree():
 
 func _post_ready():
 	# If TaskServer plugin is present connect to it
-	task_server_plugin = Engine.get_main_loop().root.has_node("TaskServer")
+	task_server_plugin = Engine.get_main_loop().root.get_node_or_null("TaskServer")
 	
 	if task_server_plugin:
 		print("VoxelHammer: Found TaskServer plugin! Integrating...")

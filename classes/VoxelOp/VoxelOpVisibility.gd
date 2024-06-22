@@ -34,7 +34,8 @@ func run_operation():
 	voxel_instance.vis_buffer = vis_buffer
 	voxel_instance.data_buffer_mutex.unlock()
 	
-	voxel_instance.call_deferred("notify_visibility_calculated")
+	voxel_instance.notify_visibility_calculated.call_deferred()
+	voxel_instance.notify_operation_is_ready.call_deferred()
 
 
 func calculate_visibility(data : PackedInt64Array, size : Vector3i):

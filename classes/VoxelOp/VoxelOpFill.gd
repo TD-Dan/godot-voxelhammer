@@ -26,7 +26,9 @@ func run_operation():
 	voxel_instance.voxel_data.data_mutex.lock()
 	voxel_instance.voxel_data.data = new_data
 	voxel_instance.voxel_data.data_mutex.unlock()
-	voxel_instance.voxel_data.call_deferred("notify_data_changed")
+	
+	voxel_instance.voxel_data.notify_data_changed.call_deferred()
+	voxel_instance.notify_operation_is_ready.call_deferred()
 
 # This code is potentially executed in another thread!
 func fill(data : PackedInt64Array, value : int):
