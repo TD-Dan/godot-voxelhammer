@@ -414,7 +414,6 @@ func _run_op_thread(op : VoxelOperation):
 
 func join_worker_thread():
 	worker_thread.wait_to_finish()
-	notify_operation_is_ready()
 
 
 # Run operation in local simple thread mode
@@ -430,7 +429,6 @@ func _run_op_worker_pool(op : VoxelOperation):
 func join_worker_pool():
 	WorkerThreadPool.wait_for_task_completion(worker_pool_task_number)
 	worker_pool_task_number = null
-	notify_operation_is_ready()
 
 
 func notify_operation_is_ready():

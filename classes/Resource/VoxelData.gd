@@ -40,7 +40,7 @@ signal voxel_data_changed
 		data = nv
 		data_mutex.unlock()
 		
-		notify_data_changed()
+		notify_data_changed.call_deferred()
 	get:
 		return data # PackedInt64Array(data) # Should make a copy for editing here, but duplication is not working (Might be a Resource related issue)
 
